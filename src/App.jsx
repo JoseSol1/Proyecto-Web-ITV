@@ -50,17 +50,51 @@ const COLORS = {
 const nowDate = () => new Date().toISOString().slice(0, 10);
 
 /* =====================
-   Checklist fijo (ejemplo)
+   Plantillas de inspección por tipo de vehículo
    ===================== */
-const CHECKLIST_ITEMS = [
-  { id: "frenos", label: "Frenos" },
-  { id: "luces", label: "Luces" },
-  { id: "neumaticos", label: "Neumáticos" },
-  { id: "emision", label: "Emisiones" },
-  { id: "direccion", label: "Dirección" },
-  { id: "suspension", label: "Suspensión" },
-  { id: "chasis", label: "Chasis" },
-];
+const INSPECTION_TEMPLATES = {
+  AUTO: [
+    { code: "SEG_001", name: "Sistema de frenos", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar estado de discos, pastillas y sistema hidráulico" },
+    { code: "SEG_002", name: "Sistema de dirección", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar columna, caja de dirección y terminales" },
+    { code: "SEG_003", name: "Sistema de suspensión", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar amortiguadores, resortes y bujes" },
+    { code: "SEG_004", name: "Neumáticos", category: "SEGURIDAD", resultType: "NUMERIC", unit: "mm", minValue: 1.6, severity: "GRAVE", description: "Profundidad mínima de labrado" },
+    { code: "SEG_005", name: "Sistema de luces", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar faros, luces de freno, intermitentes y neblineros" },
+    { code: "SEG_006", name: "Cinturones de seguridad", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar funcionamiento y anclajes" },
+    { code: "SEG_007", name: "Limpia parabrisas", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "LEVE", description: "Verificar estado de gomas y funcionamiento" },
+    { code: "SEG_008", name: "Espejos retrovisores", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "LEVE", description: "Verificar estado y ajuste" },
+    { code: "MED_001", name: "Emisiones de gases", category: "MEDIOAMBIENTE", resultType: "NUMERIC", unit: "%", maxValue: 1.0, severity: "CRITICA", description: "Nivel de CO en emisiones" },
+    { code: "MED_002", name: "Fugas de fluidos", category: "MEDIOAMBIENTE", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar fugas de aceite, refrigerante o combustible" },
+    { code: "MED_003", name: "Sistema de escape", category: "MEDIOAMBIENTE", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar integridad y fugas" },
+    { code: "DOC_001", name: "Número de chasis", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar coincidencia con documentación" },
+    { code: "DOC_002", name: "Placa visible", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar legibilidad y fijación" },
+  ],
+  MOTO: [
+    { code: "SEG_M01", name: "Sistema de frenos", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar freno delantero y trasero" },
+    { code: "SEG_M02", name: "Neumáticos", category: "SEGURIDAD", resultType: "NUMERIC", unit: "mm", minValue: 1.0, severity: "GRAVE", description: "Profundidad mínima de labrado" },
+    { code: "SEG_M03", name: "Sistema de luces", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar faro, luz de freno e intermitentes" },
+    { code: "SEG_M04", name: "Suspensión", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar horquilla y amortiguador" },
+    { code: "SEG_M05", name: "Espejos", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "LEVE", description: "Verificar presencia y estado" },
+    { code: "MED_M01", name: "Emisiones de gases", category: "MEDIOAMBIENTE", resultType: "NUMERIC", unit: "%", maxValue: 1.5, severity: "CRITICA", description: "Nivel de CO en emisiones" },
+    { code: "MED_M02", name: "Sistema de escape", category: "MEDIOAMBIENTE", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar integridad y ruido" },
+    { code: "DOC_M01", name: "Número de chasis", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar coincidencia con documentación" },
+    { code: "DOC_M02", name: "Placa visible", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar legibilidad y fijación" },
+  ],
+  CAMION: [
+    { code: "SEG_C01", name: "Sistema de frenos", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar sistema de frenos de servicio y estacionamiento" },
+    { code: "SEG_C02", name: "Sistema de dirección", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar columna, caja y terminales con holguras" },
+    { code: "SEG_C03", name: "Sistema de suspensión", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar ballestas, amortiguadores y bujes" },
+    { code: "SEG_C04", name: "Neumáticos", category: "SEGURIDAD", resultType: "NUMERIC", unit: "mm", minValue: 2.0, severity: "CRITICA", description: "Profundidad mínima de labrado (mayor por carga)" },
+    { code: "SEG_C05", name: "Sistema de luces", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar luces delanteras, traseras, laterales y de freno" },
+    { code: "SEG_C06", name: "Triángulos y señales", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "LEVE", description: "Verificar presencia de equipo de seguridad" },
+    { code: "SEG_C07", name: "Carrocería y carga", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar integridad y sistemas de sujeción" },
+    { code: "MED_C01", name: "Emisiones de gases", category: "MEDIOAMBIENTE", resultType: "NUMERIC", unit: "%", maxValue: 2.0, severity: "CRITICA", description: "Nivel de opacidad en diésel" },
+    { code: "MED_C02", name: "Fugas de fluidos", category: "MEDIOAMBIENTE", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar fugas de aceite, refrigerante o combustible" },
+    { code: "MED_C03", name: "Sistema de escape", category: "MEDIOAMBIENTE", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar integridad y fugas" },
+    { code: "DOC_C01", name: "Número de chasis", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar coincidencia con documentación" },
+    { code: "DOC_C02", name: "Placa visible", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar legibilidad y fijación" },
+    { code: "DOC_C03", name: "Peso y dimensiones", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar cumplimiento de límites legales" },
+  ],
+};
 
 /* =====================
    Helper: export CSV
@@ -150,6 +184,10 @@ function Sidebar({ role, page, setPage, username }) {
     { Icon: BarChart2, label: "Reportes", target: "reports" },
   ];
 
+  const supervisorOnly = [
+    { Icon: Users, label: "Gestión de Inspectores", target: "supervisor" },
+  ];
+
   return (
     <aside className="w-72 p-4 border-r bg-white">
       <div className="text-center mb-6">
@@ -160,10 +198,11 @@ function Sidebar({ role, page, setPage, username }) {
         <div className="text-xs text-gray-500 mt-1">{role}</div>
       </div>
 
-      <nav className="flex flex-col gap-2">
-        {common.map((m) => <MenuButton key={m.target} Icon={m.Icon} label={m.label} target={m.target} />)}
-        {role === "Administrador" && adminOnly.map((m) => <MenuButton key={m.target} Icon={m.Icon} label={m.label} target={m.target} />)}
-      </nav>
+    <nav className="flex flex-col gap-2">
+      {common.map((m) => <MenuButton key={m.target} Icon={m.Icon} label={m.label} target={m.target} />)}
+      {role === "Administrador" && adminOnly.map((m) => <MenuButton key={m.target} Icon={m.Icon} label={m.label} target={m.target} />)}
+      {role === "Supervisor" && supervisorOnly.map((m) => <MenuButton key={m.target} Icon={m.Icon} label={m.label} target={m.target} />)}
+    </nav>
     </aside>
   );
 }
@@ -395,43 +434,69 @@ function VehicleRegister({ owners, onAdd }) {
 /* =====================
    Schedule inspection
    ===================== */
-function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule }) {
-  const [form, setForm] = useState({ vehiclePlate: "", type: "Completa", date: "", time: "", inspectorId: "", taller: "", notes: "" });
+function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule, userRole, userWorkshopId }) {
+  const [form, setForm] = useState({ vehiclePlate: "", templateId: "", date: "", time: "", inspectorId: "", notes: "" });
   const [error, setError] = useState("");
+  const [selectedVehicleType, setSelectedVehicleType] = useState("");
+
+  // Filter inspectors and workshop based on role
+  const availableInspectors = userRole === "Inspector" || userRole === "Supervisor" 
+    ? inspectors.filter(i => i.workshopId === userWorkshopId)
+    : inspectors;
+  
+  const userWorkshop = talleres.find(t => t.id === userWorkshopId);
 
   function submit(e) {
     e.preventDefault();
     if (!form.vehiclePlate) return setError("Selecciona vehículo.");
+    if (!form.templateId) return setError("Selecciona plantilla de inspección.");
     if (!form.date) return setError("Fecha requerida.");
     setError("");
+    
+    const vehicle = vehicles.find(v => v.plate === form.vehiclePlate);
+    const inspector = inspectors.find(i => i.id === form.inspectorId);
+    const workshop = userRole === "Inspector" || userRole === "Supervisor" 
+      ? userWorkshop 
+      : talleres.find(t => t.id === (inspector?.workshopId || userWorkshopId));
+    
     const schedule = {
       id: Date.now().toString(),
       vehicle: form.vehiclePlate,
-      type: form.type,
+      vehicleType: vehicle?.type || "AUTO",
+      templateId: form.templateId,
       datetime: `${form.date} ${form.time || "00:00"}`,
-      inspector: inspectors.find(i=>i.id===form.inspectorId)?.name || "No asignado",
-      taller: form.taller,
+      inspector: inspector?.name || "No asignado",
+      workshopId: workshop?.id || "",
+      taller: workshop?.name || "No asignado",
       notes: form.notes,
       status: "Programada",
     };
     onSchedule(schedule);
-    setForm({ vehiclePlate: "", type: "Completa", date: "", time: "", inspectorId: "", taller: "", notes: "" });
+    setForm({ vehiclePlate: "", templateId: "", date: "", time: "", inspectorId: "", notes: "" });
+    setSelectedVehicleType("");
   }
+
+  const handleVehicleChange = (plate) => {
+    const vehicle = vehicles.find(v => v.plate === plate);
+    setForm({...form, vehiclePlate: plate, templateId: ""});
+    setSelectedVehicleType(vehicle?.type || "");
+  };
 
   return (
     <div className="bg-white p-4 rounded shadow">
       <h3 className="font-semibold mb-2">Programar inspección</h3>
       <form onSubmit={submit} className="space-y-2">
-        <select value={form.vehiclePlate} onChange={(e)=>setForm({...form, vehiclePlate:e.target.value})} className="border p-2 rounded w-full">
+        <select value={form.vehiclePlate} onChange={(e)=>handleVehicleChange(e.target.value)} className="border p-2 rounded w-full">
           <option value="">Seleccionar vehículo</option>
-          {vehicles.map(v=> <option key={v.id} value={v.plate}>{v.plate} — {v.brand} {v.model}</option>)}
+          {vehicles.map(v=> <option key={v.id} value={v.plate}>{v.plate} — {v.brand} {v.model} ({v.type})</option>)}
         </select>
 
-        <select value={form.type} onChange={(e)=>setForm({...form, type:e.target.value})} className="border p-2 rounded w-full">
-          <option>Completa</option>
-          <option>Emisiones</option>
-          <option>Frenos</option>
-        </select>
+        {selectedVehicleType && (
+          <select value={form.templateId} onChange={(e)=>setForm({...form, templateId:e.target.value})} className="border p-2 rounded w-full">
+            <option value="">Seleccionar plantilla de inspección</option>
+            <option value={`TEMPLATE_${selectedVehicleType}`}>Inspección {selectedVehicleType === "AUTO" ? "Automóvil" : selectedVehicleType === "MOTO" ? "Motocicleta" : "Camión"} - Estándar</option>
+          </select>
+        )}
 
         <div className="grid grid-cols-2 gap-2">
           <input value={form.date} onChange={(e)=>setForm({...form, date:e.target.value})} type="date" className="border p-2 rounded" />
@@ -440,13 +505,14 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule }) {
 
         <select value={form.inspectorId} onChange={(e)=>setForm({...form, inspectorId:e.target.value})} className="border p-2 rounded w-full">
           <option value="">Asignar inspector (opcional)</option>
-          {inspectors.map(i=> <option key={i.id} value={i.id}>{i.name}</option>)}
+          {availableInspectors.map(i=> <option key={i.id} value={i.id}>{i.name}</option>)}
         </select>
 
-        <select value={form.taller} onChange={(e)=>setForm({...form, taller:e.target.value})} className="border p-2 rounded w-full">
-          <option value="">Seleccionar taller</option>
-          {talleres.map((t,idx)=> <option key={idx} value={t}>{t}</option>)}
-        </select>
+        {(userRole === "Inspector" || userRole === "Supervisor") && userWorkshop && (
+          <div className="p-2 bg-gray-100 rounded text-sm">
+            <b>Taller:</b> {userWorkshop.name}
+          </div>
+        )}
 
         <textarea value={form.notes} onChange={(e)=>setForm({...form, notes:e.target.value})} placeholder="Observaciones" className="border p-2 rounded w-full"/>
         {error && <div className="text-sm text-red-600">{error}</div>}
@@ -463,8 +529,29 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule }) {
    Execute inspection (checklist + photos)
    ===================== */
 function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
-  // inspection: { id, vehicle, ... } when starting
-  const [items, setItems] = useState(() => CHECKLIST_ITEMS.map((it) => ({ id: it.id, label: it.label, status: "No aplica", comment: "", photos: [] })));
+  // Get template based on vehicle type
+  const template = INSPECTION_TEMPLATES[inspection.vehicleType] || INSPECTION_TEMPLATES.AUTO;
+  
+  const [items, setItems] = useState(() => 
+    template.map((it) => ({ 
+      code: it.code,
+      name: it.name, 
+      category: it.category,
+      description: it.description,
+      resultType: it.resultType,
+      unit: it.unit,
+      minValue: it.minValue,
+      maxValue: it.maxValue,
+      severity: it.severity,
+      status: "No aplica", 
+      valueBoolean: null,
+      valueNumeric: "",
+      comment: "", 
+      photos: [],
+      defectSeverity: "",
+      defectDescription: ""
+    }))
+  );
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -472,56 +559,184 @@ function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
     setProgress(Math.round((done / items.length) * 100));
   }, [items]);
 
-  // add photo to an item
-  const handlePhoto = (file, itemId) => {
+  const handlePhoto = (file, itemCode) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
-      setItems(prev => prev.map(it => it.id === itemId ? { ...it, photos: [...it.photos, { name: file.name, data: ev.target.result }] } : it));
+      setItems(prev => prev.map(it => it.code === itemCode ? { ...it, photos: [...it.photos, { name: file.name, data: ev.target.result }] } : it));
     };
     reader.readAsDataURL(file);
   };
 
-  const updateItem = (itemId, patch) => setItems(prev => prev.map(it => it.id === itemId ? { ...it, ...patch } : it));
+  const updateItem = (itemCode, patch) => setItems(prev => prev.map(it => it.code === itemCode ? { ...it, ...patch } : it));
+
+  const renderItemInput = (item) => {
+    if (item.resultType === "BOOLEAN") {
+      return (
+        <select value={item.status} onChange={(e)=>{
+          const newStatus = e.target.value;
+          updateItem(item.code, { 
+            status: newStatus, 
+            valueBoolean: newStatus === "Aprobado" ? true : newStatus === "Falla" ? false : null,
+            defectSeverity: newStatus === "Falla" ? item.severity : "",
+            defectDescription: newStatus === "Falla" ? "" : ""
+          });
+        }} className="border p-1 rounded">
+          <option>No aplica</option>
+          <option>Aprobado</option>
+          <option>Falla</option>
+        </select>
+      );
+    } else if (item.resultType === "NUMERIC") {
+      return (
+        <div className="flex gap-2 items-center">
+          <input 
+            type="number" 
+            step="0.01"
+            value={item.valueNumeric} 
+            onChange={(e)=>{
+              const val = parseFloat(e.target.value);
+              const passes = (!item.minValue || val >= item.minValue) && (!item.maxValue || val <= item.maxValue);
+              updateItem(item.code, { 
+                valueNumeric: e.target.value,
+                status: e.target.value === "" ? "No aplica" : passes ? "Aprobado" : "Falla",
+                defectSeverity: !passes && e.target.value !== "" ? item.severity : "",
+                defectDescription: !passes && e.target.value !== "" ? "" : ""
+              });
+            }} 
+            placeholder={`${item.unit || ""}`}
+            className="border p-1 rounded w-24" 
+          />
+          <span className="text-xs text-gray-600">
+            {item.minValue && `≥${item.minValue}`}
+            {item.minValue && item.maxValue && " / "}
+            {item.maxValue && `≤${item.maxValue}`}
+            {item.unit && ` ${item.unit}`}
+          </span>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const getCategoryColor = (cat) => {
+    if (cat === "SEGURIDAD") return "bg-red-100 text-red-800";
+    if (cat === "MEDIOAMBIENTE") return "bg-green-100 text-green-800";
+    if (cat === "DOCUMENTAL") return "bg-blue-100 text-blue-800";
+    return "bg-gray-100 text-gray-800";
+  };
 
   return (
     <div className="bg-white p-4 rounded shadow space-y-3">
       <div className="flex justify-between items-center">
-        <h3 className="font-semibold">Ejecutar inspección - Vehículo {inspection.vehicle}</h3>
+        <div>
+          <h3 className="font-semibold">Ejecutar inspección - Vehículo {inspection.vehicle}</h3>
+          <div className="text-sm text-gray-600">Plantilla: {inspection.vehicleType === "AUTO" ? "Automóvil" : inspection.vehicleType === "MOTO" ? "Motocicleta" : "Camión"}</div>
+        </div>
         <div className="text-sm text-gray-600">Progreso: {progress}%</div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {items.map((it) => (
-          <div key={it.id} className="p-3 border rounded">
-            <div className="flex justify-between items-center">
-              <div className="font-medium">{it.label}</div>
-              <div className="flex gap-2 items-center">
-                <select value={it.status} onChange={(e)=>updateItem(it.id, { status: e.target.value })} className="border p-1 rounded">
-                  <option>No aplica</option>
-                  <option>Aprobado</option>
-                  <option>Falla</option>
-                </select>
-                <input placeholder="Comentario" value={it.comment} onChange={(e)=>updateItem(it.id, { comment: e.target.value })} className="border p-1 rounded text-sm" />
-                <label className="p-1 rounded border cursor-pointer text-sm flex items-center gap-1">
-                  <Camera className="w-4 h-4"/>
-                  <input onChange={(e)=>e.target.files && handlePhoto(e.target.files[0], it.id)} type="file" accept="image/*" style={{ display: "none" }} />
-                  Foto
-                </label>
+          <div key={it.code} className="p-3 border rounded">
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`px-2 py-1 rounded text-xs ${getCategoryColor(it.category)}`}>{it.category}</span>
+                  <span className="font-medium">{it.name}</span>
+                  <span className="text-xs text-gray-500">({it.code})</span>
+                </div>
+                <div className="text-xs text-gray-600 mb-2">{it.description}</div>
               </div>
             </div>
-            <div className="mt-2 flex gap-2">
-              {it.photos.map((p, idx) => <img key={idx} src={p.data} alt={p.name} style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 6 }} />)}
+            
+            <div className="flex gap-2 items-start flex-wrap">
+              <div className="flex gap-2 items-center">
+                {renderItemInput(it)}
+              </div>
+              
+              <input 
+                placeholder="Comentario adicional" 
+                value={it.comment} 
+                onChange={(e)=>updateItem(it.code, { comment: e.target.value })} 
+                className="border p-1 rounded text-sm flex-1 min-w-[200px]" 
+              />
+              
+              <label className="p-1 rounded border cursor-pointer text-sm flex items-center gap-1 hover:bg-gray-50">
+                <Camera className="w-4 h-4"/>
+                <input 
+                  onChange={(e)=>e.target.files && handlePhoto(e.target.files[0], it.code)} 
+                  type="file" 
+                  accept="image/*" 
+                  style={{ display: "none" }} 
+                />
+                Foto
+              </label>
             </div>
+
+            {it.status === "Falla" && (
+              <div className="mt-3 p-3 bg-red-50 rounded border border-red-200">
+                <div className="font-medium text-sm text-red-800 mb-2">⚠ Defecto detectado</div>
+                <div className="grid grid-cols-2 gap-2">
+                  <select 
+                    value={it.defectSeverity} 
+                    onChange={(e)=>updateItem(it.code, { defectSeverity: e.target.value })} 
+                    className="border p-2 rounded"
+                  >
+                    <option value="">Clasificar severidad</option>
+                    <option value="LEVE">Leve</option>
+                    <option value="GRAVE">Grave</option>
+                    <option value="CRITICA">Crítica</option>
+                  </select>
+                  <input 
+                    placeholder="Descripción del defecto" 
+                    value={it.defectDescription} 
+                    onChange={(e)=>updateItem(it.code, { defectDescription: e.target.value })} 
+                    className="border p-2 rounded" 
+                  />
+                </div>
+                {it.severity && (
+                  <div className="text-xs text-gray-600 mt-1">
+                    Severidad sugerida según normativa: <b>{it.severity}</b>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {it.photos.length > 0 && (
+              <div className="mt-2 flex gap-2 flex-wrap">
+                {it.photos.map((p, idx) => (
+                  <img 
+                    key={idx} 
+                    src={p.data} 
+                    alt={p.name} 
+                    style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 6 }} 
+                  />
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
 
       <div className="flex justify-end gap-2">
-        <button onClick={() => onSaveProgress({ inspectionId: inspection.id, items })} className="px-3 py-2 rounded border">
+        <button 
+          onClick={() => onSaveProgress({ inspectionId: inspection.id, items })} 
+          className="px-3 py-2 rounded border hover:bg-gray-50"
+        >
+          <Save className="w-4 h-4 inline mr-1" />
           Guardar progreso
         </button>
-        <button onClick={() => onCancel(inspection.id)} className="px-3 py-2 rounded border">Cancelar</button>
-        <button onClick={() => onFinish({ ...inspection, items })} className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}>
+        <button 
+          onClick={() => onCancel(inspection.id)} 
+          className="px-3 py-2 rounded border hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
+        <button 
+          onClick={() => onFinish({ ...inspection, items })} 
+          className="px-3 py-2 rounded" 
+          style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}
+        >
           Finalizar inspección
         </button>
       </div>
@@ -619,20 +834,34 @@ function NotificationsView({ notifications, onRetry }) {
 }
 
 /* =====================
-   Admin panel (CRUD simulated)
+   Admin panel 
    ===================== */
 function AdminPanel({ users, setUsers, talleres, setTalleres }) {
-  const [newUser, setNewUser] = useState({ fullName: "", email: "", role: "Inspector" });
-  const [newTaller, setNewTaller] = useState("");
+  const [newUser, setNewUser] = useState({ fullName: "", email: "", role: "Inspector", workshopId: "" });
+  const [newTaller, setNewTaller] = useState({ name: "", rnc: "" });
 
   const addUser = () => {
     if (!newUser.fullName || !newUser.email) return;
-    setUsers(prev => [{ id: Date.now().toString(), ...newUser }, ...prev]);
-    setNewUser({ fullName: "", email: "", role: "Inspector" });
+    const userData = { 
+      id: Date.now().toString(), 
+      ...newUser,
+      verified: true,
+      firstLogin: true,
+      document: `DOC-${Date.now()}`
+    };
+    setUsers(prev => [userData, ...prev]);
+    setNewUser({ fullName: "", email: "", role: "Inspector", workshopId: "" });
   };
+  
   const delUser = (id) => setUsers(prev => prev.filter(u => u.id !== id));
-  const addTaller = () => { if (!newTaller) return; setTalleres(prev => [newTaller, ...prev]); setNewTaller(""); };
-  const delTaller = (t) => setTalleres(prev => prev.filter(x => x !== t));
+  
+  const addTaller = () => { 
+    if (!newTaller.name || !newTaller.rnc) return; 
+    setTalleres(prev => [{ id: `w${Date.now()}`, ...newTaller }, ...prev]); 
+    setNewTaller({ name: "", rnc: "" }); 
+  };
+  
+  const delTaller = (id) => setTalleres(prev => prev.filter(x => x.id !== id));
 
   return (
     <div>
@@ -640,26 +869,41 @@ function AdminPanel({ users, setUsers, talleres, setTalleres }) {
 
       <div className="grid grid-cols-2 gap-4 mt-4">
         <div className="bg-white p-4 rounded shadow">
-          <h3 className="font-semibold mb-2">Usuarios</h3>
+          <h3 className="font-semibold mb-2">Usuarios del Sistema</h3>
           <div className="space-y-2">
             <div className="flex gap-2">
-              <input value={newUser.fullName} onChange={e=>setNewUser({...newUser, fullName:e.target.value})} placeholder="Nombre" className="border p-2 rounded flex-1" />
+              <input value={newUser.fullName} onChange={e=>setNewUser({...newUser, fullName:e.target.value})} placeholder="Nombre completo" className="border p-2 rounded flex-1" />
               <input value={newUser.email} onChange={e=>setNewUser({...newUser, email:e.target.value})} placeholder="Correo" className="border p-2 rounded flex-1" />
             </div>
             <div className="flex gap-2">
-              <select value={newUser.role} onChange={e=>setNewUser({...newUser, role:e.target.value})} className="border p-2 rounded">
+              <select value={newUser.role} onChange={e=>setNewUser({...newUser, role:e.target.value})} className="border p-2 rounded flex-1">
                 <option>Inspector</option>
+                <option>Supervisor</option>
                 <option>Administrador</option>
                 <option>Titular</option>
               </select>
-              <button onClick={addUser} className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}><UserPlus/> Agregar</button>
+              {(newUser.role === "Inspector" || newUser.role === "Supervisor") && (
+                <select value={newUser.workshopId} onChange={e=>setNewUser({...newUser, workshopId:e.target.value})} className="border p-2 rounded flex-1">
+                  <option value="">Asignar taller</option>
+                  {talleres.map(t=> <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+              )}
+              <button onClick={addUser} className="px-3 py-2 rounded flex items-center gap-1" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}>
+                <UserPlus className="w-4 h-4"/> Agregar
+              </button>
             </div>
 
-            <div className="mt-3 border-t pt-2">
+            <div className="mt-3 border-t pt-2 max-h-96 overflow-y-auto">
               {users.map(u=>(
-                <div key={u.id} className="flex justify-between items-center py-1 border-b">
-                  <div><div className="font-medium">{u.fullName}</div><div className="text-sm text-gray-600">{u.role} - {u.email}</div></div>
-                  <button onClick={()=>delUser(u.id)} className="px-2 py-1 text-xs rounded border">Borrar</button>
+                <div key={u.id} className="flex justify-between items-center py-2 border-b">
+                  <div>
+                    <div className="font-medium">{u.fullName}</div>
+                    <div className="text-sm text-gray-600">
+                      {u.role} - {u.email}
+                      {u.workshopId && ` - ${talleres.find(t => t.id === u.workshopId)?.name || "Taller no asignado"}`}
+                    </div>
+                  </div>
+                  <button onClick={()=>delUser(u.id)} className="px-2 py-1 text-xs rounded border hover:bg-red-50 hover:text-red-600">Borrar</button>
                 </div>
               ))}
             </div>
@@ -667,18 +911,121 @@ function AdminPanel({ users, setUsers, talleres, setTalleres }) {
         </div>
 
         <div className="bg-white p-4 rounded shadow">
-          <h3 className="font-semibold mb-2">Talleres</h3>
-          <div className="flex gap-2">
-            <input value={newTaller} onChange={e=>setNewTaller(e.target.value)} placeholder="Nombre taller" className="border p-2 rounded flex-1" />
-            <button onClick={addTaller} className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}>Agregar</button>
+          <h3 className="font-semibold mb-2">Talleres Autorizados</h3>
+          <div className="space-y-2">
+            <input value={newTaller.name} onChange={e=>setNewTaller({...newTaller, name:e.target.value})} placeholder="Nombre del taller" className="border p-2 rounded w-full" />
+            <div className="flex gap-2">
+              <input value={newTaller.rnc} onChange={e=>setNewTaller({...newTaller, rnc:e.target.value})} placeholder="RNC" className="border p-2 rounded flex-1" />
+              <button onClick={addTaller} className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}>Agregar</button>
+            </div>
           </div>
-          <div className="mt-3">
+          
+          <div className="mt-3 border-t pt-2">
             {talleres.map(t=>(
-              <div key={t} className="flex justify-between items-center py-1 border-b">
-                <div>{t}</div>
-                <button onClick={()=>delTaller(t)} className="px-2 py-1 text-xs rounded border">Borrar</button>
+              <div key={t.id} className="flex justify-between items-center py-2 border-b">
+                <div>
+                  <div className="font-medium">{t.name}</div>
+                  <div className="text-sm text-gray-600">{t.rnc}</div>
+                </div>
+                <button onClick={()=>delTaller(t.id)} className="px-2 py-1 text-xs rounded border hover:bg-red-50 hover:text-red-600">Borrar</button>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =====================
+   Supervisor panel 
+   ===================== */
+function SupervisorPanel({ users, setUsers, talleres, userWorkshopId }) {
+  const [newInspector, setNewInspector] = useState({ fullName: "", email: "" });
+  
+  const userWorkshop = talleres.find(t => t.id === userWorkshopId);
+  const workshopInspectors = users.filter(u => u.workshopId === userWorkshopId && u.role === "Inspector");
+
+  const addInspector = () => {
+    if (!newInspector.fullName || !newInspector.email) return;
+    const inspectorData = { 
+      id: Date.now().toString(), 
+      fullName: newInspector.fullName,
+      email: newInspector.email,
+      role: "Inspector",
+      workshopId: userWorkshopId,
+      verified: true,
+      firstLogin: true,
+      document: `DOC-${Date.now()}`
+    };
+    setUsers(prev => [inspectorData, ...prev]);
+    setNewInspector({ fullName: "", email: "" });
+  };
+  
+  const delInspector = (id) => {
+    if (window.confirm("¿Está seguro de eliminar este inspector?")) {
+      setUsers(prev => prev.filter(u => u.id !== id));
+    }
+  };
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold" style={{ color: COLORS.intrantBlue }}>Gestión de Inspectores</h2>
+      <div className="text-sm text-gray-600 mb-4">Taller: <b>{userWorkshop?.name || "No asignado"}</b></div>
+
+      <div className="bg-white p-4 rounded shadow">
+        <h3 className="font-semibold mb-3">Agregar Inspector</h3>
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <input 
+              value={newInspector.fullName} 
+              onChange={e=>setNewInspector({...newInspector, fullName:e.target.value})} 
+              placeholder="Nombre completo" 
+              className="border p-2 rounded flex-1" 
+            />
+            <input 
+              value={newInspector.email} 
+              onChange={e=>setNewInspector({...newInspector, email:e.target.value})} 
+              placeholder="Correo electrónico" 
+              className="border p-2 rounded flex-1" 
+            />
+            <button 
+              onClick={addInspector} 
+              className="px-3 py-2 rounded flex items-center gap-1" 
+              style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}
+            >
+              <UserPlus className="w-4 h-4"/> Agregar
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 border-t pt-3">
+          <h3 className="font-semibold mb-2">Inspectores del Taller ({workshopInspectors.length})</h3>
+          <div className="space-y-2">
+            {workshopInspectors.map(inspector => (
+              <div key={inspector.id} className="flex justify-between items-center p-3 border rounded hover:bg-gray-50">
+                <div>
+                  <div className="font-medium">{inspector.fullName}</div>
+                  <div className="text-sm text-gray-600">{inspector.email}</div>
+                  {inspector.firstLogin && (
+                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded mt-1 inline-block">
+                      Pendiente primer inicio
+                    </span>
+                  )}
+                </div>
+                <button 
+                  onClick={()=>delInspector(inspector.id)} 
+                  className="px-3 py-1 text-sm rounded border hover:bg-red-50 hover:text-red-600"
+                >
+                  Eliminar
+                </button>
+              </div>
+            ))}
+            {workshopInspectors.length === 0 && (
+              <div className="text-center text-gray-500 py-4">
+                No hay inspectores asignados a este taller
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -748,40 +1095,44 @@ export default function App() {
   /* Data stores (simulados, representan BD) */
   const [users, setUsers] = useState([
     { id: "u1", fullName: "Carlos Pérez", email: "carlos@example.com", role: "Titular", document: "001-0000001-0", verified: true, firstLogin: false },
-    { id: "u2", fullName: "Taller Los Robles", email: "taller@example.com", role: "Taller", document: "RNC-123456", verified: true, firstLogin: false },
+    { id: "u2", fullName: "Taller Los Robles", email: "taller@example.com", role: "Taller", document: "RNC-123456", verified: true, firstLogin: false, workshopId: "w1" },
     { id: "u3", fullName: "Admin INTRANT", email: "admin@example.com", role: "Administrador", document: "000", verified: true, firstLogin: false },
     { id: "u4", fullName: "María González", email: "maria@example.com", role: "Titular", document: "001-0000002-0", verified: true, firstLogin: false },
-    { id: "u5", fullName: "Taller San Cristóbal", email: "tallersancristobal@example.com", role: "Taller", document: "RNC-789012", verified: true, firstLogin: false },
+    { id: "u5", fullName: "Taller San Cristóbal", email: "tallersancristobal@example.com", role: "Taller", document: "RNC-789012", verified: true, firstLogin: false, workshopId: "w2" },
+    { id: "u6", fullName: "Supervisor Taller Los Robles", email: "supervisor@losrobles.com", role: "Supervisor", document: "001-0000005-0", verified: true, firstLogin: false, workshopId: "w1" },
   ]);
 
   const [vehicles, setVehicles] = useState([
-    { id: "v1", plate: "A123456", vin: "1HGBH41JXMN109186", brand: "Toyota", model: "Corolla", year: 2020, color: "Blanco", fuel: "Gasolina", owner: "Carlos Pérez", documents: [] },
-    { id: "v2", plate: "B987654", vin: "JH4KA8260NC000000", brand: "Honda", model: "Civic", year: 2019, color: "Negro", fuel: "Híbrido", owner: "María González", documents: [] },
-    { id: "v3", plate: "C555888", vin: "WBAVA37553NM12345", brand: "BMW", model: "X3", year: 2021, color: "Gris", fuel: "Gasolina", owner: "Carlos Pérez", documents: [] },
-    { id: "v4", plate: "D112233", vin: "1G1ZE5ST4HF123456", brand: "Chevrolet", model: "Malibu", year: 2018, color: "Azul", fuel: "Gasolina", owner: "María González", documents: [] },
+    { id: "v1", plate: "A123456", vin: "1HGBH41JXMN109186", brand: "Toyota", model: "Corolla", year: 2020, color: "Blanco", fuel: "Gasolina", owner: "Carlos Pérez", documents: [], type: "AUTO" },
+    { id: "v2", plate: "B987654", vin: "JH4KA8260NC000000", brand: "Honda", model: "Civic", year: 2019, color: "Negro", fuel: "Híbrido", owner: "María González", documents: [], type: "AUTO" },
+    { id: "v3", plate: "C555888", vin: "WBAVA37553NM12345", brand: "BMW", model: "X3", year: 2021, color: "Gris", fuel: "Gasolina", owner: "Carlos Pérez", documents: [], type: "AUTO" },
+    { id: "v4", plate: "D112233", vin: "1G1ZE5ST4HF123456", brand: "Chevrolet", model: "Malibu", year: 2018, color: "Azul", fuel: "Gasolina", owner: "María González", documents: [], type: "AUTO" },
+    { id: "v5", plate: "M555111", vin: "JH2SC5902MK000001", brand: "Honda", model: "CBR", year: 2020, color: "Rojo", fuel: "Gasolina", owner: "Carlos Pérez", documents: [], type: "MOTO" },
+    { id: "v6", plate: "T888999", vin: "3HSDJAPR8HN000001", brand: "Hino", model: "FC", year: 2019, color: "Blanco", fuel: "Diésel", owner: "Transporte XYZ", documents: [], type: "CAMION" },
   ]);
 
   const [inspectors, setInspectors] = useState([
-    { id: "ins1", name: "Juan Pérez Martínez", email: "juan.perez@taller.com", role: "Inspector", certification: "ITV-2023-001" },
-    { id: "ins2", name: "Ana Gómez Silva", email: "ana.gomez@taller.com", role: "Inspector", certification: "ITV-2023-002" },
-    { id: "ins3", name: "Roberto Fernández", email: "roberto.fernandez@taller.com", role: "Inspector", certification: "ITV-2023-003" },
-    { id: "ins4", name: "Carmen Rodríguez", email: "carmen.rodriguez@taller.com", role: "Inspector", certification: "ITV-2023-004" },
+    { id: "ins1", name: "Juan Pérez Martínez", email: "juan.perez@taller.com", role: "Inspector", certification: "ITV-2023-001", workshopId: "w1" },
+    { id: "ins2", name: "Ana Gómez Silva", email: "ana.gomez@taller.com", role: "Inspector", certification: "ITV-2023-002", workshopId: "w1" },
+    { id: "ins3", name: "Roberto Fernández", email: "roberto.fernandez@taller.com", role: "Inspector", certification: "ITV-2023-003", workshopId: "w2" },
+    { id: "ins4", name: "Carmen Rodríguez", email: "carmen.rodriguez@taller.com", role: "Inspector", certification: "ITV-2023-004", workshopId: "w2" },
   ]);
 
   const [talleres, setTalleres] = useState([
-    "Taller Los Robles", 
-    "Taller El Progreso", 
-    "Taller Autorizado Norte",
-    "Centro de Inspección San Cristóbal",
-    "Taller Mecánico Central",
-    "Inspecciones Técnicas del Este"
+    { id: "w1", name: "Taller Los Robles", rnc: "RNC-123456" },
+    { id: "w2", name: "Taller San Cristóbal", rnc: "RNC-789012" },
+    { id: "w3", name: "Taller El Progreso", rnc: "RNC-456789" },
+    { id: "w4", name: "Centro de Inspección San Cristóbal", rnc: "RNC-111222" },
+    { id: "w5", name: "Taller Mecánico Central", rnc: "RNC-333444" },
+    { id: "w6", name: "Inspecciones Técnicas del Este", rnc: "RNC-555666" },
   ]);
 
   const [scheduled, setScheduled] = useState([
-    { id: "s1", vehicle: "A123456", type: "Completa", datetime: "2025-09-25 09:00", inspector: "Juan Pérez Martínez", taller: "Taller Los Robles", status: "Programada", notes: "Primera inspección del año" },
-    { id: "s2", vehicle: "B987654", type: "Emisiones", datetime: "2025-09-26 14:00", inspector: "Ana Gómez Silva", taller: "Centro de Inspección San Cristóbal", status: "Programada", notes: "Inspección de rutina" },
-    { id: "s3", vehicle: "C555888", type: "Frenos", datetime: "2025-09-27 10:30", inspector: "Roberto Fernández", taller: "Taller El Progreso", status: "En proceso", notes: "Verificación post-reparación" },
-    { id: "s4", vehicle: "D112233", type: "Completa", datetime: "2025-09-28 16:00", inspector: "Carmen Rodríguez", taller: "Inspecciones Técnicas del Este", status: "Programada", notes: "Inspección anual obligatoria" },
+    { id: "s1", vehicle: "A123456", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-25 09:00", inspector: "Juan Pérez Martínez", workshopId: "w1", taller: "Taller Los Robles", status: "Programada", notes: "Primera inspección del año" },
+    { id: "s2", vehicle: "B987654", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-26 14:00", inspector: "Ana Gómez Silva", workshopId: "w2", taller: "Centro de Inspección San Cristóbal", status: "Programada", notes: "Inspección de rutina" },
+    { id: "s3", vehicle: "C555888", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-27 10:30", inspector: "Roberto Fernández", workshopId: "w3", taller: "Taller El Progreso", status: "En proceso", notes: "Verificación post-reparación" },
+    { id: "s4", vehicle: "D112233", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-28 16:00", inspector: "Carmen Rodríguez", workshopId: "w6", taller: "Inspecciones Técnicas del Este", status: "Programada", notes: "Inspección anual obligatoria" },
+    { id: "s5", vehicle: "M555111", vehicleType: "MOTO", templateId: "TEMPLATE_MOTO", datetime: "2025-09-29 11:00", inspector: "Juan Pérez Martínez", workshopId: "w1", taller: "Taller Los Robles", status: "Programada", notes: "Inspección motocicleta" },
   ]);
 
   const [inspections, setInspections] = useState([
@@ -908,39 +1259,55 @@ export default function App() {
   };
 
   const finishInspectionFlow = (inspectionWithItems) => {
-    const anyFail = inspectionWithItems.items.some(it => it.status === "Falla");
-    const result = anyFail ? "Rechazado" : "Aprobado";
-    const newInspection = {
-      id: `final_${inspectionWithItems.id || Date.now().toString()}`,
-      vehicle: inspectionWithItems.vehicle,
-      date: nowDate(),
-      result,
-      inspector: inspectionWithItems.inspector || "N/A",
-      taller: inspectionWithItems.taller || "N/A",
-      items: inspectionWithItems.items,
-    };
-    addInspection(newInspection);
-
-    if (result === "Aprobado") {
-      const newCert = {
-        id: `C-${String(certificates.length + 1).padStart(3, '0')}`,
-        vehicle: newInspection.vehicle,
-        date: nowDate(),
-        status: "Activo",
-        details: `Certificado emitido tras inspección exitosa. Válido por 12 meses.`,
-        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
-      };
-      setCertificates(prev => [newCert, ...prev]);
-      setSelectedCert(newCert);
-      setViewCertDetail(true);
-      setPage("certificates");
-      setNotifications(prev => [{ id: `n${Date.now()}`, title: "Certificado emitido", message: `Certificado ${newCert.id} generado para ${newCert.vehicle}`, status: "Entregado" }, ...prev]);
-    } else {
-      setNotifications(prev => [{ id: `n${Date.now()}`, title: "Inspección no aprobada", message: `La inspección de ${newInspection.vehicle} requiere reparaciones antes de la re-inspección`, status: "Entregado" }, ...prev]);
-    }
-    
-    setExecInspection(null);
+  // Check for critical or severe defects
+  const hasCritical = inspectionWithItems.items.some(it => it.status === "Falla" && it.defectSeverity === "CRITICA");
+  const hasGrave = inspectionWithItems.items.some(it => it.status === "Falla" && it.defectSeverity === "GRAVE");
+  const anyFail = inspectionWithItems.items.some(it => it.status === "Falla");
+  
+  let result = "APPROVED";
+  if (hasCritical) {
+    result = "REJECTED";
+  } else if (hasGrave) {
+    result = "CONDITIONAL";
+  } else if (anyFail) {
+    result = "CONDITIONAL";
+  }
+  
+  const newInspection = {
+    id: `final_${inspectionWithItems.id || Date.now().toString()}`,
+    vehicle: inspectionWithItems.vehicle,
+    vehicleType: inspectionWithItems.vehicleType,
+    date: nowDate(),
+    result: result === "APPROVED" ? "Aprobado" : result === "REJECTED" ? "Rechazado" : "Condicional",
+    inspector: inspectionWithItems.inspector || "N/A",
+    taller: inspectionWithItems.taller || "N/A",
+    workshopId: inspectionWithItems.workshopId || "",
+    items: inspectionWithItems.items,
   };
+  addInspection(newInspection);
+
+  if (result === "APPROVED") {
+    const newCert = {
+      id: `C-${String(certificates.length + 1).padStart(3, '0')}`,
+      vehicle: newInspection.vehicle,
+      date: nowDate(),
+      status: "Activo",
+      details: `Certificado emitido tras inspección exitosa. Válido por 12 meses.`,
+      expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    };
+    setCertificates(prev => [newCert, ...prev]);
+    setSelectedCert(newCert);
+    setViewCertDetail(true);
+    setPage("certificates");
+    setNotifications(prev => [{ id: `n${Date.now()}`, title: "Certificado emitido", message: `Certificado ${newCert.id} generado para ${newCert.vehicle}`, status: "Entregado" }, ...prev]);
+  } else if (result === "CONDITIONAL") {
+    setNotifications(prev => [{ id: `n${Date.now()}`, title: "Inspección condicional", message: `La inspección de ${newInspection.vehicle} tiene defectos leves que deben corregirse en el plazo establecido`, status: "Entregado" }, ...prev]);
+  } else {
+    setNotifications(prev => [{ id: `n${Date.now()}`, title: "Inspección no aprobada", message: `La inspección de ${newInspection.vehicle} requiere reparaciones críticas antes de la re-inspección`, status: "Entregado" }, ...prev]);
+  }
+  
+  setExecInspection(null);
+};
 
   /* =========================
      Notifications handlers
@@ -1134,7 +1501,9 @@ export default function App() {
                         <tr><th className="p-2">Vehículo</th><th className="p-2">Tipo</th><th className="p-2">Fecha/Hora</th><th className="p-2">Inspector</th><th className="p-2">Estado</th><th className="p-2">Acciones</th></tr>
                       </thead>
                       <tbody>
-                        {scheduled.map(s => (
+                        {scheduled
+                          .filter(s => (role === "Inspector" || role === "Supervisor") ? s.workshopId === loggedUser?.workshopId : true)
+                          .map(s => (
                           <tr key={s.id} className="border-t">
                             <td className="p-2 font-medium">{s.vehicle}</td>
                             <td className="p-2">{s.type}</td>
@@ -1147,7 +1516,14 @@ export default function App() {
                             </td>
                             <td className="p-2">
                               <button 
-                                onClick={() => setExecInspection({ id: s.id, vehicle: s.vehicle, inspector: s.inspector, taller: s.taller })} 
+                                onClick={() => setExecInspection({ 
+                                  id: s.id, 
+                                  vehicle: s.vehicle, 
+                                  vehicleType: s.vehicleType,
+                                  inspector: s.inspector, 
+                                  taller: s.taller,
+                                  workshopId: s.workshopId
+                                })} 
                                 className="px-2 py-1 rounded border text-sm hover:bg-gray-50"
                                 disabled={s.status === "En proceso"}
                               >
@@ -1168,7 +1544,10 @@ export default function App() {
                     <table className="w-full text-left">
                       <thead className="bg-[#FFF4E5]"><tr><th className="p-2">ID</th><th className="p-2">Vehículo</th><th className="p-2">Fecha</th><th className="p-2">Inspector</th><th className="p-2">Resultado</th></tr></thead>
                       <tbody>
-                        {inspections.slice(0, 8).map(it=>(
+                        {inspections
+                          .filter(i => (role === "Inspector" || role === "Supervisor") ? i.workshopId === loggedUser?.workshopId : true)
+                          .slice(0, 8)
+                          .map(it=>(
                           <tr key={it.id} className="border-t">
                             <td className="p-2 text-sm text-gray-600">{it.id}</td>
                             <td className="p-2 font-medium">{it.vehicle}</td>
@@ -1187,7 +1566,14 @@ export default function App() {
                 </div>
 
                 <div>
-                  <ScheduleInspection vehicles={vehicles} inspectors={inspectors} talleres={talleres} onSchedule={scheduleInspection} />
+                  <ScheduleInspection 
+                    vehicles={vehicles} 
+                    inspectors={inspectors} 
+                    talleres={talleres} 
+                    onSchedule={scheduleInspection}
+                    userRole={role}
+                    userWorkshopId={loggedUser?.workshopId}
+/>
                 </div>
               </div>
 
@@ -1256,6 +1642,11 @@ export default function App() {
           {/* Admin */}
           {page === "admin" && (
             <AdminPanel users={users} setUsers={setUsers} talleres={talleres} setTalleres={setTalleres} />
+          )}
+
+          {/* Supervisor */}
+          {page === "supervisor" && (
+            <SupervisorPanel users={users} setUsers={setUsers} talleres={talleres} userWorkshopId={loggedUser?.workshopId} />
           )}
 
           {/* Reports */}
