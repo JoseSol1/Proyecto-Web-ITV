@@ -34,6 +34,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { httpService, API_ENDPOINTS } from './services/api.config';
 
 /* =====================
    Config colores y util
@@ -363,15 +364,14 @@ function VehicleRegister({ owners, onAdd }) {
     setError("");
     // construct vehicle object
     const newV = {
-      id: Date.now().toString(),
       vin: form.vin,
       plate: form.plate,
       brand: form.brand,
       model: form.model,
       year: form.year,
       color: form.color,
-      owner: owners.find((o) => o.id === form.ownerId)?.fullName || "Titular no asignado",
-      documents: form.files, // array of {name, dataURL}
+      ownerId: form.ownerId,
+      documents: form.files,
     };
     onAdd(newV);
     setForm({ vin: "", plate: "", brand: "", model: "", year: "", color: "", ownerId: "", files: [] });
@@ -460,16 +460,16 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule, userRo
       : talleres.find(t => t.id === (inspector?.workshopId || userWorkshopId));
     
     const schedule = {
-      id: Date.now().toString(),
-      vehicle: form.vehiclePlate,
+      vehiclePlate: form.vehiclePlate,
+      vehicleId: vehicle?.id,
       vehicleType: vehicle?.type || "AUTO",
       templateId: form.templateId,
       datetime: `${form.date} ${form.time || "00:00"}`,
+      inspectorId: form.inspectorId,
       inspector: inspector?.name || "No asignado",
       workshopId: workshop?.id || "",
       taller: workshop?.name || "No asignado",
       notes: form.notes,
-      status: "Programada",
     };
     onSchedule(schedule);
     setForm({ vehiclePlate: "", templateId: "", date: "", time: "", inspectorId: "", notes: "" });
@@ -1085,14 +1085,14 @@ function ReportsView({ inspections, certificates }) {
    ===================== */
 export default function App() {
   /* Layout & auth */
-  const [portal, setPortal] = useState(null); // Titular / Taller / Administrador
+  const [portal, setPortal] = useState(null);
   const [role, setRole] = useState(null);
-  const [page, setPage] = useState("dashboard"); // pages: dashboard, vehicles, inspections, certificates, notifications, admin, reports, history
+  const [page, setPage] = useState("dashboard");
   const [loggedUser, setLoggedUser] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [execInspection, setExecInspection] = useState(null); // Fixed: properly declared state
+  const [execInspection, setExecInspection] = useState(null);
 
-  /* Data stores (simulados, representan BD) */
+  /* Data stores */
   const [users, setUsers] = useState([
     { id: "u1", fullName: "Carlos Pérez", email: "carlos@example.com", role: "Titular", document: "001-0000001-0", verified: true, firstLogin: false },
     { id: "u2", fullName: "Taller Los Robles", email: "taller@example.com", role: "Taller", document: "RNC-123456", verified: true, firstLogin: false, workshopId: "w1" },
@@ -1164,45 +1164,110 @@ export default function App() {
   /* =========================
      Auth / registration flow
      ========================= */
-  const handleRegister = (payload) => {
-    const newUser = {
-      id: Date.now().toString(),
-      fullName: `${payload.firstName} ${payload.lastName}`,
-      email: payload.email,
-      role: portal === "Titular" ? "Titular" : portal === "Taller" ? "Taller" : "Administrador",
-      document: payload.idNumber || "",
-      verified: false,
-      firstLogin: true,
+  const handleRegister = async (payload) => {
+    try {
+      let endpoint, requestData;
+
+      if (payload.portal === "Titular") {
+        endpoint = API_ENDPOINTS.REGISTER_HOLDER;
+        requestData = {
+          email: payload.email,
+          password: payload.password,
+          documentType: "CEDULA",
+          documentNumber: payload.idNumber,
+          fullNameOrCorporate: `${payload.firstName} ${payload.lastName}`,
+          phone: payload.phone,
+          addressLine: payload.optional || "",
+          municipalityId: 1
+        };
+      } else {
+        endpoint = API_ENDPOINTS.REGISTER;
+        requestData = {
+          email: payload.email,
+          password: payload.password,
+          phone: payload.phone
+        };
+      }
+
+      const response = await httpService.post(endpoint, requestData);
+
+      const newUser = {
+        id: response.userId || Date.now().toString(),
+        fullName: `${payload.firstName} ${payload.lastName}`,
+        email: payload.email,
+        role: payload.portal === "Titular" ? "Titular" : payload.portal,
+        document: payload.idNumber,
+        verified: false,
+        firstLogin: true,
+      };
+
+      setUsers(prev => [newUser, ...prev]);
+      alert("Registro exitoso. Por favor verifica tu correo.");
+
+    } catch (error) {
+      alert(`Error en el registro: ${error.message}`);
+    }
+  };
+    const handleLogin = async ({ email, password }) => {
+        try {
+            // 1. Petición de Login a la API
+            const response = await httpService.post(API_ENDPOINTS.LOGIN, {
+                email,
+                password
+            });
+
+            // 2. Establecer el Token
+            // 'response.token' es la clave JWT necesaria para futuras peticiones.
+            httpService.setToken(response.token);
+
+            // 3. Mapear la Respuesta del Backend al Objeto de Usuario (user)
+
+            // Obtener el rol: si 'roles' existe y tiene elementos, toma el primero. De lo contrario, asigna 'user'.
+            const userRole = (response.roles && response.roles.length > 0)
+                ? response.roles[0]
+                : 'user';
+
+            const user = {
+                // Usamos 'response.userId' y 'response.email' que vienen directamente en la respuesta.
+                id: response.userId,
+                email: response.email,
+
+                // Mapear propiedades opcionales o con diferente nombre:
+                // Si 'fullName' no existe, usamos el email como nombre.
+                fullName: response.fullName || response.email,
+
+                // Mapeamos el rol del array (roles) al singular (role).
+                role: userRole,
+
+                // Mapeamos 'mustChangePassword' a 'firstLogin' (asumiendo que es la intención)
+                firstLogin: response.mustChangePassword || false,
+
+                // 'workshopId' puede ser nulo o indefinido, por lo que usamos 'null' como fallback.
+                workshopId: response.workshopId || null,
+
+                // 'verified' y 'status' (opcionalmente) se mantienen en la lógica del frontend.
+                verified: response.status === 'ACTIVE',
+            };
+
+            // 4. Configurar el Estado de la Aplicación
+            setLoggedUser(user);
+            setRole(user.role);
+            setLoggedIn(true);
+            setPage("dashboard");
+
+            // 5. Cargar Datos Adicionales (Acciones asíncronas necesarias tras el login)
+            await loadUserVehicles();
+            await loadCertificates();
+
+        } catch (error) {
+            // Manejo de errores: Muestra un mensaje amigable.
+            // El 'failed to fetch' o el error 401/500 será atrapado aquí.
+            console.error("Login Failed:", error);
+            alert(`Error al iniciar sesión: ${error.message || "Por favor, verifica tus credenciales y la conexión."}`);
+        }
     };
-    setUsers(prev => [newUser, ...prev]);
-    setNotifications(prev => [{ id: `n${Date.now()}`, title: "Nuevo registro", message: `Usuario ${newUser.fullName} se ha registrado exitosamente`, status: "Entregado" }, ...prev]);
-  };
-
-  const handleLogin = ({ email, password }) => {
-    const user = users.find(u => u.email === email);
-    if (!user) {
-      alert("Credenciales inválidas. Usuario no encontrado.");
-      return;
-    }
-    if (!user.verified) {
-      alert("Cuenta no verificada. Por favor revise su correo electrónico para completar la verificación.");
-      return;
-    }
-    
-    setLoggedUser(user);
-    setRole(user.role);
-    setLoggedIn(true);
-    setPage("dashboard");
-    
-    if (user.firstLogin) {
-      setTimeout(() => {
-        alert("Bienvenido al sistema. Por favor configure su perfil y cambie su contraseña en la primera oportunidad.");
-        setUsers(prev => prev.map(u => u.id === user.id ? { ...u, firstLogin: false } : u));
-      }, 500);
-    }
-  };
-
   const handleLogout = () => {
+    httpService.setToken(null);
     setLoggedIn(false);
     setLoggedUser(null);
     setPortal(null);
@@ -1214,100 +1279,335 @@ export default function App() {
   /* =========================
      Vehicle handlers
      ========================= */
-  const addVehicle = (v) => {
-    if (vehicles.some(x => x.plate === v.plate)) { 
-      alert("Error: Esta placa ya está registrada en el sistema."); 
-      return; 
+  const addVehicle = async (v) => {
+    try {
+      const requestData = {
+        vin: v.vin,
+        plate: v.plate,
+        vehicleTypeCode: v.type || "AUTO",
+        vehicleMakeName: v.brand,
+        vehicleModelName: v.model,
+        modelYear: parseInt(v.year),
+        vehicleModelYearFrom: parseInt(v.year),
+        fuelTypeCode: v.fuel || "GASOLINA",
+        engineNumber: v.engineNumber || "",
+        color: v.color,
+        grossWeightKg: v.weight || 0,
+        seatCount: v.seats || 5,
+        imageUrl: v.imageUrl || "",
+        initialHolderId: v.ownerId || loggedUser?.id
+      };
+
+      const response = await httpService.post(API_ENDPOINTS.VEHICLE_REGISTER, requestData);
+
+      const newVehicle = {
+        id: response.vehicleId,
+        ...v,
+        owner: users.find(u => u.id === v.ownerId)?.fullName || "Sin asignar"
+      };
+
+      setVehicles(prev => [newVehicle, ...prev]);
+      alert("Vehículo registrado exitosamente");
+
+    } catch (error) {
+      alert(`Error al registrar vehículo: ${error.message}`);
     }
-    if (v.vin && vehicles.some(x => x.vin === v.vin)) { 
-      alert("Error: Este VIN ya está registrado en el sistema."); 
-      return; 
+  };
+
+  const loadUserVehicles = async () => {
+    try {
+      const response = await httpService.get(API_ENDPOINTS.VEHICLE_GET_ALL);
+
+      const vehiclesData = response.map(v => ({
+        id: v.vehicleId,
+        plate: v.plate,
+        vin: v.vin,
+        brand: v.Make,
+          model: v.model,
+        year: v.modelYear,
+        color: v.color,
+        type: v.vehicleTypeCode,
+        owner: v.currentHolderName || "Sin asignar",
+        documents: []
+      }));
+
+      setVehicles(vehiclesData);
+
+    } catch (error) {
+      console.error("Error cargando vehículos:", error);
     }
-    setVehicles(prev => [v, ...prev]);
-    setNotifications(prev => [{ id: `n${Date.now()}`, title: "Vehículo registrado", message: `Vehículo ${v.plate} ha sido registrado exitosamente`, status: "Entregado" }, ...prev]);
   };
 
   /* =========================
      Scheduling & inspection
      ========================= */
-  const scheduleInspection = (s) => {
-    if (scheduled.some(x => x.vehicle === s.vehicle && x.datetime === s.datetime)) { 
-      alert("Error: Ya existe una inspección programada para este vehículo en la misma fecha y hora."); 
-      return; 
+  const scheduleInspection = async (s) => {
+    try {
+      const vehicle = vehicles.find(v => v.plate === s.vehiclePlate);
+
+      const requestData = {
+        vehicleId: vehicle?.id,
+        workshopId: s.workshopId || talleres[0]?.id,
+        inspectorUserId: s.inspectorId || null,
+        templateId: s.templateId,
+        scheduledAt: new Date(`${s.datetime}`).toISOString(),
+        odometerKm: 0,
+        comments: s.notes || ""
+      };
+
+      const response = await httpService.post(API_ENDPOINTS.INSPECTION_CREATE, requestData);
+
+      const newSchedule = {
+        id: response.inspectionId,
+        vehicle: s.vehiclePlate,
+        vehicleType: vehicle?.type || "AUTO",
+        templateId: s.templateId,
+        datetime: s.datetime,
+        inspector: s.inspector,
+        workshopId: s.workshopId,
+        taller: s.taller,
+        status: "Programada",
+        notes: s.notes
+      };
+
+      setScheduled(prev => [newSchedule, ...prev]);
+      alert("Inspección programada exitosamente");
+
+    } catch (error) {
+      alert(`Error al programar inspección: ${error.message}`);
     }
-    setScheduled(prev => [s, ...prev]);
-    setNotifications(prev => [{ id: `n${Date.now()}`, title: "Inspección programada", message: `Inspección programada para ${s.vehicle} el ${s.datetime}`, status: "Entregado" }, ...prev]);
   };
 
   const addInspection = (ins) => {
     setInspections(prev => [ins, ...prev]);
   };
 
-  const saveInspectionProgress = ({ inspectionId, items }) => {
-    const scheduledItem = scheduled.find(s => s.id === inspectionId);
-    const newInspection = {
-      id: `progress_${inspectionId}`,
-      vehicle: scheduledItem?.vehicle || "Desconocido",
-      date: nowDate(),
-      result: "En progreso",
-      inspector: scheduledItem?.inspector || "N/A",
-      taller: scheduledItem?.taller || "N/A",
-      items
-    };
-    setInspections(prev => [newInspection, ...prev]);
-    setNotifications(prev => [{ id: `n${Date.now()}`, title: "Progreso guardado", message: `Se ha guardado el progreso de la inspección para ${newInspection.vehicle}`, status: "Entregado" }, ...prev]);
+  const saveInspectionProgress = async ({ inspectionId, items }) => {
+    try {
+      const itemsToUpdate = items.filter(item => 
+        item.status !== "No aplica" && item.status !== ""
+      );
+
+      if (itemsToUpdate.length === 0) {
+        alert("No hay items para guardar");
+        return;
+      }
+
+      const batchRequest = {
+        items: itemsToUpdate.map(item => ({
+          itemId: item.code,
+          valueBoolean: item.valueBoolean,
+          valueNumeric: item.valueNumeric ? parseFloat(item.valueNumeric) : null,
+          valueEnum: item.valueEnum || null,
+          valueText: item.comment || null,
+          passFail: item.status === "Aprobado" ? "PASS" :
+            item.status === "Falla" ? "FAIL" : null,
+          evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null
+        }))
+      };
+
+      await httpService.put(
+        API_ENDPOINTS.INSPECTION_BATCH_UPDATE_ITEMS(inspectionId),
+        batchRequest
+      );
+
+      const scheduledItem = scheduled.find(s => s.id === inspectionId);
+      const progressInspection = {
+        id: `progress_${inspectionId}`,
+        vehicle: scheduledItem?.vehicle || "Desconocido",
+        date: nowDate(),
+        result: "En progreso",
+        inspector: scheduledItem?.inspector || "N/A",
+        taller: scheduledItem?.taller || "N/A",
+        items
+      };
+
+      setInspections(prev => {
+        const filtered = prev.filter(i => i.id !== progressInspection.id);
+        return [progressInspection, ...filtered];
+      });
+
+      setNotifications(prev => [
+        {
+          id: `n${Date.now()}`,
+          title: "Progreso guardado",
+          message: `Se han guardado ${itemsToUpdate.length} items de la inspección`,
+          status: "Entregado"
+        },
+        ...prev
+      ]);
+
+      alert(`✓ Progreso guardado\n${itemsToUpdate.length} items actualizados`);
+
+    } catch (error) {
+      console.error("Error guardando progreso:", error);
+      alert(`Error guardando progreso: ${error.message}`);
+    }
   };
 
-  const finishInspectionFlow = (inspectionWithItems) => {
-  // Check for critical or severe defects
-  const hasCritical = inspectionWithItems.items.some(it => it.status === "Falla" && it.defectSeverity === "CRITICA");
-  const hasGrave = inspectionWithItems.items.some(it => it.status === "Falla" && it.defectSeverity === "GRAVE");
-  const anyFail = inspectionWithItems.items.some(it => it.status === "Falla");
-  
-  let result = "APPROVED";
-  if (hasCritical) {
-    result = "REJECTED";
-  } else if (hasGrave) {
-    result = "CONDITIONAL";
-  } else if (anyFail) {
-    result = "CONDITIONAL";
-  }
-  
-  const newInspection = {
-    id: `final_${inspectionWithItems.id || Date.now().toString()}`,
-    vehicle: inspectionWithItems.vehicle,
-    vehicleType: inspectionWithItems.vehicleType,
-    date: nowDate(),
-    result: result === "APPROVED" ? "Aprobado" : result === "REJECTED" ? "Rechazado" : "Condicional",
-    inspector: inspectionWithItems.inspector || "N/A",
-    taller: inspectionWithItems.taller || "N/A",
-    workshopId: inspectionWithItems.workshopId || "",
-    items: inspectionWithItems.items,
-  };
-  addInspection(newInspection);
+  const finishInspectionFlow = async (inspectionWithItems) => {
+    try {
+      // 1. Actualizar items en batch
+      const itemsToUpdate = inspectionWithItems.items.filter(item => 
+        item.status !== "No aplica" && item.status !== ""
+      );
 
-  if (result === "APPROVED") {
-    const newCert = {
-      id: `C-${String(certificates.length + 1).padStart(3, '0')}`,
-      vehicle: newInspection.vehicle,
-      date: nowDate(),
-      status: "Activo",
-      details: `Certificado emitido tras inspección exitosa. Válido por 12 meses.`,
-      expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
-    };
-    setCertificates(prev => [newCert, ...prev]);
-    setSelectedCert(newCert);
-    setViewCertDetail(true);
-    setPage("certificates");
-    setNotifications(prev => [{ id: `n${Date.now()}`, title: "Certificado emitido", message: `Certificado ${newCert.id} generado para ${newCert.vehicle}`, status: "Entregado" }, ...prev]);
-  } else if (result === "CONDITIONAL") {
-    setNotifications(prev => [{ id: `n${Date.now()}`, title: "Inspección condicional", message: `La inspección de ${newInspection.vehicle} tiene defectos leves que deben corregirse en el plazo establecido`, status: "Entregado" }, ...prev]);
-  } else {
-    setNotifications(prev => [{ id: `n${Date.now()}`, title: "Inspección no aprobada", message: `La inspección de ${newInspection.vehicle} requiere reparaciones críticas antes de la re-inspección`, status: "Entregado" }, ...prev]);
-  }
-  
-  setExecInspection(null);
-};
+      if (itemsToUpdate.length > 0) {
+        const batchRequest = {
+          items: itemsToUpdate.map(item => ({
+            itemId: item.code,
+            valueBoolean: item.valueBoolean,
+            valueNumeric: item.valueNumeric ? parseFloat(item.valueNumeric) : null,
+            valueEnum: item.valueEnum || null,
+            valueText: item.comment || null,
+            passFail: item.status === "Aprobado" ? "PASS" :
+              item.status === "Falla" ? "FAIL" : null,
+            evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null
+          }))
+        };
+
+        await httpService.put(
+          API_ENDPOINTS.INSPECTION_BATCH_UPDATE_ITEMS(inspectionWithItems.id),
+          batchRequest
+        );
+      }
+
+      // 2. Agregar defectos
+      const defects = inspectionWithItems.items
+        .filter(item => item.status === "Falla" && item.defectSeverity)
+        .map(item => ({
+          itemId: item.code,
+          severity: item.defectSeverity,
+          description: item.defectDescription || `Defecto en ${item.name}`,
+          correctiveDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        }));
+
+      for (const defect of defects) {
+        try {
+          await httpService.post(
+            API_ENDPOINTS.INSPECTION_ADD_DEFECT(inspectionWithItems.id),
+            defect
+          );
+        } catch (defectError) {
+          console.error(`Error registrando defecto:`, defectError);
+        }
+      }
+
+      // 3. Completar inspección
+      const completeResponse = await httpService.post(
+        API_ENDPOINTS.INSPECTION_COMPLETE(inspectionWithItems.id),
+        {
+          finalComments: `Inspección completada. ${defects.length} defecto(s) encontrado(s).`
+        }
+      );
+
+      // 4. Mapear resultado
+      const resultMap = {
+        "APPROVED": "Aprobado",
+        "REJECTED": "Rechazado",
+        "CONDITIONAL": "Condicional"
+      };
+
+      const newInspection = {
+        id: inspectionWithItems.id,
+        vehicle: inspectionWithItems.vehicle,
+        vehicleType: inspectionWithItems.vehicleType,
+        date: nowDate(),
+        result: resultMap[completeResponse.overallResult] || "Aprobado",
+        inspector: inspectionWithItems.inspector,
+        taller: inspectionWithItems.taller,
+        workshopId: inspectionWithItems.workshopId,
+        items: inspectionWithItems.items
+      };
+
+      addInspection(newInspection);
+
+      // 5. Si aprobó, solicitar certificado
+      if (newInspection.result === "Aprobado") {
+        try {
+          await requestCertificate(inspectionWithItems.id);
+
+          setNotifications(prev => [
+            {
+              id: `n${Date.now()}`,
+              title: "Certificado en proceso",
+              message: `El certificado para ${newInspection.vehicle} está siendo generado`,
+              status: "Entregado"
+            },
+            ...prev
+          ]);
+        } catch (certError) {
+          console.error("Error solicitando certificado:", certError);
+          alert("Inspección aprobada pero hubo un error al solicitar el certificado.");
+        }
+      } else if (newInspection.result === "Condicional") {
+        setNotifications(prev => [
+          {
+            id: `n${Date.now()}`,
+            title: "Inspección condicional",
+            message: `La inspección de ${newInspection.vehicle} tiene defectos que deben corregirse en 30 días`,
+            status: "Entregado"
+          },
+          ...prev
+        ]);
+      } else {
+        setNotifications(prev => [
+          {
+            id: `n${Date.now()}`,
+            title: "Inspección no aprobada",
+            message: `La inspección de ${newInspection.vehicle} requiere reparaciones críticas`,
+            status: "Entregado"
+          },
+          ...prev
+        ]);
+      }
+
+      setExecInspection(null);
+      setPage("inspections");
+
+      alert(`✓ Inspección completada\nResultado: ${newInspection.result}\nDefectos: ${defects.length}`);
+
+    } catch (error) {
+      console.error("Error al finalizar inspección:", error);
+      alert(`Error al finalizar inspección: ${error.message}`);
+    }
+  };
+
+  const requestCertificate = async (inspectionId) => {
+    try {
+      const response = await httpService.post(API_ENDPOINTS.CERTIFICATE_REQUEST, {
+        inspectionId: inspectionId,
+        provider: "DGII"
+      });
+
+      return response.certificateId;
+
+    } catch (error) {
+      console.error("Error solicitando certificado:", error);
+      throw error;
+    }
+  };
+
+  const loadCertificates = async () => {
+    try {
+      const response = await httpService.get(API_ENDPOINTS.CERTIFICATE_GET_ALL);
+
+      const certsData = response.map(c => ({
+        id: c.certificateId,
+        vehicle: c.vehiclePlate || "N/A",
+        date: c.issueDate?.split('T')[0],
+        status: c.status === "VALID" ? "Activo" : c.status === "REVOKED" ? "Revocado" : "Expirado",
+        details: c.comments || "Certificado de inspección técnica vehicular",
+        expiryDate: c.expiryDate?.split('T')[0],
+        qrHash: c.qrHash
+      }));
+
+      setCertificates(certsData);
+
+    } catch (error) {
+      console.error("Error cargando certificados:", error);
+    }
+  };
 
   /* =========================
      Notifications handlers
@@ -1323,6 +1623,7 @@ export default function App() {
     setSelectedCert(c);
     setViewCertDetail(false);
   };
+  
   const openCertDetail = () => setViewCertDetail(true);
   const closeCertDetail = () => setViewCertDetail(false);
 
@@ -1506,7 +1807,7 @@ export default function App() {
                           .map(s => (
                           <tr key={s.id} className="border-t">
                             <td className="p-2 font-medium">{s.vehicle}</td>
-                            <td className="p-2">{s.type}</td>
+                            <td className="p-2">{s.vehicleType}</td>
                             <td className="p-2">{s.datetime}</td>
                             <td className="p-2">{s.inspector}</td>
                             <td className="p-2">
@@ -1573,7 +1874,7 @@ export default function App() {
                     onSchedule={scheduleInspection}
                     userRole={role}
                     userWorkshopId={loggedUser?.workshopId}
-/>
+                  />
                 </div>
               </div>
 
