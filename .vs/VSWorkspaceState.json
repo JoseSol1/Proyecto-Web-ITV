@@ -1,10 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\public",
     "\\src",
-    "\\src\\assets",
     "\\src\\services"
   ],
+  "SelectedNode": "\\src\\services\\api.config.js",
   "PreviewInSolutionExplorer": false
 }

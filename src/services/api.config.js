@@ -11,6 +11,10 @@ export const API_ENDPOINTS = {
     GET_USER: (id) => `/api/UserAccount/${id}`,
     GET_ALL_USERS: '/api/UserAccount',
     ASSIGN_ROLE: '/api/UserAccount/assign-role',
+    GET_HOLDERS: '/api/UserAccount/holders',
+    GET_WORKSHOP_USERS: '/api/UserAccount/workshop-users',
+    GET_
+        : '/api/UserAccount/workshops',
 
     // Vehicle endpoints
     VEHICLE_REGISTER: '/api/Vehicle/register',
@@ -18,6 +22,23 @@ export const API_ENDPOINTS = {
     VEHICLE_GET_BY_PLATE: (plate) => `/api/Vehicle/${plate}`,
     VEHICLE_GET_ALL: '/api/Vehicle',
     VEHICLE_UPDATE: (vehicleId) => `/api/Vehicle/${vehicleId}`,
+
+    // Vehicle Makes
+    VEHICLE_MAKES_GET_ALL: '/api/VehicleMakes',
+    VEHICLE_MAKES_GET_BY_ID: (id) => `/api/VehicleMakes/${id}`,
+
+    // Vehicle Models
+    VEHICLE_MODELS_GET_ALL: '/api/VehicleModels',
+    VEHICLE_MODELS_GET_BY_ID: (id) => `/api/VehicleModels/${id}`,
+    VEHICLE_MODELS_BY_MAKE: (makeId) => `/api/VehicleModels/by-make/${makeId}`,
+
+    // Vehicle Types
+    VEHICLE_TYPES_GET_ALL: '/api/VehicleTypes',
+    VEHICLE_TYPES_GET_BY_ID: (id) => `/api/VehicleTypes/${id}`,
+
+    // Fuel Types
+    FUEL_TYPES_GET_ALL: '/api/FuelTypes',
+    FUEL_TYPES_GET_BY_ID: (id) => `/api/FuelTypes/${id}`,
 
     // Inspection endpoints
     INSPECTION_CREATE: '/api/Inspection',
@@ -85,30 +106,22 @@ class HttpService {
             headers['Authorization'] = `Bearer ${this.token}`;
         }
 
-        const config = {
-            ...options,
-            headers,
-        };
+        const config = { ...options, headers };
 
         try {
             const response = await fetch(url, config);
 
-            // Si la respuesta es 401, limpiar token
             if (response.status === 401) {
                 this.setToken(null);
                 throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.');
             }
 
-            // Si la respuesta no es OK, lanzar error con mensaje
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
             }
 
-            // Si la respuesta está vacía (204 No Content), retornar null
-            if (response.status === 204) {
-                return null;
-            }
+            if (response.status === 204) return null;
 
             return await response.json();
         } catch (error) {
@@ -123,10 +136,7 @@ class HttpService {
         ).toString();
 
         const url = queryString ? `${endpoint}?${queryString}` : endpoint;
-
-        return this.request(url, {
-            method: 'GET',
-        });
+        return this.request(url, { method: 'GET' });
     }
 
     async post(endpoint, data = {}) {
@@ -144,9 +154,7 @@ class HttpService {
     }
 
     async delete(endpoint) {
-        return this.request(endpoint, {
-            method: 'DELETE',
-        });
+        return this.request(endpoint, { method: 'DELETE' });
     }
 }
 

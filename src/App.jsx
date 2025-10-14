@@ -50,6 +50,11 @@ const COLORS = {
 
 const nowDate = () => new Date().toISOString().slice(0, 10);
 
+/* INSPECCIONES
+
+*/
+
+
 /* =====================
    Plantillas de inspección por tipo de vehículo
    ===================== */
@@ -1083,131 +1088,140 @@ function ReportsView({ inspections, certificates }) {
 /* =====================
    Main App (estado global + flujo)
    ===================== */
-export default function App() {
-  /* Layout & auth */
-  const [portal, setPortal] = useState(null);
-  const [role, setRole] = useState(null);
-  const [page, setPage] = useState("dashboard");
-  const [loggedUser, setLoggedUser] = useState(null);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [execInspection, setExecInspection] = useState(null);
+export default function App()
+{
+    /* Layout & auth */
+    const [portal, setPortal] = useState(null);
+    const [role, setRole] = useState(null);
+    const [page, setPage] = useState("dashboard");
+    const [loggedUser, setLoggedUser] = useState(null);
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [execInspection, setExecInspection] = useState(null);
 
-  /* Data stores */
-  const [users, setUsers] = useState([
-    { id: "u1", fullName: "Carlos Pérez", email: "carlos@example.com", role: "Titular", document: "001-0000001-0", verified: true, firstLogin: false },
-    { id: "u2", fullName: "Taller Los Robles", email: "taller@example.com", role: "Taller", document: "RNC-123456", verified: true, firstLogin: false, workshopId: "w1" },
-    { id: "u3", fullName: "Admin INTRANT", email: "admin@example.com", role: "Administrador", document: "000", verified: true, firstLogin: false },
-    { id: "u4", fullName: "María González", email: "maria@example.com", role: "Titular", document: "001-0000002-0", verified: true, firstLogin: false },
-    { id: "u5", fullName: "Taller San Cristóbal", email: "tallersancristobal@example.com", role: "Taller", document: "RNC-789012", verified: true, firstLogin: false, workshopId: "w2" },
-    { id: "u6", fullName: "Supervisor Taller Los Robles", email: "supervisor@losrobles.com", role: "Supervisor", document: "001-0000005-0", verified: true, firstLogin: false, workshopId: "w1" },
-  ]);
+    /* Data stores */
+    const [users, setUsers] = useState([
+        { id: "u1", fullName: "Carlos Pérez", email: "carlos@example.com", role: "Titular", document: "001-0000001-0", verified: true, firstLogin: false },
+        { id: "u2", fullName: "Taller Los Robles", email: "taller@example.com", role: "Taller", document: "RNC-123456", verified: true, firstLogin: false, workshopId: "w1" },
+        { id: "u3", fullName: "Admin INTRANT", email: "admin@example.com", role: "Administrador", document: "000", verified: true, firstLogin: false },
+        { id: "u4", fullName: "María González", email: "maria@example.com", role: "Titular", document: "001-0000002-0", verified: true, firstLogin: false },
+        { id: "u5", fullName: "Taller San Cristóbal", email: "tallersancristobal@example.com", role: "Taller", document: "RNC-789012", verified: true, firstLogin: false, workshopId: "w2" },
+        { id: "u6", fullName: "Supervisor Taller Los Robles", email: "supervisor@losrobles.com", role: "Supervisor", document: "001-0000005-0", verified: true, firstLogin: false, workshopId: "w1" },
+    ]);
 
-  const [vehicles, setVehicles] = useState([
-    { id: "v1", plate: "A123456", vin: "1HGBH41JXMN109186", brand: "Toyota", model: "Corolla", year: 2020, color: "Blanco", fuel: "Gasolina", owner: "Carlos Pérez", documents: [], type: "AUTO" },
-    { id: "v2", plate: "B987654", vin: "JH4KA8260NC000000", brand: "Honda", model: "Civic", year: 2019, color: "Negro", fuel: "Híbrido", owner: "María González", documents: [], type: "AUTO" },
-    { id: "v3", plate: "C555888", vin: "WBAVA37553NM12345", brand: "BMW", model: "X3", year: 2021, color: "Gris", fuel: "Gasolina", owner: "Carlos Pérez", documents: [], type: "AUTO" },
-    { id: "v4", plate: "D112233", vin: "1G1ZE5ST4HF123456", brand: "Chevrolet", model: "Malibu", year: 2018, color: "Azul", fuel: "Gasolina", owner: "María González", documents: [], type: "AUTO" },
-    { id: "v5", plate: "M555111", vin: "JH2SC5902MK000001", brand: "Honda", model: "CBR", year: 2020, color: "Rojo", fuel: "Gasolina", owner: "Carlos Pérez", documents: [], type: "MOTO" },
-    { id: "v6", plate: "T888999", vin: "3HSDJAPR8HN000001", brand: "Hino", model: "FC", year: 2019, color: "Blanco", fuel: "Diésel", owner: "Transporte XYZ", documents: [], type: "CAMION" },
-  ]);
+    const [vehicles, setVehicles] = useState([
+        { id: "v1", plate: "A123456", vin: "1HGBH41JXMN109186", brand: "Toyota", model: "Corolla", year: 2020, color: "Blanco", fuel: "Gasolina", owner: "Carlos Pérez", documents: [], type: "AUTO" },
+        { id: "v2", plate: "B987654", vin: "JH4KA8260NC000000", brand: "Honda", model: "Civic", year: 2019, color: "Negro", fuel: "Híbrido", owner: "María González", documents: [], type: "AUTO" },
+        { id: "v3", plate: "C555888", vin: "WBAVA37553NM12345", brand: "BMW", model: "X3", year: 2021, color: "Gris", fuel: "Gasolina", owner: "Carlos Pérez", documents: [], type: "AUTO" },
+        { id: "v4", plate: "D112233", vin: "1G1ZE5ST4HF123456", brand: "Chevrolet", model: "Malibu", year: 2018, color: "Azul", fuel: "Gasolina", owner: "María González", documents: [], type: "AUTO" },
+        { id: "v5", plate: "M555111", vin: "JH2SC5902MK000001", brand: "Honda", model: "CBR", year: 2020, color: "Rojo", fuel: "Gasolina", owner: "Carlos Pérez", documents: [], type: "MOTO" },
+        { id: "v6", plate: "T888999", vin: "3HSDJAPR8HN000001", brand: "Hino", model: "FC", year: 2019, color: "Blanco", fuel: "Diésel", owner: "Transporte XYZ", documents: [], type: "CAMION" },
+    ]);
 
-  const [inspectors, setInspectors] = useState([
-    { id: "ins1", name: "Juan Pérez Martínez", email: "juan.perez@taller.com", role: "Inspector", certification: "ITV-2023-001", workshopId: "w1" },
-    { id: "ins2", name: "Ana Gómez Silva", email: "ana.gomez@taller.com", role: "Inspector", certification: "ITV-2023-002", workshopId: "w1" },
-    { id: "ins3", name: "Roberto Fernández", email: "roberto.fernandez@taller.com", role: "Inspector", certification: "ITV-2023-003", workshopId: "w2" },
-    { id: "ins4", name: "Carmen Rodríguez", email: "carmen.rodriguez@taller.com", role: "Inspector", certification: "ITV-2023-004", workshopId: "w2" },
-  ]);
+    const [inspectors, setInspectors] = useState([]);
+    const [templates, setTemplates] = useState([]);
 
-  const [talleres, setTalleres] = useState([
-    { id: "w1", name: "Taller Los Robles", rnc: "RNC-123456" },
-    { id: "w2", name: "Taller San Cristóbal", rnc: "RNC-789012" },
-    { id: "w3", name: "Taller El Progreso", rnc: "RNC-456789" },
-    { id: "w4", name: "Centro de Inspección San Cristóbal", rnc: "RNC-111222" },
-    { id: "w5", name: "Taller Mecánico Central", rnc: "RNC-333444" },
-    { id: "w6", name: "Inspecciones Técnicas del Este", rnc: "RNC-555666" },
-  ]);
 
-  const [scheduled, setScheduled] = useState([
-    { id: "s1", vehicle: "A123456", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-25 09:00", inspector: "Juan Pérez Martínez", workshopId: "w1", taller: "Taller Los Robles", status: "Programada", notes: "Primera inspección del año" },
-    { id: "s2", vehicle: "B987654", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-26 14:00", inspector: "Ana Gómez Silva", workshopId: "w2", taller: "Centro de Inspección San Cristóbal", status: "Programada", notes: "Inspección de rutina" },
-    { id: "s3", vehicle: "C555888", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-27 10:30", inspector: "Roberto Fernández", workshopId: "w3", taller: "Taller El Progreso", status: "En proceso", notes: "Verificación post-reparación" },
-    { id: "s4", vehicle: "D112233", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-28 16:00", inspector: "Carmen Rodríguez", workshopId: "w6", taller: "Inspecciones Técnicas del Este", status: "Programada", notes: "Inspección anual obligatoria" },
-    { id: "s5", vehicle: "M555111", vehicleType: "MOTO", templateId: "TEMPLATE_MOTO", datetime: "2025-09-29 11:00", inspector: "Juan Pérez Martínez", workshopId: "w1", taller: "Taller Los Robles", status: "Programada", notes: "Inspección motocicleta" },
-  ]);
+    const [talleres, setTalleres] = useState([
+        { id: "w1", name: "Taller Los Robles", rnc: "RNC-123456" },
+        { id: "w2", name: "Taller San Cristóbal", rnc: "RNC-789012" },
+        { id: "w3", name: "Taller El Progreso", rnc: "RNC-456789" },
+        { id: "w4", name: "Centro de Inspección San Cristóbal", rnc: "RNC-111222" },
+        { id: "w5", name: "Taller Mecánico Central", rnc: "RNC-333444" },
+        { id: "w6", name: "Inspecciones Técnicas del Este", rnc: "RNC-555666" },
+    ]);
+    const [vehicleModels, setVehicleModels] = useState([]);
+    const [fuelTypes, setFuelTypes] = useState([]);
 
-  const [inspections, setInspections] = useState([
-    { id: "i1", vehicle: "A123456", date: "2025-09-15", result: "Aprobado", inspector: "Juan Pérez Martínez", taller: "Taller Los Robles", items: [] },
-    { id: "i2", vehicle: "B987654", date: "2025-09-10", result: "Rechazado", inspector: "Ana Gómez Silva", taller: "Taller El Progreso", items: [] },
-    { id: "i3", vehicle: "C555888", date: "2025-09-08", result: "Aprobado", inspector: "Roberto Fernández", taller: "Centro de Inspección San Cristóbal", items: [] },
-    { id: "i4", vehicle: "D112233", date: "2025-09-05", result: "Rechazado", inspector: "Carmen Rodríguez", taller: "Inspecciones Técnicas del Este", items: [] },
-    { id: "i5", vehicle: "A123456", date: "2025-09-01", result: "Aprobado", inspector: "Juan Pérez Martínez", taller: "Taller Los Robles", items: [] },
-  ]);
 
-  const [certificates, setCertificates] = useState([
-    { id: "C-001", vehicle: "A123456", date: "2025-09-15", status: "Activo", details: "Certificado de inspección técnica vehicular válido hasta septiembre 2026.", expiryDate: "2026-09-15" },
-    { id: "C-002", vehicle: "C555888", date: "2025-09-08", status: "Activo", details: "Certificado de inspección técnica vehicular válido hasta septiembre 2026.", expiryDate: "2026-09-08" },
-    { id: "C-003", vehicle: "A123456", date: "2025-09-01", status: "Renovado", details: "Certificado anterior, reemplazado por C-001.", expiryDate: "2025-09-01" },
-  ]);
+    const [scheduled, setScheduled] = useState([
+        { id: "s1", vehicle: "A123456", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-25 09:00", inspector: "Juan Pérez Martínez", workshopId: "w1", taller: "Taller Los Robles", status: "Programada", notes: "Primera inspección del año" },
+        { id: "s2", vehicle: "B987654", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-26 14:00", inspector: "Ana Gómez Silva", workshopId: "w2", taller: "Centro de Inspección San Cristóbal", status: "Programada", notes: "Inspección de rutina" },
+        { id: "s3", vehicle: "C555888", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-27 10:30", inspector: "Roberto Fernández", workshopId: "w3", taller: "Taller El Progreso", status: "En proceso", notes: "Verificación post-reparación" },
+        { id: "s4", vehicle: "D112233", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-28 16:00", inspector: "Carmen Rodríguez", workshopId: "w6", taller: "Inspecciones Técnicas del Este", status: "Programada", notes: "Inspección anual obligatoria" },
+        { id: "s5", vehicle: "M555111", vehicleType: "MOTO", templateId: "TEMPLATE_MOTO", datetime: "2025-09-29 11:00", inspector: "Juan Pérez Martínez", workshopId: "w1", taller: "Taller Los Robles", status: "Programada", notes: "Inspección motocicleta" },
+    ]);
 
-  const [notifications, setNotifications] = useState([
-    { id: "n1", title: "Certificado disponible", message: "Certificado C-001 para vehículo A123456 está disponible para descarga", status: "Entregado" },
-    { id: "n2", title: "Inspección programada", message: "Recordatorio: Inspección para B987654 el 26 de septiembre a las 2:00 PM", status: "Entregado" },
-    { id: "n3", title: "Documento vencido", message: "El certificado del vehículo D112233 vence en 30 días", status: "Pendiente" },
-    { id: "n4", title: "Resultado de inspección", message: "Inspección para B987654 ha sido rechazada. Requiere reparaciones", status: "Entregado" },
-    { id: "n5", title: "Nuevo taller disponible", message: "Se ha agregado 'Inspecciones Técnicas del Este' a la red de talleres autorizados", status: "Pendiente" },
-  ]);
+    const [inspections, setInspections] = useState([
+        { id: "i1", vehicle: "A123456", date: "2025-09-15", result: "Aprobado", inspector: "Juan Pérez Martínez", taller: "Taller Los Robles", items: [] },
+        { id: "i2", vehicle: "B987654", date: "2025-09-10", result: "Rechazado", inspector: "Ana Gómez Silva", taller: "Taller El Progreso", items: [] },
+        { id: "i3", vehicle: "C555888", date: "2025-09-08", result: "Aprobado", inspector: "Roberto Fernández", taller: "Centro de Inspección San Cristóbal", items: [] },
+        { id: "i4", vehicle: "D112233", date: "2025-09-05", result: "Rechazado", inspector: "Carmen Rodríguez", taller: "Inspecciones Técnicas del Este", items: [] },
+        { id: "i5", vehicle: "A123456", date: "2025-09-01", result: "Aprobado", inspector: "Juan Pérez Martínez", taller: "Taller Los Robles", items: [] },
+    ]);
 
-  /* UI selection state */
-  const [selectedCert, setSelectedCert] = useState(null);
-  const [viewCertDetail, setViewCertDetail] = useState(false);
+    const [certificates, setCertificates] = useState([
+        { id: "C-001", vehicle: "A123456", date: "2025-09-15", status: "Activo", details: "Certificado de inspección técnica vehicular válido hasta septiembre 2026.", expiryDate: "2026-09-15" },
+        { id: "C-002", vehicle: "C555888", date: "2025-09-08", status: "Activo", details: "Certificado de inspección técnica vehicular válido hasta septiembre 2026.", expiryDate: "2026-09-08" },
+        { id: "C-003", vehicle: "A123456", date: "2025-09-01", status: "Renovado", details: "Certificado anterior, reemplazado por C-001.", expiryDate: "2025-09-01" },
+    ]);
 
-  /* =========================
-     Auth / registration flow
-     ========================= */
-  const handleRegister = async (payload) => {
-    try {
-      let endpoint, requestData;
+    const [notifications, setNotifications] = useState([
+        { id: "n1", title: "Certificado disponible", message: "Certificado C-001 para vehículo A123456 está disponible para descarga", status: "Entregado" },
+        { id: "n2", title: "Inspección programada", message: "Recordatorio: Inspección para B987654 el 26 de septiembre a las 2:00 PM", status: "Entregado" },
+        { id: "n3", title: "Documento vencido", message: "El certificado del vehículo D112233 vence en 30 días", status: "Pendiente" },
+        { id: "n4", title: "Resultado de inspección", message: "Inspección para B987654 ha sido rechazada. Requiere reparaciones", status: "Entregado" },
+        { id: "n5", title: "Nuevo taller disponible", message: "Se ha agregado 'Inspecciones Técnicas del Este' a la red de talleres autorizados", status: "Pendiente" },
+    ]);
 
-      if (payload.portal === "Titular") {
-        endpoint = API_ENDPOINTS.REGISTER_HOLDER;
-        requestData = {
-          email: payload.email,
-          password: payload.password,
-          documentType: "CEDULA",
-          documentNumber: payload.idNumber,
-          fullNameOrCorporate: `${payload.firstName} ${payload.lastName}`,
-          phone: payload.phone,
-          addressLine: payload.optional || "",
-          municipalityId: 1
-        };
-      } else {
-        endpoint = API_ENDPOINTS.REGISTER;
-        requestData = {
-          email: payload.email,
-          password: payload.password,
-          phone: payload.phone
-        };
-      }
+    const [vehicleTypes, setVehicleTypes] = useState([
+        { id: 1, name: "Automóvil" },
+        { id: 2, name: "Motocicleta" },
+        { id: 3, name: "Camión" },
+        { id: 4, name: "SUV" },
+    ]);
 
-      const response = await httpService.post(endpoint, requestData);
 
-      const newUser = {
-        id: response.userId || Date.now().toString(),
-        fullName: `${payload.firstName} ${payload.lastName}`,
-        email: payload.email,
-        role: payload.portal === "Titular" ? "Titular" : payload.portal,
-        document: payload.idNumber,
-        verified: false,
-        firstLogin: true,
-      };
+    /* UI selection state */
+    const [selectedCert, setSelectedCert] = useState(null);
+    const [viewCertDetail, setViewCertDetail] = useState(false);
 
-      setUsers(prev => [newUser, ...prev]);
-      alert("Registro exitoso. Por favor verifica tu correo.");
+    /* =========================
+       Auth / registration flow
+       ========================= */
+    const handleRegister = async (payload) => {
+        try {
+            let endpoint, requestData;
 
-    } catch (error) {
-      alert(`Error en el registro: ${error.message}`);
-    }
-  };
+            if (payload.portal === "Titular") {
+                endpoint = API_ENDPOINTS.REGISTER_HOLDER;
+                requestData = {
+                    email: payload.email,
+                    password: payload.password,
+                    documentType: "CEDULA",
+                    documentNumber: payload.idNumber,
+                    fullNameOrCorporate: `${payload.firstName} ${payload.lastName}`,
+                    phone: payload.phone,
+                    addressLine: payload.optional || "",
+                    municipalityId: 1
+                };
+            } else {
+                endpoint = API_ENDPOINTS.REGISTER;
+                requestData = {
+                    email: payload.email,
+                    password: payload.password,
+                    phone: payload.phone
+                };
+            }
+
+            const response = await httpService.post(endpoint, requestData);
+
+            const newUser = {
+                id: response.userId || Date.now().toString(),
+                fullName: `${payload.firstName} ${payload.lastName}`,
+                email: payload.email,
+                role: payload.portal === "Titular" ? "Titular" : payload.portal,
+                document: payload.idNumber,
+                verified: false,
+                firstLogin: true,
+            };
+
+            setUsers(prev => [newUser, ...prev]);
+            alert("Registro exitoso. Por favor verifica tu correo.");
+
+        } catch (error) {
+            alert(`Error en el registro: ${error.message}`);
+        }
+    };
     const handleLogin = async ({ email, password }) => {
         try {
             // 1. Petición de Login a la API
@@ -1258,6 +1272,9 @@ export default function App() {
             // 5. Cargar Datos Adicionales (Acciones asíncronas necesarias tras el login)
             await loadUserVehicles();
             await loadCertificates();
+            await loadAllInspections();  // ← Nueva
+            await loadTemplates();
+            await loadInitialData();
 
         } catch (error) {
             // Manejo de errores: Muestra un mensaje amigable.
@@ -1266,731 +1283,1035 @@ export default function App() {
             alert(`Error al iniciar sesión: ${error.message || "Por favor, verifica tus credenciales y la conexión."}`);
         }
     };
-  const handleLogout = () => {
-    httpService.setToken(null);
-    setLoggedIn(false);
-    setLoggedUser(null);
-    setPortal(null);
-    setRole(null);
-    setPage("dashboard");
-    setExecInspection(null);
-  };
+    const handleLogout = () => {
+        httpService.setToken(null);
+        setLoggedIn(false);
+        setLoggedUser(null);
+        setPortal(null);
+        setRole(null);
+        setPage("dashboard");
+        setExecInspection(null);
+    };
 
-  /* =========================
-     Vehicle handlers
-     ========================= */
-  const addVehicle = async (v) => {
-    try {
-      const requestData = {
-        vin: v.vin,
-        plate: v.plate,
-        vehicleTypeCode: v.type || "AUTO",
-        vehicleMakeName: v.brand,
-        vehicleModelName: v.model,
-        modelYear: parseInt(v.year),
-        vehicleModelYearFrom: parseInt(v.year),
-        fuelTypeCode: v.fuel || "GASOLINA",
-        engineNumber: v.engineNumber || "",
-        color: v.color,
-        grossWeightKg: v.weight || 0,
-        seatCount: v.seats || 5,
-        imageUrl: v.imageUrl || "",
-        initialHolderId: v.ownerId || loggedUser?.id
-      };
+    /* =========================
+       Vehicle handlers
+       ========================= */
+    const addVehicle = async (v) => {
+        try {
+            const requestData = {
+                vin: v.vin,
+                plate: v.plate,
+                vehicleTypeCode: v.type || "AUTO",
+                vehicleMakeName: v.brand,
+                vehicleModelName: v.model,
+                modelYear: parseInt(v.year),
+                vehicleModelYearFrom: parseInt(v.year),
+                fuelTypeCode: v.fuel || "GASOLINA",
+                engineNumber: v.engineNumber || "",
+                color: v.color,
+                grossWeightKg: v.weight || 0,
+                seatCount: v.seats || 5,
+                imageUrl: v.imageUrl || "",
+                initialHolderId: v.ownerId || loggedUser?.id
+            };
 
-      const response = await httpService.post(API_ENDPOINTS.VEHICLE_REGISTER, requestData);
+            const response = await httpService.post(API_ENDPOINTS.VEHICLE_REGISTER, requestData);
 
-      const newVehicle = {
-        id: response.vehicleId,
-        ...v,
-        owner: users.find(u => u.id === v.ownerId)?.fullName || "Sin asignar"
-      };
+            const newVehicle = {
+                id: response.vehicleId,
+                ...v,
+                owner: users.find(u => u.id === v.ownerId)?.fullName || "Sin asignar"
+            };
 
-      setVehicles(prev => [newVehicle, ...prev]);
-      alert("Vehículo registrado exitosamente");
+            setVehicles(prev => [newVehicle, ...prev]);
+            alert("Vehículo registrado exitosamente");
 
-    } catch (error) {
-      alert(`Error al registrar vehículo: ${error.message}`);
+        } catch (error) {
+            alert(`Error al registrar vehículo: ${error.message}`);
+        }
+    };
+
+    const loadUserVehicles = async () => {
+        try {
+            const response = await httpService.get(API_ENDPOINTS.VEHICLE_GET_ALL);
+
+            const vehiclesData = response.map(v => ({
+                id: v.vehicleId,
+                plate: v.plate,
+                vin: v.vin,
+                brand: v.Make,
+                model: v.model,
+                year: v.modelYear,
+                color: v.color,
+                type: v.vehicleTypeCode,
+                owner: v.currentHolderName || "Sin asignar",
+                documents: []
+            }));
+
+            setVehicles(vehiclesData);
+
+        } catch (error) {
+            console.error("Error cargando vehículos:", error);
+        }
+    };
+
+    /* Funciones de INSPECCION
+     */
+
+    // Función para cargar todos los datos al iniciar sesión
+    const loadInitialData = async () => {
+        try {
+            console.log('🔄 Cargando datos iniciales...');
+
+            await Promise.all([
+                loadVehicleModels(),
+                loadInspectors(),
+                loadHolders(),
+                loadWorkshops(),
+                loadFuelTypes(),
+                loadVehicleTypes()
+            ]);
+
+            console.log('✅ Todos los datos iniciales cargados correctamente');
+        } catch (error) {
+            console.error('❌ Error cargando datos iniciales:', error);
+            // Opcional: mostrar notificación al usuario
+        }
+    };
+
+    // 1. Modelos de vehículos
+    const loadVehicleModels = async () => {
+        try {
+            const response = await httpService.get(API_ENDPOINTS.VEHICLE_MODELS_GET_ALL);
+
+            const models = response.map(m => ({
+                id: m.modelId,
+                makeId: m.makeId,
+                makeName: m.makeName,
+                name: m.name,
+                type: m.type,
+                fullName: `${m.makeName} ${m.name}`, // Para mostrar en selects
+                yearFrom: m.yearFrom,
+                yearTo: m.yearTo,
+                createdAt: m.createdAt
+            }));
+
+            setVehicleModels(models);
+            console.log(`✓ Cargados ${models.length} modelos de vehículos`);
+
+            return models;
+        } catch (error) {
+            console.error('Error cargando modelos de vehículos:', error);
+            throw error;
+        }
+    };
+
+    // 2. Inspectores (usuarios de talleres)
+    const loadInspectors = async () => {
+        try {
+            const response = await httpService.get(API_ENDPOINTS.GET_WORKSHOP_USERS);
+            console.log("Response de inspectores:", response);
+
+            const inspectors = response.map(i => ({
+                id: i.workshopUserId,
+                userId: i.userId,
+                workshopId: i.workshopId,
+                workshopName: i.workshopName,
+                username: i.username,
+                role: i.roleInWorkshop,
+                active: i.active,
+                assignedAt: i.assignedAt,
+                updatedAt: i.updatedAt
+            }));
+
+            setInspectors(inspectors);
+            console.log(`✓ Cargados ${inspectors.length} inspectores`);
+
+            return inspectors;
+        } catch (error) {
+            console.error('Error cargando inspectores:', error);
+            throw error;
+        }
+    };
+
+    // 3. Titulares
+    const loadHolders = async () => {
+        try {
+            const response = await httpService.get(API_ENDPOINTS.GET_HOLDERS);
+
+            const holders = response.map(h => ({
+                id: h.holderId,
+                userId: h.userId,
+                documentType: h.documentType,
+                documentNumber: h.documentNumber,
+                fullName: h.fullNameOrCorporate,
+                email: h.email,
+                phone: h.phone,
+                municipality: h.municipalityName,
+                createdAt: h.createdAt
+            }));
+
+            setUsers(holders);
+            console.log(`✓ Cargados ${holders.length} titulares`);
+
+            return holders;
+        } catch (error) {
+            console.error('Error cargando titulares:', error);
+            throw error;
+        }
+    };
+
+    // 4. Talleres
+    const loadWorkshops = async () => {
+        try {
+            const response = await httpService.get(API_ENDPOINTS.GET_WORKSHOPS);
+
+            const workshops = response.map(w => ({
+                id: w.workshopId,
+                rnc: w.rnc,
+                name: w.name,
+                email: w.email,
+                phone: w.phone,
+                address: w.addressLine,
+                municipality: w.municipalityName,
+                status: w.status,
+                authorizedSince: w.authorizedSince,
+                createdAt: w.createdAt,
+                updatedAt: w.updatedAt
+            }));
+
+            setTalleres(workshops);
+            console.log(`✓ Cargados ${workshops.length} talleres`);
+
+            return workshops;
+        } catch (error) {
+            console.error('Error cargando talleres:', error);
+            throw error;
+        }
+    };
+
+    // 5. Tipos de combustible
+    const loadFuelTypes = async () => {
+        try {
+            const response = await httpService.get(API_ENDPOINTS.FUEL_TYPES_GET_ALL);
+
+            const fuelTypes = response.map(f => ({
+                id: f.fuelId,
+                code: f.code,
+                description: f.description,
+                createdAt: f.createdAt
+            }));
+
+            setFuelTypes(fuelTypes);
+            console.log(`✓ Cargados ${fuelTypes.length} tipos de combustible`);
+
+            return fuelTypes;
+        } catch (error) {
+            console.error('Error cargando tipos de combustible:', error);
+            throw error;
+        }
+    };
+
+    // 6. Plantillas de inspección
+    
+
+
+
+    const loadAllInspections = async () => {
+        try {
+            const response = await httpService.get(API_ENDPOINTS.INSPECTION_GET_ALL);
+
+            // Separar inspecciones completadas de las programadas/en progreso
+            const completedInspections = [];
+            const scheduledInspections = [];
+            console.log("Response de inspecciones:", response);
+            response.forEach(i => {
+                const inspectionData = {
+                    id: i.inspectionId,
+                    vehicle: i.vehiclePlate,
+                    vehicleId: i.vehicleId,
+                    vehicleType: getVehicleTypeName(i.typeId), // Podrías necesitar obtener esto del vehículo
+                    templateId: i.templateId,
+                    datetime: i.scheduledAt?.split('T')[0] + ' ' + (i.scheduledAt?.split('T')[1]?.substring(0, 5) || '00:00'),
+                    inspectorId: i.inspectorUserId,
+                    workshopId: i.workshopId,
+                    taller: i.workshopName || "N/A",
+                    notes: i.comments || "",
+                    odometerKm: i.odometerKm,
+                    totalItems: i.totalItems,
+                    completedItems: i.completedItems,
+                    pendingItems: i.pendingItems,
+                    defectsCount: i.defectsCount
+                };
+
+                // Criterio: completada si tiene overallResult Y status es COMPLETED
+                if (i.status === "COMPLETED" && i.overallResult) {
+                    completedInspections.push({
+                        ...inspectionData,
+                        date: i.finishedAt?.split('T')[0] || i.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+                        result: i.overallResult === "PASS" ? "Aprobado" :
+                            i.overallResult === "FAIL" ? "Rechazado" :
+                                "No Evaluado",
+                        items: []
+                    });
+                } else {
+                    // Inspección programada o en progreso
+                    scheduledInspections.push({
+                        ...inspectionData,
+                        status: i.status === "IN_PROGRESS" ? "En proceso" :
+                            i.status === "SCHEDULED" ? "Programada" :
+                                "Programada",
+                    });
+                }
+            });
+
+            // Actualizar ambos estados
+            setInspections(completedInspections);
+            setScheduled(scheduledInspections);
+
+            console.log(`✓ Cargadas ${completedInspections.length} inspecciones completadas`);
+            console.log(`✓ Cargadas ${scheduledInspections.length} inspecciones programadas/en progreso`);
+
+        } catch (error) {
+            console.error("Error cargando inspecciones:", error);
+        }
+    };
+
+    const loadTemplates = async () => {
+            try {
+                const response = await httpService.get(API_ENDPOINTS.TEMPLATES_GET_ALL);
+
+                const templates = response.map(t => ({
+                    id: t.templateId,
+                    type: getVehicleTypeName(t.typeId),
+                    name: t.templateName,
+                    resolutionId: t.resolutionId,
+                    resolutionCode: t.resolutionCode,
+                    resolutionTitle: t.resolutionTitle,
+                    version: t.version,
+                    isActive: t.isActive,
+                    checkItems: t.checkItems || []
+                }));
+
+                setTemplates(templates);
+                console.log(`✓ Cargadas ${templates.length} plantillas de inspección`);
+
+                return templates;
+            } catch (error) {
+                console.error('Error cargando plantillas de inspección:', error);
+                throw error;
+            }
+    };
+    const loadVehicleTypes = async () => {
+        try {
+            const response = await httpService.get(API_ENDPOINTS.VEHICLE_TYPES_GET_ALL);
+
+            const vehicleTypes = response.map(v => ({
+                id: v.typeId,
+                code: v.code,
+                name: v.description,
+                createdAt: v.createdAt
+            }));
+
+            setVehicleTypes(vehicleTypes);
+            console.log(`✓ Cargados ${vehicleTypes.length} tipos de vehículos`);
+
+            return vehicleTypes;
+
+        } catch (error) {
+            console.error('Error cargando tipos de vehículos:', error);
+            throw error;
+        }
+    };
+
+    const getVehicleTypeName = (typeId) => {
+        const type = vehicleTypes.find(v => v.id === typeId);
+        return type ? type.name : "N/A";
+    };
+    const getMakeNameByModelName = (modelName) => {
+        const model = vehicleModels.find(m => m.name === modelName);
+        return model ? model.makeName : "N/A";
+    };
+    const getTemplateNameById = (templateId) => {
+        const template = templates.find(t => t.id === templateId);
+        return template ? template.name : "Resolución General de ITV 2024";
+    };
+
+
+
+
+
+
+    /* =========================
+       Scheduling & inspection
+       ========================= */
+    const scheduleInspection = async (s) => {
+        try {
+            const vehicle = vehicles.find(v => v.plate === s.vehiclePlate);
+
+            const requestData = {
+                vehicleId: vehicle?.id,
+                workshopId: s.workshopId || talleres[0]?.id,
+                inspectorUserId: s.inspectorId || null,
+                templateId: s.templateId,
+                scheduledAt: new Date(`${s.datetime}`).toISOString(),
+                odometerKm: 0,
+                comments: s.notes || ""
+            };
+
+            const response = await httpService.post(API_ENDPOINTS.INSPECTION_CREATE, requestData);
+
+            const newSchedule = {
+                id: response.inspectionId,
+                vehicle: s.vehiclePlate,
+                vehicleType: vehicle?.type || "AUTO",
+                templateId: s.templateId,
+                datetime: s.datetime,
+                inspector: s.inspector,
+                workshopId: s.workshopId,
+                taller: s.taller,
+                status: "Programada",
+                notes: s.notes
+            };
+
+            setScheduled(prev => [newSchedule, ...prev]);
+            alert("Inspección programada exitosamente");
+
+        } catch (error) {
+            alert(`Error al programar inspección: ${error.message}`);
+        }
+    };
+
+    const addInspection = (ins) => {
+        setInspections(prev => [ins, ...prev]);
+    };
+
+    const saveInspectionProgress = async ({ inspectionId, items }) => {
+        try {
+            const itemsToUpdate = items.filter(item =>
+                item.status !== "No aplica" && item.status !== ""
+            );
+
+            if (itemsToUpdate.length === 0) {
+                alert("No hay items para guardar");
+                return;
+            }
+
+            const batchRequest = {
+                items: itemsToUpdate.map(item => ({
+                    itemId: item.code,
+                    valueBoolean: item.valueBoolean,
+                    valueNumeric: item.valueNumeric ? parseFloat(item.valueNumeric) : null,
+                    valueEnum: item.valueEnum || null,
+                    valueText: item.comment || null,
+                    passFail: item.status === "Aprobado" ? "PASS" :
+                        item.status === "Falla" ? "FAIL" : null,
+                    evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null
+                }))
+            };
+
+            await httpService.put(
+                API_ENDPOINTS.INSPECTION_BATCH_UPDATE_ITEMS(inspectionId),
+                batchRequest
+            );
+
+            const scheduledItem = scheduled.find(s => s.id === inspectionId);
+            const progressInspection = {
+                id: `progress_${inspectionId}`,
+                vehicle: scheduledItem?.vehicle || "Desconocido",
+                date: nowDate(),
+                result: "En progreso",
+                inspector: scheduledItem?.inspector || "N/A",
+                taller: scheduledItem?.taller || "N/A",
+                items
+            };
+
+            setInspections(prev => {
+                const filtered = prev.filter(i => i.id !== progressInspection.id);
+                return [progressInspection, ...filtered];
+            });
+
+            setNotifications(prev => [
+                {
+                    id: `n${Date.now()}`,
+                    title: "Progreso guardado",
+                    message: `Se han guardado ${itemsToUpdate.length} items de la inspección`,
+                    status: "Entregado"
+                },
+                ...prev
+            ]);
+
+            alert(`✓ Progreso guardado\n${itemsToUpdate.length} items actualizados`);
+
+        } catch (error) {
+            console.error("Error guardando progreso:", error);
+            alert(`Error guardando progreso: ${error.message}`);
+        }
+    };
+
+    const finishInspectionFlow = async (inspectionWithItems) => {
+        try {
+            // 1. Actualizar items en batch
+            const itemsToUpdate = inspectionWithItems.items.filter(item =>
+                item.status !== "No aplica" && item.status !== ""
+            );
+
+            if (itemsToUpdate.length > 0) {
+                const batchRequest = {
+                    items: itemsToUpdate.map(item => ({
+                        itemId: item.code,
+                        valueBoolean: item.valueBoolean,
+                        valueNumeric: item.valueNumeric ? parseFloat(item.valueNumeric) : null,
+                        valueEnum: item.valueEnum || null,
+                        valueText: item.comment || null,
+                        passFail: item.status === "Aprobado" ? "PASS" :
+                            item.status === "Falla" ? "FAIL" : null,
+                        evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null
+                    }))
+                };
+
+                await httpService.put(
+                    API_ENDPOINTS.INSPECTION_BATCH_UPDATE_ITEMS(inspectionWithItems.id),
+                    batchRequest
+                );
+            }
+
+            // 2. Agregar defectos
+            const defects = inspectionWithItems.items
+                .filter(item => item.status === "Falla" && item.defectSeverity)
+                .map(item => ({
+                    itemId: item.code,
+                    severity: item.defectSeverity,
+                    description: item.defectDescription || `Defecto en ${item.name}`,
+                    correctiveDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                }));
+
+            for (const defect of defects) {
+                try {
+                    await httpService.post(
+                        API_ENDPOINTS.INSPECTION_ADD_DEFECT(inspectionWithItems.id),
+                        defect
+                    );
+                } catch (defectError) {
+                    console.error(`Error registrando defecto:`, defectError);
+                }
+            }
+
+            // 3. Completar inspección
+            const completeResponse = await httpService.post(
+                API_ENDPOINTS.INSPECTION_COMPLETE(inspectionWithItems.id),
+                {
+                    finalComments: `Inspección completada. ${defects.length} defecto(s) encontrado(s).`
+                }
+            );
+
+            // 4. Mapear resultado
+            const resultMap = {
+                "APPROVED": "Aprobado",
+                "REJECTED": "Rechazado",
+                "CONDITIONAL": "Condicional"
+            };
+
+            const newInspection = {
+                id: inspectionWithItems.id,
+                vehicle: inspectionWithItems.vehicle,
+                vehicleType: inspectionWithItems.vehicleType,
+                date: nowDate(),
+                result: resultMap[completeResponse.overallResult] || "Aprobado",
+                inspector: inspectionWithItems.inspector,
+                taller: inspectionWithItems.taller,
+                workshopId: inspectionWithItems.workshopId,
+                items: inspectionWithItems.items
+            };
+
+            addInspection(newInspection);
+
+            // 5. Si aprobó, solicitar certificado
+            if (newInspection.result === "Aprobado") {
+                try {
+                    await requestCertificate(inspectionWithItems.id);
+
+                    setNotifications(prev => [
+                        {
+                            id: `n${Date.now()}`,
+                            title: "Certificado en proceso",
+                            message: `El certificado para ${newInspection.vehicle} está siendo generado`,
+                            status: "Entregado"
+                        },
+                        ...prev
+                    ]);
+                } catch (certError) {
+                    console.error("Error solicitando certificado:", certError);
+                    alert("Inspección aprobada pero hubo un error al solicitar el certificado.");
+                }
+            } else if (newInspection.result === "Condicional") {
+                setNotifications(prev => [
+                    {
+                        id: `n${Date.now()}`,
+                        title: "Inspección condicional",
+                        message: `La inspección de ${newInspection.vehicle} tiene defectos que deben corregirse en 30 días`,
+                        status: "Entregado"
+                    },
+                    ...prev
+                ]);
+            } else {
+                setNotifications(prev => [
+                    {
+                        id: `n${Date.now()}`,
+                        title: "Inspección no aprobada",
+                        message: `La inspección de ${newInspection.vehicle} requiere reparaciones críticas`,
+                        status: "Entregado"
+                    },
+                    ...prev
+                ]);
+            }
+
+            setExecInspection(null);
+            setPage("inspections");
+
+            alert(`✓ Inspección completada\nResultado: ${newInspection.result}\nDefectos: ${defects.length}`);
+
+        } catch (error) {
+            console.error("Error al finalizar inspección:", error);
+            alert(`Error al finalizar inspección: ${error.message}`);
+        }
+    };
+
+    const requestCertificate = async (inspectionId) => {
+        try {
+            const response = await httpService.post(API_ENDPOINTS.CERTIFICATE_REQUEST, {
+                inspectionId: inspectionId,
+                provider: "DGII"
+            });
+
+            return response.certificateId;
+
+        } catch (error) {
+            console.error("Error solicitando certificado:", error);
+            throw error;
+        }
+    };
+
+    const loadCertificates = async () => {
+        try {
+            const response = await httpService.get(API_ENDPOINTS.CERTIFICATE_GET_ALL);
+
+            const certsData = response.map(c => ({
+                id: c.certificateId,
+                vehicle: c.vehiclePlate || "N/A",
+                date: c.issuedAt?.split('T')[0],
+                status: c.status === "VALID" ? "Activo" : c.status === "REVOKED" ? "Revocado" : "Expirado",
+                details: c.comments || "Certificado de inspección técnica vehicular",
+                expiryDate: c.validUntil,
+                qrHash: c.qrHash
+            }));
+
+            setCertificates(certsData);
+
+        } catch (error) {
+            console.error("Error cargando certificados:", error);
+        }
+    };
+
+    /* =========================
+       Notifications handlers
+       ========================= */
+    const retryNotification = (id) => {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, status: "Entregado" } : n));
+    };
+
+    /* =========================
+       Certificate selection
+       ========================= */
+    const selectCertificate = (c) => {
+        setSelectedCert(c);
+        setViewCertDetail(false);
+    };
+
+    const openCertDetail = () => setViewCertDetail(true);
+    const closeCertDetail = () => setViewCertDetail(false);
+
+    /* =========================
+       History filtering
+       ========================= */
+    const [historyFilter, setHistoryFilter] = useState({ q: "", from: "", to: "" });
+    const filteredInspections = inspections.filter(i => {
+        const matchesQ = !historyFilter.q || (i.vehicle || "").includes(historyFilter.q) || (i.id || "").includes(historyFilter.q);
+        const date = i.date || "";
+        const matchesFrom = !historyFilter.from || date >= historyFilter.from;
+        const matchesTo = !historyFilter.to || date <= historyFilter.to;
+        return matchesQ && matchesFrom && matchesTo;
+    });
+
+    /* =========================
+       Export functions
+       ========================= */
+    const exportInspectionsCSV = () => downloadCSV("inspections.csv", inspections.map(i => ({ id: i.id, vehicle: i.vehicle, date: i.date, result: i.result })));
+    const exportCertificatesCSV = () => downloadCSV("certificates.csv", certificates.map(c => ({ id: c.id, vehicle: c.vehicle, date: c.date, status: c.status })));
+
+    /* =========================
+       Portal selection initial screen
+       ========================= */
+    if (!portal) {
+        return <PortalSelect onSelect={(p) => { setPortal(p); setRole(null); setPage("login"); }} />;
     }
-  };
 
-  const loadUserVehicles = async () => {
-    try {
-      const response = await httpService.get(API_ENDPOINTS.VEHICLE_GET_ALL);
-
-      const vehiclesData = response.map(v => ({
-        id: v.vehicleId,
-        plate: v.plate,
-        vin: v.vin,
-        brand: v.Make,
-          model: v.model,
-        year: v.modelYear,
-        color: v.color,
-        type: v.vehicleTypeCode,
-        owner: v.currentHolderName || "Sin asignar",
-        documents: []
-      }));
-
-      setVehicles(vehiclesData);
-
-    } catch (error) {
-      console.error("Error cargando vehículos:", error);
-    }
-  };
-
-  /* =========================
-     Scheduling & inspection
-     ========================= */
-  const scheduleInspection = async (s) => {
-    try {
-      const vehicle = vehicles.find(v => v.plate === s.vehiclePlate);
-
-      const requestData = {
-        vehicleId: vehicle?.id,
-        workshopId: s.workshopId || talleres[0]?.id,
-        inspectorUserId: s.inspectorId || null,
-        templateId: s.templateId,
-        scheduledAt: new Date(`${s.datetime}`).toISOString(),
-        odometerKm: 0,
-        comments: s.notes || ""
-      };
-
-      const response = await httpService.post(API_ENDPOINTS.INSPECTION_CREATE, requestData);
-
-      const newSchedule = {
-        id: response.inspectionId,
-        vehicle: s.vehiclePlate,
-        vehicleType: vehicle?.type || "AUTO",
-        templateId: s.templateId,
-        datetime: s.datetime,
-        inspector: s.inspector,
-        workshopId: s.workshopId,
-        taller: s.taller,
-        status: "Programada",
-        notes: s.notes
-      };
-
-      setScheduled(prev => [newSchedule, ...prev]);
-      alert("Inspección programada exitosamente");
-
-    } catch (error) {
-      alert(`Error al programar inspección: ${error.message}`);
-    }
-  };
-
-  const addInspection = (ins) => {
-    setInspections(prev => [ins, ...prev]);
-  };
-
-  const saveInspectionProgress = async ({ inspectionId, items }) => {
-    try {
-      const itemsToUpdate = items.filter(item => 
-        item.status !== "No aplica" && item.status !== ""
-      );
-
-      if (itemsToUpdate.length === 0) {
-        alert("No hay items para guardar");
-        return;
-      }
-
-      const batchRequest = {
-        items: itemsToUpdate.map(item => ({
-          itemId: item.code,
-          valueBoolean: item.valueBoolean,
-          valueNumeric: item.valueNumeric ? parseFloat(item.valueNumeric) : null,
-          valueEnum: item.valueEnum || null,
-          valueText: item.comment || null,
-          passFail: item.status === "Aprobado" ? "PASS" :
-            item.status === "Falla" ? "FAIL" : null,
-          evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null
-        }))
-      };
-
-      await httpService.put(
-        API_ENDPOINTS.INSPECTION_BATCH_UPDATE_ITEMS(inspectionId),
-        batchRequest
-      );
-
-      const scheduledItem = scheduled.find(s => s.id === inspectionId);
-      const progressInspection = {
-        id: `progress_${inspectionId}`,
-        vehicle: scheduledItem?.vehicle || "Desconocido",
-        date: nowDate(),
-        result: "En progreso",
-        inspector: scheduledItem?.inspector || "N/A",
-        taller: scheduledItem?.taller || "N/A",
-        items
-      };
-
-      setInspections(prev => {
-        const filtered = prev.filter(i => i.id !== progressInspection.id);
-        return [progressInspection, ...filtered];
-      });
-
-      setNotifications(prev => [
-        {
-          id: `n${Date.now()}`,
-          title: "Progreso guardado",
-          message: `Se han guardado ${itemsToUpdate.length} items de la inspección`,
-          status: "Entregado"
-        },
-        ...prev
-      ]);
-
-      alert(`✓ Progreso guardado\n${itemsToUpdate.length} items actualizados`);
-
-    } catch (error) {
-      console.error("Error guardando progreso:", error);
-      alert(`Error guardando progreso: ${error.message}`);
-    }
-  };
-
-  const finishInspectionFlow = async (inspectionWithItems) => {
-    try {
-      // 1. Actualizar items en batch
-      const itemsToUpdate = inspectionWithItems.items.filter(item => 
-        item.status !== "No aplica" && item.status !== ""
-      );
-
-      if (itemsToUpdate.length > 0) {
-        const batchRequest = {
-          items: itemsToUpdate.map(item => ({
-            itemId: item.code,
-            valueBoolean: item.valueBoolean,
-            valueNumeric: item.valueNumeric ? parseFloat(item.valueNumeric) : null,
-            valueEnum: item.valueEnum || null,
-            valueText: item.comment || null,
-            passFail: item.status === "Aprobado" ? "PASS" :
-              item.status === "Falla" ? "FAIL" : null,
-            evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null
-          }))
-        };
-
-        await httpService.put(
-          API_ENDPOINTS.INSPECTION_BATCH_UPDATE_ITEMS(inspectionWithItems.id),
-          batchRequest
+    /* =========================
+       If not logged in -> show auth pages (login/register)
+       ========================= */
+    if (!loggedIn) {
+        return (
+            <div className="min-h-screen flex flex-col" style={{ backgroundColor: COLORS.grayBg }}>
+                <TopMenu loggedIn={loggedIn} onToggleLogin={() => { setLoggedIn(true); }} goPortal={(p) => { if (p === 'home') setPortal(null); }} />
+                <div className="flex-1 p-6">
+                    <div className="max-w-5xl mx-auto grid grid-cols-2 gap-6">
+                        <div>
+                            <Login onLogin={(creds) => handleLogin(creds)} onForgot={() => alert("Funcionalidad de recuperación de contraseña estará disponible próximamente")} />
+                        </div>
+                        <div>
+                            <Register portal={portal} onRegister={(payload) => handleRegister(payload)} />
+                        </div>
+                    </div>
+                </div>
+            </div>
         );
-      }
-
-      // 2. Agregar defectos
-      const defects = inspectionWithItems.items
-        .filter(item => item.status === "Falla" && item.defectSeverity)
-        .map(item => ({
-          itemId: item.code,
-          severity: item.defectSeverity,
-          description: item.defectDescription || `Defecto en ${item.name}`,
-          correctiveDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        }));
-
-      for (const defect of defects) {
-        try {
-          await httpService.post(
-            API_ENDPOINTS.INSPECTION_ADD_DEFECT(inspectionWithItems.id),
-            defect
-          );
-        } catch (defectError) {
-          console.error(`Error registrando defecto:`, defectError);
-        }
-      }
-
-      // 3. Completar inspección
-      const completeResponse = await httpService.post(
-        API_ENDPOINTS.INSPECTION_COMPLETE(inspectionWithItems.id),
-        {
-          finalComments: `Inspección completada. ${defects.length} defecto(s) encontrado(s).`
-        }
-      );
-
-      // 4. Mapear resultado
-      const resultMap = {
-        "APPROVED": "Aprobado",
-        "REJECTED": "Rechazado",
-        "CONDITIONAL": "Condicional"
-      };
-
-      const newInspection = {
-        id: inspectionWithItems.id,
-        vehicle: inspectionWithItems.vehicle,
-        vehicleType: inspectionWithItems.vehicleType,
-        date: nowDate(),
-        result: resultMap[completeResponse.overallResult] || "Aprobado",
-        inspector: inspectionWithItems.inspector,
-        taller: inspectionWithItems.taller,
-        workshopId: inspectionWithItems.workshopId,
-        items: inspectionWithItems.items
-      };
-
-      addInspection(newInspection);
-
-      // 5. Si aprobó, solicitar certificado
-      if (newInspection.result === "Aprobado") {
-        try {
-          await requestCertificate(inspectionWithItems.id);
-
-          setNotifications(prev => [
-            {
-              id: `n${Date.now()}`,
-              title: "Certificado en proceso",
-              message: `El certificado para ${newInspection.vehicle} está siendo generado`,
-              status: "Entregado"
-            },
-            ...prev
-          ]);
-        } catch (certError) {
-          console.error("Error solicitando certificado:", certError);
-          alert("Inspección aprobada pero hubo un error al solicitar el certificado.");
-        }
-      } else if (newInspection.result === "Condicional") {
-        setNotifications(prev => [
-          {
-            id: `n${Date.now()}`,
-            title: "Inspección condicional",
-            message: `La inspección de ${newInspection.vehicle} tiene defectos que deben corregirse en 30 días`,
-            status: "Entregado"
-          },
-          ...prev
-        ]);
-      } else {
-        setNotifications(prev => [
-          {
-            id: `n${Date.now()}`,
-            title: "Inspección no aprobada",
-            message: `La inspección de ${newInspection.vehicle} requiere reparaciones críticas`,
-            status: "Entregado"
-          },
-          ...prev
-        ]);
-      }
-
-      setExecInspection(null);
-      setPage("inspections");
-
-      alert(`✓ Inspección completada\nResultado: ${newInspection.result}\nDefectos: ${defects.length}`);
-
-    } catch (error) {
-      console.error("Error al finalizar inspección:", error);
-      alert(`Error al finalizar inspección: ${error.message}`);
     }
-  };
 
-  const requestCertificate = async (inspectionId) => {
-    try {
-      const response = await httpService.post(API_ENDPOINTS.CERTIFICATE_REQUEST, {
-        inspectionId: inspectionId,
-        provider: "DGII"
-      });
-
-      return response.certificateId;
-
-    } catch (error) {
-      console.error("Error solicitando certificado:", error);
-      throw error;
-    }
-  };
-
-  const loadCertificates = async () => {
-    try {
-      const response = await httpService.get(API_ENDPOINTS.CERTIFICATE_GET_ALL);
-
-      const certsData = response.map(c => ({
-        id: c.certificateId,
-        vehicle: c.vehiclePlate || "N/A",
-        date: c.issueDate?.split('T')[0],
-        status: c.status === "VALID" ? "Activo" : c.status === "REVOKED" ? "Revocado" : "Expirado",
-        details: c.comments || "Certificado de inspección técnica vehicular",
-        expiryDate: c.expiryDate?.split('T')[0],
-        qrHash: c.qrHash
-      }));
-
-      setCertificates(certsData);
-
-    } catch (error) {
-      console.error("Error cargando certificados:", error);
-    }
-  };
-
-  /* =========================
-     Notifications handlers
-     ========================= */
-  const retryNotification = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, status: "Entregado" } : n));
-  };
-
-  /* =========================
-     Certificate selection
-     ========================= */
-  const selectCertificate = (c) => {
-    setSelectedCert(c);
-    setViewCertDetail(false);
-  };
-  
-  const openCertDetail = () => setViewCertDetail(true);
-  const closeCertDetail = () => setViewCertDetail(false);
-
-  /* =========================
-     History filtering
-     ========================= */
-  const [historyFilter, setHistoryFilter] = useState({ q: "", from: "", to: "" });
-  const filteredInspections = inspections.filter(i => {
-    const matchesQ = !historyFilter.q || (i.vehicle || "").includes(historyFilter.q) || (i.id || "").includes(historyFilter.q);
-    const date = i.date || "";
-    const matchesFrom = !historyFilter.from || date >= historyFilter.from;
-    const matchesTo = !historyFilter.to || date <= historyFilter.to;
-    return matchesQ && matchesFrom && matchesTo;
-  });
-
-  /* =========================
-     Export functions
-     ========================= */
-  const exportInspectionsCSV = () => downloadCSV("inspections.csv", inspections.map(i => ({ id: i.id, vehicle: i.vehicle, date: i.date, result: i.result })));
-  const exportCertificatesCSV = () => downloadCSV("certificates.csv", certificates.map(c => ({ id: c.id, vehicle: c.vehicle, date: c.date, status: c.status })));
-
-  /* =========================
-     Portal selection initial screen
-     ========================= */
-  if (!portal) {
-    return <PortalSelect onSelect={(p) => { setPortal(p); setRole(null); setPage("login"); }} />;
-  }
-
-  /* =========================
-     If not logged in -> show auth pages (login/register)
-     ========================= */
-  if (!loggedIn) {
+    /* =========================
+       Main logged-in layout
+       ========================= */
     return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: COLORS.grayBg }}>
-        <TopMenu loggedIn={loggedIn} onToggleLogin={() => { setLoggedIn(true); }} goPortal={(p)=>{ if (p==='home') setPortal(null); }} />
-        <div className="flex-1 p-6">
-          <div className="max-w-5xl mx-auto grid grid-cols-2 gap-6">
-            <div>
-              <Login onLogin={(creds) => handleLogin(creds)} onForgot={() => alert("Funcionalidad de recuperación de contraseña estará disponible próximamente")} />
-            </div>
-            <div>
-              <Register portal={portal} onRegister={(payload)=>handleRegister(payload)} />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* =========================
-     Main logged-in layout
-     ========================= */
-  return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: COLORS.grayBg }}>
-      <TopMenu loggedIn={loggedIn} onToggleLogin={handleLogout} goPortal={(p)=>{ if (p==='home') { setPortal(null); setLoggedIn(false); } }} />
-      <div className="flex flex-1">
-        <Sidebar role={role || (loggedUser?.role ?? portal)} page={page} setPage={setPage} username={loggedUser?.fullName || "Usuario"} />
-        <main className="flex-1 p-6 overflow-auto">
-          {/* Dashboard */}
-          {page === "dashboard" && (
-            <div>
-              <h1 className="text-2xl font-semibold mb-4" style={{ color: COLORS.intrantBlue }}>Panel de Control</h1>
-              <div className="grid grid-cols-4 gap-4">
-                <div className="bg-white p-4 rounded shadow">
-                  <div className="text-sm text-gray-600">Inspecciones totales</div>
-                  <div className="text-2xl font-bold">{inspections.length}</div>
-                  <div className="text-xs text-green-600">↗ +12% este mes</div>
-                </div>
-                <div className="bg-white p-4 rounded shadow">
-                  <div className="text-sm text-gray-600">Certificados activos</div>
-                  <div className="text-2xl font-bold">{certificates.filter(c => c.status === "Activo").length}</div>
-                  <div className="text-xs text-blue-600">• Vigentes</div>
-                </div>
-                <div className="bg-white p-4 rounded shadow">
-                  <div className="text-sm text-gray-600">Vehículos registrados</div>
-                  <div className="text-2xl font-bold">{vehicles.length}</div>
-                  <div className="text-xs text-gray-500">En el sistema</div>
-                </div>
-                <div className="bg-white p-4 rounded shadow">
-                  <div className="text-sm text-gray-600">Inspecciones programadas</div>
-                  <div className="text-2xl font-bold">{scheduled.filter(s => s.status === "Programada").length}</div>
-                  <div className="text-xs text-orange-600">• Próximas</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="bg-white p-4 rounded shadow">
-                  <h3 className="font-semibold mb-2">Resumen de resultados</h3>
-                  <ResponsiveContainer width="100%" height={240}>
-                    <PieChart>
-                      <Pie data={[
-                        { name: "Aprobadas", value: inspections.filter(i=>i.result==="Aprobado").length },
-                        { name: "Rechazadas", value: inspections.filter(i=>i.result==="Rechazado").length },
-                        { name: "En proceso", value: inspections.filter(i=>i.result==="En progreso").length },
-                      ]} dataKey="value" nameKey="name" outerRadius={80}>
-                        <Cell fill={COLORS.intrantGreen} />
-                        <Cell fill="#FF4444" />
-                        <Cell fill={COLORS.intrantOrange} />
-                      </Pie>
-                      <Tooltip />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-
-                <div className="bg-white p-4 rounded shadow">
-                  <h3 className="font-semibold mb-2">Actividad reciente</h3>
-                  <div className="space-y-2">
-                    {inspections.slice(0, 5).map((ins, idx) => (
-                      <div key={idx} className="flex justify-between items-center py-2 border-b">
+        <div className="min-h-screen flex flex-col" style={{ backgroundColor: COLORS.grayBg }}>
+            <TopMenu loggedIn={loggedIn} onToggleLogin={handleLogout} goPortal={(p) => { if (p === 'home') { setPortal(null); setLoggedIn(false); } }} />
+            <div className="flex flex-1">
+                <Sidebar role={role || (loggedUser?.role ?? portal)} page={page} setPage={setPage} username={loggedUser?.fullName || "Usuario"} />
+                <main className="flex-1 p-6 overflow-auto">
+                    {page === "dashboard" && (
                         <div>
-                          <div className="font-medium text-sm">{ins.vehicle}</div>
-                          <div className="text-xs text-gray-500">{ins.date}</div>
+                            <h1 className="text-2xl font-semibold mb-4" style={{ color: COLORS.intrantBlue }}>Panel de Control</h1>
+                            <div className="grid grid-cols-4 gap-4">
+                                <div className="bg-white p-4 rounded shadow">
+                                    <div className="text-sm text-gray-600">Inspecciones totales</div>
+                                    <div className="text-2xl font-bold">{inspections.length}</div>
+                                    <div className="text-xs text-green-600">↗ {inspections.filter(i => i.result === "Aprobado").length} aprobadas</div>
+                                </div>
+                                <div className="bg-white p-4 rounded shadow">
+                                    <div className="text-sm text-gray-600">Certificados activos</div>
+                                    <div className="text-2xl font-bold">{certificates.filter(c => c.status === "Activo").length}</div>
+                                    <div className="text-xs text-blue-600">• Vigentes</div>
+                                </div>
+                                <div className="bg-white p-4 rounded shadow">
+                                    <div className="text-sm text-gray-600">Vehículos registrados</div>
+                                    <div className="text-2xl font-bold">{vehicles.length}</div>
+                                    <div className="text-xs text-gray-500">En el sistema</div>
+                                </div>
+                                <div className="bg-white p-4 rounded shadow">
+                                    <div className="text-sm text-gray-600">Inspecciones programadas</div>
+                                    <div className="text-2xl font-bold">{scheduled.filter(s => s.status === "Programada").length}</div>
+                                    <div className="text-xs text-orange-600">• Próximas</div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 mt-4">
+                                <div className="bg-white p-4 rounded shadow">
+                                    <h3 className="font-semibold mb-2">Resumen de resultados</h3>
+                                    <ResponsiveContainer width="100%" height={240}>
+                                        <PieChart>
+                                            <Pie data={[
+                                                { name: "Aprobadas", value: inspections.filter(i => i.result === "Aprobado").length },
+                                                { name: "Rechazadas", value: inspections.filter(i => i.result === "Rechazado").length },
+                                                { name: "En proceso", value: inspections.filter(i => i.result === "En progreso").length },
+                                            ]} dataKey="value" nameKey="name" outerRadius={80}>
+                                                <Cell fill={COLORS.intrantGreen} />
+                                                <Cell fill="#FF4444" />
+                                                <Cell fill={COLORS.intrantOrange} />
+                                            </Pie>
+                                            <Tooltip />
+                                            <Legend />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+
+                                <div className="bg-white p-4 rounded shadow">
+                                    <h3 className="font-semibold mb-2">Actividad reciente</h3>
+                                    <div className="space-y-2">
+                                        {inspections.slice(0, 5).map((ins, idx) => (
+                                            <div key={idx} className="flex justify-between items-center py-2 border-b">
+                                                <div>
+                                                    <div className="font-medium text-sm">{ins.vehicle}</div>
+                                                    <div className="text-xs text-gray-500">{ins.date}</div>
+                                                </div>
+                                                <div className={`text-xs px-2 py-1 rounded ${ins.result === 'Aprobado' ? 'bg-green-100 text-green-800' : ins.result === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}`}>
+                                                    {ins.result}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className={`text-xs px-2 py-1 rounded ${ins.result === 'Aprobado' ? 'bg-green-100 text-green-800' : ins.result === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}`}>
-                          {ins.result}
+                    )}
+
+    {/* Vehicles */ }
+    {page === "vehicles" && (
+            <div>
+                <h1 className="text-2xl font-semibold mb-4">Gestión de Vehículos</h1>
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="col-span-2">
+                        <div className="bg-white p-4 rounded shadow">
+                            <div className="flex justify-between items-center mb-3">
+                                <h3 className="font-semibold">Vehículos registrados</h3>
+                                <div className="text-sm text-gray-500">{vehicles.length} total</div>
+                            </div>
+                            <table className="w-full text-left">
+                                <thead className="bg-[#FFF4E5]">
+                                    <tr><th className="p-2">Placa</th><th className="p-2">VIN</th><th className="p-2">Marca/Modelo</th><th className="p-2">Año</th><th className="p-2">Titular</th></tr>
+                                </thead>
+                                <tbody>
+                                    {vehicles.map(v => (
+                                        <tr key={v.id} className="border-t hover:bg-gray-50 cursor-pointer">
+                                            <td className="p-2 font-medium">{v.plate}</td>
+                                            <td className="p-2 text-sm text-gray-600">{v.vin}</td>
+                                            <td className="p-2">{getMakeNameByModelName(v.model)} {v.model}</td>
+                                            <td className="p-2">{v.year}</td>
+                                            <td className="p-2">{v.owner}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Vehicles */}
-          {page === "vehicles" && (
-            <div>
-              <h1 className="text-2xl font-semibold mb-4">Gestión de Vehículos</h1>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2">
-                  <div className="bg-white p-4 rounded shadow">
-                    <div className="flex justify-between items-center mb-3">
-                      <h3 className="font-semibold">Vehículos registrados</h3>
-                      <div className="text-sm text-gray-500">{vehicles.length} total</div>
                     </div>
-                    <table className="w-full text-left">
-                      <thead className="bg-[#FFF4E5]">
-                        <tr><th className="p-2">Placa</th><th className="p-2">VIN</th><th className="p-2">Marca/Modelo</th><th className="p-2">Año</th><th className="p-2">Titular</th></tr>
-                      </thead>
-                      <tbody>
-                        {vehicles.map(v => (
-                          <tr key={v.id} className="border-t hover:bg-gray-50 cursor-pointer">
-                            <td className="p-2 font-medium">{v.plate}</td>
-                            <td className="p-2 text-sm text-gray-600">{v.vin}</td>
-                            <td className="p-2">{v.brand} {v.model}</td>
-                            <td className="p-2">{v.year}</td>
-                            <td className="p-2">{v.owner}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
 
-                <div>
-                  <VehicleRegister owners={users.filter(u=>u.role==="Titular")} onAdd={addVehicle} />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Inspections: schedule + execute */}
-          {page === "inspections" && (
-            <div>
-              <h1 className="text-2xl font-semibold mb-4">Gestión de Inspecciones</h1>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2">
-                  <div className="bg-white p-4 rounded shadow mb-4">
-                    <div className="flex justify-between items-center mb-3">
-                      <h3 className="font-semibold">Inspecciones programadas</h3>
-                      <div className="text-sm text-gray-500">{scheduled.length} programadas</div>
+                    <div>
+                        <VehicleRegister owners={users.filter(u => u.role === "Titular")} onAdd={addVehicle} />
                     </div>
-                    <table className="w-full text-left mt-2">
-                      <thead className="bg-[#FFF4E5]">
-                        <tr><th className="p-2">Vehículo</th><th className="p-2">Tipo</th><th className="p-2">Fecha/Hora</th><th className="p-2">Inspector</th><th className="p-2">Estado</th><th className="p-2">Acciones</th></tr>
-                      </thead>
-                      <tbody>
-                        {scheduled
-                          .filter(s => (role === "Inspector" || role === "Supervisor") ? s.workshopId === loggedUser?.workshopId : true)
-                          .map(s => (
-                          <tr key={s.id} className="border-t">
-                            <td className="p-2 font-medium">{s.vehicle}</td>
-                            <td className="p-2">{s.vehicleType}</td>
-                            <td className="p-2">{s.datetime}</td>
-                            <td className="p-2">{s.inspector}</td>
-                            <td className="p-2">
-                              <span className={`px-2 py-1 rounded text-xs ${s.status === 'Programada' ? 'bg-blue-100 text-blue-800' : s.status === 'En proceso' ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
-                                {s.status}
-                              </span>
-                            </td>
-                            <td className="p-2">
-                              <button 
-                                onClick={() => setExecInspection({ 
-                                  id: s.id, 
-                                  vehicle: s.vehicle, 
-                                  vehicleType: s.vehicleType,
-                                  inspector: s.inspector, 
-                                  taller: s.taller,
-                                  workshopId: s.workshopId
-                                })} 
-                                className="px-2 py-1 rounded border text-sm hover:bg-gray-50"
-                                disabled={s.status === "En proceso"}
-                              >
-                                {s.status === "En proceso" ? "En curso" : "Iniciar"}
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="bg-white p-4 rounded shadow">
-                    <div className="flex justify-between items-center mb-3">
-                      <h3 className="font-semibold">Historial de inspecciones</h3>
-                      <div className="text-sm text-gray-500">{inspections.length} completadas</div>
-                    </div>
-                    <table className="w-full text-left">
-                      <thead className="bg-[#FFF4E5]"><tr><th className="p-2">ID</th><th className="p-2">Vehículo</th><th className="p-2">Fecha</th><th className="p-2">Inspector</th><th className="p-2">Resultado</th></tr></thead>
-                      <tbody>
-                        {inspections
-                          .filter(i => (role === "Inspector" || role === "Supervisor") ? i.workshopId === loggedUser?.workshopId : true)
-                          .slice(0, 8)
-                          .map(it=>(
-                          <tr key={it.id} className="border-t">
-                            <td className="p-2 text-sm text-gray-600">{it.id}</td>
-                            <td className="p-2 font-medium">{it.vehicle}</td>
-                            <td className="p-2">{it.date}</td>
-                            <td className="p-2">{it.inspector}</td>
-                            <td className="p-2">
-                              <span className={`px-2 py-1 rounded text-xs ${it.result === 'Aprobado' ? 'bg-green-100 text-green-800' : it.result === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}`}>
-                                {it.result}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
                 </div>
-
-                <div>
-                  <ScheduleInspection 
-                    vehicles={vehicles} 
-                    inspectors={inspectors} 
-                    talleres={talleres} 
-                    onSchedule={scheduleInspection}
-                    userRole={role}
-                    userWorkshopId={loggedUser?.workshopId}
-                  />
-                </div>
-              </div>
-
-              {/* Execution area */}
-              {execInspection && (
-                <div className="mt-6">
-                  <ExecuteInspection
-                    inspection={execInspection}
-                    onSaveProgress={(data)=>saveInspectionProgress(data)}
-                    onFinish={(data)=>finishInspectionFlow(data)}
-                    onCancel={(id)=>{ setExecInspection(null); }}
-                  />
-                </div>
-              )}
             </div>
-          )}
+        )}
 
-          {/* Inspectors list */}
-          {page === "inspectors" && (
+    {/* Inspections: schedule + execute */ }
+    {page === "inspections" && (
             <div>
-              <h1 className="text-2xl font-semibold mb-4">Inspectores Certificados</h1>
-              <div className="bg-white p-4 rounded shadow">
-                <div className="grid gap-4">
-                  {inspectors.map(ins => (
-                    <div key={ins.id} className="p-4 border rounded">
-                      <div className="flex justify-between items-start">
+                <h1 className="text-2xl font-semibold mb-4">Gestión de Inspecciones</h1>
+                <div className="grid grid-cols-3 gap-4">
+                    <div className="col-span-2">
+                        <div className="bg-white p-4 rounded shadow mb-4">
+                            <div className="flex justify-between items-center mb-3">
+                                <h3 className="font-semibold">Inspecciones programadas</h3>
+                                <div className="text-sm text-gray-500">{scheduled.length} programadas</div>
+                            </div>
+                            <table className="w-full text-left mt-2">
+                                <thead className="bg-[#FFF4E5]">
+                                    <tr><th className="p-2">Vehículo</th><th className="p-2">Plantilla</th><th className="p-2">Fecha/Hora</th><th className="p-2">Inspector</th><th className="p-2">Estado</th><th className="p-2">Acciones</th></tr>
+                                </thead>
+                                <tbody>
+                                    {scheduled
+                                        .filter(s => (role === "Inspector" || role === "Supervisor") ? s.workshopId === loggedUser?.workshopId : true)
+                                        .map(s => (
+                                            <tr key={s.id} className="border-t">
+                                                <td className="p-2 font-medium">{s.vehicle}</td>
+                                                <td className="p-2">{getTemplateNameById(s.templateId)}</td>
+                                                <td className="p-2">{s.datetime}</td>
+                                                <td className="p-2">{s.inspectorUserId}</td>
+                                                <td className="p-2">
+                                                    <span className={`px-2 py-1 rounded text-xs ${s.status === 'Programada' ? 'bg-blue-100 text-blue-800' : s.status === 'En proceso' ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
+                                                        {s.status}
+                                                    </span>
+                                                </td>
+                                                <td className="p-2">
+                                                    <button
+                                                        onClick={() => setExecInspection({
+                                                            id: s.id,
+                                                            vehicle: s.vehicle,
+                                                            vehicleType: s.vehicleType,
+                                                            inspector: s.inspector,
+                                                            taller: s.taller,
+                                                            workshopId: s.workshopId
+                                                        })}
+                                                        className="px-2 py-1 rounded border text-sm hover:bg-gray-50"
+                                                        disabled={s.status === "En proceso"} // continuar permitira cargar inspeccion guardada
+                                                    >
+                                                        {s.status === "En proceso" ? "Continuar" : "Iniciar"}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/*Historial de inspecciones (en page === "inspections")*/}
+                        <div className="bg-white p-4 rounded shadow">
+                            <div className="flex justify-between items-center mb-3">
+                                <h3 className="font-semibold">Historial de inspecciones</h3>
+                                <div className="text-sm text-gray-500">{inspections.length} completadas</div>
+                            </div>
+                            <table className="w-full text-left">
+                                <thead className="bg-[#FFF4E5]">
+                                    <tr>
+                                        <th className="p-2">ID</th>
+                                        <th className="p-2">Vehículo</th>
+                                        <th className="p-2">Fecha</th>
+                                        <th className="p-2">Inspector</th>
+                                        <th className="p-2">Taller</th>
+                                        <th className="p-2">Resultado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {inspections
+                                        .filter(i => (role === "Inspector" || role === "Supervisor") ? i.workshopId === loggedUser?.workshopId : true)
+                                        .slice(0, 8)
+                                        .map(it => (
+                                            <tr key={it.id} className="border-t">
+                                                <td className="p-2 text-sm text-gray-600">{it.id}</td>
+                                                <td className="p-2 font-medium">{it.vehicle}</td>
+                                                <td className="p-2">{it.date}</td>
+                                                <td className="p-2">{it.inspector}</td>
+                                                <td className="p-2">{it.taller}</td>
+                                                <td className="p-2">
+                                                    <span className={`px-2 py-1 rounded text-xs ${it.result === 'Aprobado' ? 'bg-green-100 text-green-800' : it.result === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}`}>
+                                                        {it.result}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </table>
+                        </div>
+                </div>
+
                         <div>
-                          <div className="font-medium text-lg">{ins.name}</div>
-                          <div className="text-sm text-gray-600">{ins.role}</div>
-                          <div className="text-sm text-blue-600">{ins.email}</div>
+                            <ScheduleInspection
+                                vehicles={vehicles}
+                                inspectors={inspectors}
+                                talleres={talleres}
+                                onSchedule={scheduleInspection}
+                                userRole={role}
+                                userWorkshopId={loggedUser?.workshopId}
+                            />
                         </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium">Certificación</div>
-                          <div className="text-sm text-gray-600">{ins.certification}</div>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex gap-2">
-                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Activo</span>
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">Certificado</span>
-                      </div>
                     </div>
-                  ))}
+
+                    {/* Execution area */}
+                    {execInspection && (
+                        <div className="mt-6">
+                            <ExecuteInspection
+                                inspection={execInspection}
+                                onSaveProgress={(data) => saveInspectionProgress(data)}
+                                onFinish={(data) => finishInspectionFlow(data)}
+                                onCancel={(id) => { setExecInspection(null); }}
+                            />
+                        </div>
+                    )}
                 </div>
-              </div>
-            </div>
           )}
 
-          {/* Certificates */}
+        {/* Inspectors list */ }
+        {page === "inspectors" && (
+                <div>
+                    <h1 className="text-2xl font-semibold mb-4">Inspectores Certificados</h1>
+                    <div className="bg-white p-4 rounded shadow">
+                        <div className="grid gap-4">
+                            {inspectors.map(ins => (
+                                <div key={ins.id} className="p-4 border rounded">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="font-medium text-lg">{ins.inspectorId}</div>
+                                            <div className="text-sm text-gray-600">{ins.role}</div>
+                                            <div className="text-sm text-blue-600">{ins.username}</div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-sm font-medium">Certificación</div>
+                                            <div className="text-sm text-gray-600">{ins.certification}</div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-2 flex gap-2">
+                                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Activo</span>
+                                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">Certificado</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+          )}
+
+        {/* Certificates */}
           {page === "certificates" && (
-            <div>
-              <CertificatesView certificates={certificates} onSelect={(c)=>{ selectCertificate(c); openCertDetail(); }} selected={selectedCert} viewDetail={viewCertDetail} onCloseDetail={() => setViewCertDetail(false)} />
-              <div className="mt-4">
-                <button onClick={() => exportCertificatesCSV()} className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}>
-                  <Download className="w-4 h-4 inline mr-2" />
-                  Exportar certificados
-                </button>
-              </div>
-            </div>
+                <div>
+                    <CertificatesView certificates={certificates} onSelect={(c) => { selectCertificate(c); openCertDetail(); }} selected={selectedCert} viewDetail={viewCertDetail} onCloseDetail={() => setViewCertDetail(false)} />
+                    <div className="mt-4">
+                        <button onClick={() => exportCertificatesCSV()} className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}>
+                            <Download className="w-4 h-4 inline mr-2" />
+                            Exportar certificados
+                        </button>
+                    </div>
+                </div>
           )}
 
           {/* Notifications */}
           {page === "notifications" && (
-            <NotificationsView notifications={notifications} onRetry={retryNotification} />
+                <NotificationsView notifications={notifications} onRetry={retryNotification} />
           )}
 
           {/* Admin */}
           {page === "admin" && (
-            <AdminPanel users={users} setUsers={setUsers} talleres={talleres} setTalleres={setTalleres} />
+                <AdminPanel users={users} setUsers={setUsers} talleres={talleres} setTalleres={setTalleres} />
           )}
 
           {/* Supervisor */}
           {page === "supervisor" && (
-            <SupervisorPanel users={users} setUsers={setUsers} talleres={talleres} userWorkshopId={loggedUser?.workshopId} />
+                <SupervisorPanel users={users} setUsers={setUsers} talleres={talleres} userWorkshopId={loggedUser?.workshopId} />
           )}
 
           {/* Reports */}
           {page === "reports" && (
-            <ReportsView inspections={inspections} certificates={certificates} />
-          )}
+                <ReportsView inspections={inspections} certificates={certificates} />
+            )}
+        {page === "history" && (
+                <div>
+                    <h2 className="text-xl font-semibold" style={{ color: COLORS.intrantBlue }}>Historial completo de inspecciones</h2>
+                    <div className="bg-white p-4 rounded shadow mt-3">
+                        <div className="flex gap-2 mb-3">
+                            <input placeholder="Buscar por placa o ID" value={historyFilter.q} onChange={(e) => setHistoryFilter({ ...historyFilter, q: e.target.value })} className="border p-2 rounded flex-1" />
+                            <input type="date" value={historyFilter.from} onChange={(e) => setHistoryFilter({ ...historyFilter, from: e.target.value })} className="border p-2 rounded" />
+                            <input type="date" value={historyFilter.to} onChange={(e) => setHistoryFilter({ ...historyFilter, to: e.target.value })} className="border p-2 rounded" />
+                            <button onClick={() => exportInspectionsCSV()} className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}>
+                                <Download className="w-4 h-4 inline mr-2" />
+                                Exportar
+                            </button>
+                        </div>
 
-          {/* History / filters */}
-          {page === "history" && (
-            <div>
-              <h2 className="text-xl font-semibold" style={{ color: COLORS.intrantBlue }}>Historial completo de inspecciones</h2>
-              <div className="bg-white p-4 rounded shadow mt-3">
-                <div className="flex gap-2 mb-3">
-                  <input placeholder="Buscar por placa o ID" value={historyFilter.q} onChange={(e)=>setHistoryFilter({...historyFilter, q:e.target.value})} className="border p-2 rounded flex-1" />
-                  <input type="date" value={historyFilter.from} onChange={(e)=>setHistoryFilter({...historyFilter, from:e.target.value})} className="border p-2 rounded" />
-                  <input type="date" value={historyFilter.to} onChange={(e)=>setHistoryFilter({...historyFilter, to:e.target.value})} className="border p-2 rounded" />
-                  <button onClick={()=>exportInspectionsCSV()} className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}>
-                    <Download className="w-4 h-4 inline mr-2" />
-                    Exportar
-                  </button>
+                        <table className="w-full text-left">
+                            <thead className="bg-[#FFF4E5]">
+                                <tr>
+                                    <th className="p-2">ID</th>
+                                    <th className="p-2">Vehículo</th>
+                                    <th className="p-2">Fecha</th>
+                                    <th className="p-2">Inspector</th>
+                                    <th className="p-2">Taller</th>
+                                    <th className="p-2">Resultado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredInspections.map(it => (
+                                    <tr key={it.id} className="border-t">
+                                        <td className="p-2 text-sm text-gray-600">{it.id}</td>
+                                        <td className="p-2 font-medium">{it.vehicle}</td>
+                                        <td className="p-2">{it.date}</td>
+                                        <td className="p-2">{it.inspector}</td>
+                                        <td className="p-2">{it.taller}</td>
+                                        <td className="p-2">
+                                            <span className={`px-2 py-1 rounded text-xs ${it.result === 'Aprobado' ? 'bg-green-100 text-green-800' : it.result === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}`}>
+                                                {it.result}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-
-                <table className="w-full text-left">
-                  <thead className="bg-[#FFF4E5]"><tr><th className="p-2">ID</th><th className="p-2">Vehículo</th><th className="p-2">Fecha</th><th className="p-2">Inspector</th><th className="p-2">Taller</th><th className="p-2">Resultado</th></tr></thead>
-                  <tbody>
-                    {filteredInspections.map(it=>(
-                      <tr key={it.id} className="border-t">
-                        <td className="p-2 text-sm text-gray-600">{it.id}</td>
-                        <td className="p-2 font-medium">{it.vehicle}</td>
-                        <td className="p-2">{it.date}</td>
-                        <td className="p-2">{it.inspector}</td>
-                        <td className="p-2">{it.taller}</td>
-                        <td className="p-2">
-                          <span className={`px-2 py-1 rounded text-xs ${it.result === 'Aprobado' ? 'bg-green-100 text-green-800' : it.result === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}`}>
-                            {it.result}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           )}
         </main>
       </div>
