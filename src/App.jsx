@@ -437,22 +437,20 @@ function VehicleRegister({ owners, onAdd }) {
     model: "", 
     year: "", 
     color: "", 
-    fuel: "GASOLINA",
-    type: "AUTO",
+    fuel: "",
+    type: "",
     ownerId: "", 
-    files: [],
-    mileage: ""
+    files: []
   });
   const [error, setError] = useState("");
+  const [step, setStep] = useState(1); // Step 1: Datos básicos, Step 2: Completar
 
   // Datos de dropdowns según base de datos
   const FUEL_TYPES = [
     { code: "GASOLINA", label: "Gasolina" },
     { code: "DIESEL", label: "Diésel" },
-    { code: "GLP", label: "Gas Licuado de Petróleo (GLP)" },
-    { code: "GNV", label: "Gas Natural Vehicular (GNV)" },
     { code: "ELECTRICO", label: "Eléctrico" },
-    { code: "HIBRIDO", label: "Híbrido" },
+    { code: "OTRO", label: "Otro" },
   ];
 
   const VEHICLE_TYPES = [
@@ -469,21 +467,30 @@ function VehicleRegister({ owners, onAdd }) {
     "Lexus", "Infiniti", "Mazda", "Subaru", "Isuzu", "Daihatsu", "Peugeot"
   ];
 
+  // Modelos por marca - SE ACTUALIZAN AUTOMÁTICAMENTE
   const MODELS_BY_BRAND = {
-    Toyota: ["Corolla", "Camry", "RAV4", "Prado", "Hilux", "Yaris", "Prius"],
-    Nissan: ["Sentra", "Altima", "X-Trail", "Pathfinder", "Frontier", "Versa", "Leaf"],
-    Honda: ["Civic", "Accord", "CR-V", "Pilot", "Fit", "HR-V"],
-    Hyundai: ["Elantra", "Sonata", "Tucson", "Santa Fe", "Accent", "i10"],
-    Kia: ["Rio", "Cerato", "Sportage", "Sorento", "Picanto", "Soul"],
-    Ford: ["Focus", "Fiesta", "Explorer", "F-150", "EcoSport"],
-    Chevrolet: ["Aveo", "Cruze", "Captiva", "Silverado", "Spark"],
-    BMW: ["320", "X3", "X5", "Serie 7", "M3"],
-    "Mercedes-Benz": ["C-Class", "E-Class", "GLE", "S-Class"],
+    Toyota: ["Corolla", "Camry", "RAV4", "Prado", "Hilux", "Yaris", "Prius", "Land Cruiser", "4Runner", "Tacoma"],
+    Nissan: ["Sentra", "Altima", "X-Trail", "Pathfinder", "Frontier", "Versa", "Leaf", "Kicks", "Rogue", "Murano"],
+    Honda: ["Civic", "Accord", "CR-V", "Pilot", "Fit", "HR-V", "Odyssey", "Ridgeline"],
+    Hyundai: ["Elantra", "Sonata", "Tucson", "Santa Fe", "Accent", "i10", "Kona", "Palisade"],
+    Kia: ["Rio", "Cerato", "Sportage", "Sorento", "Picanto", "Soul", "Seltos", "Carnival"],
+    Ford: ["Focus", "Fiesta", "Explorer", "F-150", "EcoSport", "Escape", "Mustang", "Ranger"],
+    Chevrolet: ["Aveo", "Cruze", "Captiva", "Silverado", "Spark", "Equinox", "Traverse"],
+    BMW: ["320i", "X3", "X5", "Serie 3", "Serie 5", "Serie 7", "M3", "X1"],
+    "Mercedes-Benz": ["C-Class", "E-Class", "GLE", "S-Class", "A-Class", "GLC"],
+    Volkswagen: ["Jetta", "Passat", "Tiguan", "Golf", "Polo", "Amarok"],
+    Mitsubishi: ["Lancer", "Outlander", "Montero", "L200", "Mirage", "Eclipse Cross"],
+    Suzuki: ["Swift", "Vitara", "Jimny", "Ertiga", "Baleno"],
+    Audi: ["A3", "A4", "Q5", "Q7", "A6", "Q3"],
+    Mazda: ["3", "6", "CX-5", "CX-9", "CX-3"],
+    Lexus: ["ES", "RX", "NX", "IS", "GX"],
+    Subaru: ["Outback", "Forester", "Impreza", "XV"],
+    Isuzu: ["D-Max", "MU-X"],
   };
 
   const YEARS = Array.from({ length: 35 }, (_, i) => new Date().getFullYear() - i);
 
-  const COLORS = [
+  const VEHICLE_COLORS = [
     "Blanco", "Negro", "Gris", "Rojo", "Azul", "Verde", "Amarillo",
     "Naranja", "Marrón", "Plateado", "Dorado", "Beige"
   ];
@@ -492,15 +499,29 @@ function VehicleRegister({ owners, onAdd }) {
     return v && v.length >= 11 && v.length <= 17;
   }
 
+  function validateStep1() {
+    if (!form.plate) return "Placa requerida.";
+    if (!validateVIN(form.vin)) return "VIN inválido (11-17 caracteres).";
+    if (!form.type) return "Tipo de vehículo requerido.";
+    if (!form.brand) return "Marca requerida.";
+    if (!form.model) return "Modelo requerido.";
+    if (!form.year) return "Año requerido.";
+    return null;
+  }
+
+  function handleContinue(e) {
+    e.preventDefault();
+    const v = validateStep1();
+    if (v) return setError(v);
+    setError("");
+    setStep(2);
+  }
+
   function submit(e) {
     e.preventDefault();
-    if (!form.plate) return setError("Placa requerida.");
-    if (!validateVIN(form.vin)) return setError("VIN inválido (11-17 caracteres).");
-    if (!form.brand) return setError("Marca requerida.");
-    if (!form.model) return setError("Modelo requerido.");
-    if (!form.year) return setError("Año requerido.");
+    if (!form.fuel) return setError("Tipo de combustible requerido.");
+    if (!form.color) return setError("Color requerido.");
     if (!form.ownerId) return setError("Titular requerido.");
-    if (!form.mileage) return setError("Kilometraje requerido.");
     
     setError("");
     
@@ -510,11 +531,10 @@ function VehicleRegister({ owners, onAdd }) {
       brand: form.brand,
       model: form.model,
       year: form.year,
-      color: form.color || "No especificado",
+      color: form.color,
       fuel: form.fuel,
       type: form.type,
       ownerId: form.ownerId,
-      mileage: parseInt(form.mileage),
       documents: form.files,
       status: "ACTIVE"
     };
@@ -527,12 +547,12 @@ function VehicleRegister({ owners, onAdd }) {
       model: "", 
       year: "", 
       color: "", 
-      fuel: "GASOLINA",
-      type: "AUTO",
+      fuel: "",
+      type: "",
       ownerId: "", 
-      files: [],
-      mileage: ""
+      files: []
     });
+    setStep(1);
   }
 
   const fileInputRef = useRef(null);
@@ -547,178 +567,214 @@ function VehicleRegister({ owners, onAdd }) {
     });
   };
 
+  // Handler para cuando cambia la marca - ACTUALIZA MODELOS AUTOMÁTICAMENTE
+  const handleBrandChange = (brand) => {
+    setForm({...form, brand: brand, model: ""});
+  };
+
   return (
     <div className="bg-white p-4 rounded shadow">
-      <h3 className="font-semibold mb-3">Registrar vehículo</h3>
-      <form onSubmit={submit} className="space-y-3">
-        
-        {/* VIN y Placa */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">VIN</label>
-            <input 
-              value={form.vin} 
-              onChange={(e)=>setForm({...form, vin:e.target.value})} 
-              placeholder="VIN (11-17 caracteres)" 
-              className="border p-2 rounded w-full" 
-            />
+      <div className="mb-4">
+        <h3 className="font-semibold text-lg">Registrar vehículo</h3>
+        <div className="flex items-center gap-2 mt-2">
+          <div className={`flex items-center gap-1 ${step === 1 ? 'text-blue-600 font-medium' : 'text-gray-400'}`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step === 1 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-white'}`}>1</div>
+            <span className="text-xs">Datos básicos</span>
           </div>
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Placa</label>
-            <input 
-              value={form.plate} 
-              onChange={(e)=>setForm({...form, plate:e.target.value.toUpperCase()})} 
-              placeholder="Placa" 
-              className="border p-2 rounded w-full" 
-            />
+          <div className="flex-1 h-px bg-gray-300"></div>
+          <div className={`flex items-center gap-1 ${step === 2 ? 'text-blue-600 font-medium' : 'text-gray-400'}`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step === 2 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-white'}`}>2</div>
+            <span className="text-xs">Completar</span>
           </div>
         </div>
+      </div>
 
-        {/* Tipo y Combustible */}
-        <div className="grid grid-cols-2 gap-2">
+      {step === 1 && (
+        <form onSubmit={handleContinue} className="space-y-3">
+          
+          {/* VIN y Placa */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs font-medium text-gray-600 block mb-1">VIN *</label>
+              <input 
+                value={form.vin} 
+                onChange={(e)=>setForm({...form, vin:e.target.value})} 
+                placeholder="VIN (11-17 caracteres)" 
+                className="border p-2 rounded w-full text-sm" 
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-600 block mb-1">Placa *</label>
+              <input 
+                value={form.plate} 
+                onChange={(e)=>setForm({...form, plate:e.target.value.toUpperCase()})} 
+                placeholder="Ej: A123456" 
+                className="border p-2 rounded w-full text-sm" 
+              />
+            </div>
+          </div>
+
+          {/* Tipo de Vehículo */}
           <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Tipo de vehículo</label>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Tipo de vehículo *</label>
             <select 
               value={form.type} 
               onChange={(e)=>setForm({...form, type:e.target.value})} 
-              className="border p-2 rounded w-full"
+              className="border p-2 rounded w-full text-sm"
             >
               <option value="">Seleccionar tipo</option>
               {VEHICLE_TYPES.map(t => <option key={t.code} value={t.code}>{t.label}</option>)}
             </select>
           </div>
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Combustible</label>
-            <select 
-              value={form.fuel} 
-              onChange={(e)=>setForm({...form, fuel:e.target.value})} 
-              className="border p-2 rounded w-full"
-            >
-              <option value="">Seleccionar combustible</option>
-              {FUEL_TYPES.map(f => <option key={f.code} value={f.code}>{f.label}</option>)}
-            </select>
-          </div>
-        </div>
 
-        {/* Marca y Modelo */}
-        <div className="grid grid-cols-2 gap-2">
+          {/* Marca - SE ACTUALIZA MODELO AUTOMÁTICAMENTE */}
           <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Marca</label>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Marca *</label>
             <select 
               value={form.brand} 
-              onChange={(e)=>setForm({...form, brand:e.target.value, model:""})} 
-              className="border p-2 rounded w-full"
+              onChange={(e)=>handleBrandChange(e.target.value)} 
+              className="border p-2 rounded w-full text-sm"
             >
               <option value="">Seleccionar marca</option>
               {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
             </select>
           </div>
+
+          {/* Modelo - SE ACTUALIZA CUANDO CAMBIA MARCA */}
           <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Modelo</label>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Modelo *</label>
             <select 
               value={form.model} 
               onChange={(e)=>setForm({...form, model:e.target.value})} 
-              className="border p-2 rounded w-full"
+              className="border p-2 rounded w-full text-sm"
               disabled={!form.brand}
             >
               <option value="">Seleccionar modelo</option>
               {form.brand && MODELS_BY_BRAND[form.brand]?.map(m => <option key={m} value={m}>{m}</option>)}
             </select>
+            {!form.brand && <p className="text-xs text-gray-500 mt-1">Primero selecciona una marca</p>}
+            {form.brand && (!MODELS_BY_BRAND[form.brand] || MODELS_BY_BRAND[form.brand].length === 0) && (
+              <p className="text-xs text-orange-600 mt-1">No hay modelos disponibles para esta marca</p>
+            )}
           </div>
-        </div>
 
-        {/* Año y Color */}
-        <div className="grid grid-cols-2 gap-2">
+          {/* Año */}
           <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Año</label>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Año *</label>
             <select 
               value={form.year} 
               onChange={(e)=>setForm({...form, year:e.target.value})} 
-              className="border p-2 rounded w-full"
+              className="border p-2 rounded w-full text-sm"
             >
               <option value="">Seleccionar año</option>
               {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
+
+          {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded">⚠ {error}</div>}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button 
+              type="submit" 
+              className="px-4 py-2 rounded text-white font-medium hover:opacity-90" 
+              style={{ backgroundColor: COLORS.intrantOrange }}
+            >
+              Continuar →
+            </button>
+          </div>
+        </form>
+      )}
+
+      {step === 2 && (
+        <form onSubmit={submit} className="space-y-3">
+          
+          {/* Resumen de datos básicos */}
+          <div className="bg-blue-50 p-3 rounded border border-blue-200">
+            <div className="text-xs font-medium text-blue-800 mb-1">Datos ingresados:</div>
+            <div className="text-xs text-blue-700">
+              <b>{form.plate}</b> • {form.brand} {form.model} ({form.year}) • {form.type}
+            </div>
+          </div>
+
+          {/* Tipo de Combustible - DROPDOWN */}
           <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Color</label>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Tipo de combustible *</label>
+            <select 
+              value={form.fuel} 
+              onChange={(e)=>setForm({...form, fuel:e.target.value})} 
+              className="border p-2 rounded w-full text-sm"
+            >
+              <option value="">Seleccionar combustible</option>
+              {FUEL_TYPES.map(f => <option key={f.code} value={f.code}>{f.label}</option>)}
+            </select>
+          </div>
+
+          {/* Color */}
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Color *</label>
             <select 
               value={form.color} 
               onChange={(e)=>setForm({...form, color:e.target.value})} 
-              className="border p-2 rounded w-full"
+              className="border p-2 rounded w-full text-sm"
             >
               <option value="">Seleccionar color</option>
-              {COLORS.map(c => <option key={c} value={c}>{c}</option>)}
+              {VEHICLE_COLORS.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
-        </div>
 
-        {/* Kilometraje */}
-        <div>
-          <label className="text-xs font-medium text-gray-600 block mb-1">Kilometraje actual</label>
-          <input 
-            value={form.mileage} 
-            onChange={(e)=>setForm({...form, mileage:e.target.value})} 
-            placeholder="Ej: 50000" 
-            type="number"
-            min="0"
-            className="border p-2 rounded w-full" 
-          />
-        </div>
+          {/* Titular */}
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Titular *</label>
+            <select 
+              value={form.ownerId} 
+              onChange={(e)=>setForm({...form, ownerId:e.target.value})} 
+              className="border p-2 rounded w-full text-sm"
+            >
+              <option value="">Seleccionar titular</option>
+              {owners.map((o) => <option key={o.id} value={o.id}>{o.fullName} — {o.document}</option>)}
+            </select>
+          </div>
 
-        {/* Titular */}
-        <div>
-          <label className="text-xs font-medium text-gray-600 block mb-1">Titular</label>
-          <select 
-            value={form.ownerId} 
-            onChange={(e)=>setForm({...form, ownerId:e.target.value})} 
-            className="border p-2 rounded w-full"
-          >
-            <option value="">Seleccionar titular</option>
-            {owners.map((o) => <option key={o.id} value={o.id}>{o.fullName} — {o.document}</option>)}
-          </select>
-        </div>
-
-        {/* Documentos */}
-        <div>
-          <label className="text-xs font-medium text-gray-600 block mb-1">Documentos adjuntos</label>
-          <div className="flex items-center gap-2">
+          {/* Documentos */}
+          <div>
+            <label className="text-xs font-medium text-gray-600 block mb-1">Documentos adjuntos (opcional)</label>
             <input 
               ref={fileInputRef} 
               onChange={(e)=>handleFiles(e.target.files)} 
               type="file" 
               multiple 
               accept="image/*,application/pdf"
-              className="text-sm"
+              className="text-sm w-full"
             />
+          </div>
+
+          {form.files.length > 0 && (
+            <div className="bg-green-50 p-2 rounded border border-green-200">
+              <div className="text-xs font-medium text-green-800 mb-1">Archivos adjuntos:</div>
+              {form.files.map((f, idx) => <div key={idx} className="text-xs text-green-700">✓ {f.name}</div>)}
+            </div>
+          )}
+
+          {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded">⚠ {error}</div>}
+
+          <div className="flex justify-between gap-2 pt-2">
             <button 
-              type="button" 
-              onClick={()=>fileInputRef.current && fileInputRef.current.click()} 
-              className="px-2 py-1 rounded border text-sm hover:bg-gray-50"
+              type="button"
+              onClick={() => {setStep(1); setError("");}}
+              className="px-4 py-2 rounded border hover:bg-gray-50 text-sm"
             >
-              Seleccionar
+              ← Volver
+            </button>
+            <button 
+              type="submit" 
+              className="px-4 py-2 rounded text-white font-medium hover:opacity-90" 
+              style={{ backgroundColor: COLORS.intrantGreen }}
+            >
+              ✓ Completar registro
             </button>
           </div>
-        </div>
-
-        {form.files.length > 0 && (
-          <div className="bg-blue-50 p-2 rounded">
-            {form.files.map((f, idx) => <div key={idx} className="text-sm text-gray-600">✓ {f.name}</div>)}
-          </div>
-        )}
-
-        {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded">⚠ {error}</div>}
-
-        <div className="flex justify-end gap-2">
-          <button 
-            type="submit" 
-            className="px-3 py-2 rounded text-white font-medium hover:opacity-90" 
-            style={{ backgroundColor: COLORS.intrantOrange }}
-          >
-            Registrar vehículo
-          </button>
-        </div>
-      </form>
+        </form>
+      )}
     </div>
   );
 }
@@ -921,7 +977,7 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule, userRo
 }
 
 /* =====================
-   Execute inspection (checklist + photos)
+   Execute inspection 
    ===================== */
 function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
   // Get template based on vehicle type
@@ -948,6 +1004,7 @@ function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
     }))
   );
   const [progress, setProgress] = useState(0);
+  const [mileage, setMileage] = useState(""); 
 
   useEffect(() => {
     const done = items.filter(it => it.status !== "No aplica" && it.status !== "").length;
@@ -1028,6 +1085,27 @@ function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
           <div className="text-sm text-gray-600">Plantilla: {inspection.vehicleType === "AUTO" ? "Automóvil" : inspection.vehicleType === "MOTO" ? "Motocicleta" : "Camión"}</div>
         </div>
         <div className="text-sm text-gray-600">Progreso: {progress}%</div>
+      </div>
+
+      <div className="bg-blue-50 p-4 rounded border border-blue-200">
+        <label className="text-sm font-medium text-blue-800 block mb-2">Kilometraje del vehículo *</label>
+        <div className="flex gap-2 items-center">
+          <input 
+            type="number"
+            min="0"
+            value={mileage}
+            onChange={(e)=>setMileage(e.target.value)}
+            placeholder="Ej: 50000"
+            className="border p-2 rounded w-48 text-sm"
+          />
+          <span className="text-sm text-gray-600">km</span>
+          {mileage && (
+            <span className="text-xs text-green-600 ml-2">✓ {parseInt(mileage).toLocaleString()} km registrados</span>
+          )}
+        </div>
+        {!mileage && (
+          <p className="text-xs text-orange-600 mt-1">⚠ Este dato es obligatorio para completar la inspección</p>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -1115,7 +1193,13 @@ function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
 
       <div className="flex justify-end gap-2">
         <button 
-          onClick={() => onSaveProgress({ inspectionId: inspection.id, items })} 
+          onClick={() => {
+            if (!mileage) {
+              alert("Por favor ingresa el kilometraje del vehículo");
+              return;
+            }
+            onSaveProgress({ inspectionId: inspection.id, items, mileage: parseInt(mileage) });
+          }} 
           className="px-3 py-2 rounded border hover:bg-gray-50"
         >
           <Save className="w-4 h-4 inline mr-1" />
@@ -1128,7 +1212,13 @@ function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
           Cancelar
         </button>
         <button 
-          onClick={() => onFinish({ ...inspection, items })} 
+          onClick={() => {
+            if (!mileage) {
+              alert("Por favor ingresa el kilometraje del vehículo antes de finalizar");
+              return;
+            }
+            onFinish({ ...inspection, items, mileage: parseInt(mileage) });
+          }} 
           className="px-3 py-2 rounded" 
           style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}
         >
@@ -2463,7 +2553,6 @@ export default function App()
                             <th className="p-2">Tipo</th>
                             <th className="p-2">Color</th>
                             <th className="p-2">Combustible</th>
-                            <th className="p-2">KM</th>
                             <th className="p-2">Estado</th>
                             <th className="p-2">Titular</th>
                           </tr>
@@ -2508,11 +2597,11 @@ export default function App()
                               </td>
                               <td className="p-2">
                                 <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                                  {v.fuel || "N/A"}
+                                  {v.fuel === "GASOLINA" ? "Gasolina" :
+                                   v.fuel === "DIESEL" ? "Diésel" :
+                                   v.fuel === "ELECTRICO" ? "Eléctrico" :
+                                   v.fuel === "OTRO" ? "Otro" : v.fuel}
                                 </span>
-                              </td>
-                              <td className="p-2 text-right text-xs">
-                                {(v.mileage || 0).toLocaleString()} km
                               </td>
                               <td className="p-2">
                                 <span className={`px-2 py-1 text-xs rounded ${
