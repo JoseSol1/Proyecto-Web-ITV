@@ -54,6 +54,72 @@ const nowDate = () => new Date().toISOString().slice(0, 10);
 
 */
 
+const VEHICLE_MODELS_BY_BRAND = {
+    Toyota: [
+        { id: 7, makeId: 1, makeName: 'Toyota', name: 'Prius', },
+        { id: 6, makeId: 1, makeName: 'Toyota', name: 'Yaris', },
+        { id: 5, makeId: 1, makeName: 'Toyota', name: 'Hilux', },
+        { id: 4, makeId: 1, makeName: 'Toyota', name: 'Prado', },
+        { id: 3, makeId: 1, makeName: 'Toyota', name: 'RAV4', },
+        { id: 2, makeId: 1, makeName: 'Toyota', name: 'Camry', },
+        { id: 1, makeId: 1, makeName: 'Toyota', name: 'Corolla', },
+    ],
+    Nissan: [
+        { id: 14, makeId: 2, makeName: 'Nissan', name: 'Leaf', },
+        { id: 13, makeId: 2, makeName: 'Nissan', name: 'Versa', },
+        { id: 12, makeId: 2, makeName: 'Nissan', name: 'Frontier', },
+        { id: 11, makeId: 2, makeName: 'Nissan', name: 'Pathfinder', },
+        { id: 10, makeId: 2, makeName: 'Nissan', name: 'X-Trail', },
+        { id: 9, makeId: 2, makeName: 'Nissan', name: 'Altima', },
+        { id: 8, makeId: 2, makeName: 'Nissan', name: 'Sentra', },
+    ],
+    Honda: [
+        { id: 20, makeId: 3, makeName: 'Honda', name: 'HR-V', },
+        { id: 19, makeId: 3, makeName: 'Honda', name: 'Fit', },
+        { id: 18, makeId: 3, makeName: 'Honda', name: 'Pilot', },
+        { id: 17, makeId: 3, makeName: 'Honda', name: 'CR-V', },
+        { id: 16, makeId: 3, makeName: 'Honda', name: 'Accord', },
+        { id: 15, makeId: 3, makeName: 'Honda', name: 'Civic', },
+    ],
+    Hyundai: [
+        { id: 26, makeId: 4, makeName: 'Hyundai', name: 'i10', },
+        { id: 25, makeId: 4, makeName: 'Hyundai', name: 'Accent', },
+        { id: 24, makeId: 4, makeName: 'Hyundai', name: 'Santa Fe', },
+        { id: 23, makeId: 4, makeName: 'Hyundai', name: 'Tucson', },
+        { id: 22, makeId: 4, makeName: 'Hyundai', name: 'Sonata', },
+        { id: 21, makeId: 4, makeName: 'Hyundai', name: 'Elantra', },
+    ],
+    Kia: [
+        { id: 32, makeId: 5, makeName: 'Kia', name: 'Soul', },
+        { id: 31, makeId: 5, makeName: 'Kia', name: 'Picanto', },
+        { id: 30, makeId: 5, makeName: 'Kia', name: 'Sorento', },
+        { id: 29, makeId: 5, makeName: 'Kia', name: 'Sportage', },
+        { id: 28, makeId: 5, makeName: 'Kia', name: 'Cerato', },
+        { id: 27, makeId: 5, makeName: 'Kia', name: 'Rio', },
+    ],
+    Chevrolet: [
+        { id: 42, makeId: 8, makeName: 'Chevrolet', name: 'Spark', },
+        { id: 41, makeId: 8, makeName: 'Chevrolet', name: 'Silverado', },
+        { id: 40, makeId: 8, makeName: 'Chevrolet', name: 'Captiva', },
+        { id: 39, makeId: 8, makeName: 'Chevrolet', name: 'Cruze', },
+        { id: 38, makeId: 8, makeName: 'Chevrolet', name: 'Aveo', },
+    ],
+    Ford: [
+        { id: 47, makeId: 9, makeName: 'Ford', name: 'EcoSport', },
+        { id: 46, makeId: 9, makeName: 'Ford', name: 'F-150', },
+        { id: 45, makeId: 9, makeName: 'Ford', name: 'Explorer', },
+        { id: 44, makeId: 9, makeName: 'Ford', name: 'Fiesta', },
+        { id: 43, makeId: 9, makeName: 'Ford', name: 'Focus', },
+    ],
+    Mitsubishi: [
+        { id: 37, makeId: 6, makeName: 'Mitsubishi', name: 'Mirage', },
+        { id: 36, makeId: 6, makeName: 'Mitsubishi', name: 'L200', },
+        { id: 35, makeId: 6, makeName: 'Mitsubishi', name: 'Montero', },
+        { id: 34, makeId: 6, makeName: 'Mitsubishi', name: 'Outlander', },
+        { id: 33, makeId: 6, makeName: 'Mitsubishi', name: 'Lancer'},
+    ],
+};
+
 
 /* =====================
    Plantillas de inspección por tipo de vehículo
@@ -101,6 +167,13 @@ const INSPECTION_TEMPLATES = {
     { code: "DOC_C03", name: "Peso y dimensiones", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar cumplimiento de límites legales" },
   ],
 };
+const VEHICLE_TYPES = [
+    { id: 1, code: "AUTO", label: "Automóvil" },
+    { id: 2, code: "MOTO", label: "Motocicleta" },
+    { id: 3, code: "CAMION", label: "Camión" },
+    { id: 4, code: "BUS", label: "Autobús" },
+    { id: 5, code: "VAN", label: "Camioneta" },
+];
 
 /* =====================
    Helper: export CSV
@@ -429,298 +502,297 @@ function Login({ onLogin, onForgot }) {
 /* =====================
    Vehicle detail / register
    ===================== */
+
+
 function VehicleRegister({ owners, onAdd }) {
-  const [form, setForm] = useState({ 
-    vin: "", 
-    plate: "", 
-    brand: "", 
-    model: "", 
-    year: "", 
-    color: "", 
-    fuel: "GASOLINA",
-    type: "AUTO",
-    ownerId: "", 
-    files: [],
-    mileage: ""
-  });
-  const [error, setError] = useState("");
+    const [form, setForm] = useState({
+        vin: "",
+        plate: "",
+        brand: "",
+        model: "",
+        year: "",
+        color: "",
+        fuel: "GASOLINA",
+        type: "AUTO",
+        ownerId: "",
+        files: [],
+        mileage: ""
+    });
+    const [error, setError] = useState("");
 
-  // Datos de dropdowns según base de datos
-  const FUEL_TYPES = [
-    { code: "GASOLINA", label: "Gasolina" },
-    { code: "DIESEL", label: "Diésel" },
-    { code: "GLP", label: "Gas Licuado de Petróleo (GLP)" },
-    { code: "GNV", label: "Gas Natural Vehicular (GNV)" },
-    { code: "ELECTRICO", label: "Eléctrico" },
-    { code: "HIBRIDO", label: "Híbrido" },
-  ];
+    // Datos de dropdowns según base de datos
+    const FUEL_TYPES = [
+ { fuelId: 1, code: "GASOLINA", description: "Gasolina" },
+  { fuelId: 2, code: "DIESEL", description: "Diésel" },
+  { fuelId: 3, code: "GLP", description: "Gas Licuado de Petróleo" },
+  { fuelId: 4, code: "GNV", description: "Gas Natural Vehicular" },
+  { fuelId: 5, code: "ELECTRICO", description: "Eléctrico" },
+  { fuelId: 6, code: "HIBRIDO", description: "Híbrido" },
+    ];
 
-  const VEHICLE_TYPES = [
-    { code: "AUTO", label: "Automóvil" },
-    { code: "MOTO", label: "Motocicleta" },
-    { code: "CAMION", label: "Camión" },
-    { code: "BUS", label: "Autobús" },
-    { code: "VAN", label: "Camioneta/Van" },
-  ];
+const VEHICLE_TYPES = [
+    { id: 1, code: "AUTO", label: "Automóvil" },
+    { id: 2, code: "MOTO", label: "Motocicleta" },
+    { id: 3, code: "CAMION", label: "Camión" },
+    { id: 4, code: "BUS", label: "Autobús" },
+    { id: 5, code: "VAN", label: "Camioneta" }, // Etiqueta actualizada
+];
 
-  const BRANDS = [
-    "Toyota", "Nissan", "Honda", "Hyundai", "Kia", "Mitsubishi", "Suzuki",
-    "Chevrolet", "Ford", "Volkswagen", "BMW", "Mercedes-Benz", "Audi",
-    "Lexus", "Infiniti", "Mazda", "Subaru", "Isuzu", "Daihatsu", "Peugeot"
-  ];
 
-  const MODELS_BY_BRAND = {
-    Toyota: ["Corolla", "Camry", "RAV4", "Prado", "Hilux", "Yaris", "Prius"],
-    Nissan: ["Sentra", "Altima", "X-Trail", "Pathfinder", "Frontier", "Versa", "Leaf"],
-    Honda: ["Civic", "Accord", "CR-V", "Pilot", "Fit", "HR-V"],
-    Hyundai: ["Elantra", "Sonata", "Tucson", "Santa Fe", "Accent", "i10"],
-    Kia: ["Rio", "Cerato", "Sportage", "Sorento", "Picanto", "Soul"],
-    Ford: ["Focus", "Fiesta", "Explorer", "F-150", "EcoSport"],
-    Chevrolet: ["Aveo", "Cruze", "Captiva", "Silverado", "Spark"],
-    BMW: ["320", "X3", "X5", "Serie 7", "M3"],
-    "Mercedes-Benz": ["C-Class", "E-Class", "GLE", "S-Class"],
-  };
+    const YEARS = Array.from({ length: 35 }, (_, i) => new Date().getFullYear() - i);
 
-  const YEARS = Array.from({ length: 35 }, (_, i) => new Date().getFullYear() - i);
+    const COLORS = [
+        "Blanco", "Negro", "Gris", "Rojo", "Azul", "Verde", "Amarillo",
+        "Naranja", "Marrón", "Plateado", "Dorado", "Beige"
+    ];
 
-  const COLORS = [
-    "Blanco", "Negro", "Gris", "Rojo", "Azul", "Verde", "Amarillo",
-    "Naranja", "Marrón", "Plateado", "Dorado", "Beige"
-  ];
 
-  function validateVIN(v) {
-    return v && v.length >= 11 && v.length <= 17;
-  }
+    function validateVIN(v) {
+        return v && v.length >= 11 && v.length <= 17;
+    }
 
-  function submit(e) {
-    e.preventDefault();
-    if (!form.plate) return setError("Placa requerida.");
-    if (!validateVIN(form.vin)) return setError("VIN inválido (11-17 caracteres).");
-    if (!form.brand) return setError("Marca requerida.");
-    if (!form.model) return setError("Modelo requerido.");
-    if (!form.year) return setError("Año requerido.");
-    if (!form.ownerId) return setError("Titular requerido.");
-    if (!form.mileage) return setError("Kilometraje requerido.");
-    
-    setError("");
-    
-    const newV = {
-      vin: form.vin,
-      plate: form.plate,
-      brand: form.brand,
-      model: form.model,
-      year: form.year,
-      color: form.color || "No especificado",
-      fuel: form.fuel,
-      type: form.type,
-      ownerId: form.ownerId,
-      mileage: parseInt(form.mileage),
-      documents: form.files,
-      status: "ACTIVE"
+    function submit(e) {
+        e.preventDefault();
+        if (!form.plate) return setError("Placa requerida.");
+        if (!validateVIN(form.vin)) return setError("VIN inválido (11-17 caracteres).");
+        if (!form.brand) return setError("Marca requerida.");
+        if (!form.model) return setError("Modelo requerido.");
+        if (!form.year) return setError("Año requerido.");
+        if (!form.ownerId) return setError("Titular requerido.");
+        if (!form.mileage) return setError("Kilometraje requerido.");
+
+        setError("");
+
+        const newV = {
+            vin: form.vin,
+            plate: form.plate,
+            brand: form.brand,
+            model: form.model,
+            year: form.year,
+            color: form.color || "No especificado",
+            fuel: form.fuel,
+            type: form.type,
+            ownerId: form.ownerId,
+            mileage: parseInt(form.mileage),
+            documents: form.files,
+            status: "ACTIVE"
+        };
+
+        onAdd(newV);
+        setForm({
+            vin: "",
+            plate: "",
+            brand: "",
+            model: "",
+            year: "",
+            color: "",
+            fuel: "GASOLINA",
+            type: "AUTO",
+            ownerId: "",
+            files: [],
+            mileage: ""
+        });
+    }
+
+    const fileInputRef = useRef(null);
+    const handleFiles = (files) => {
+        const arr = Array.from(files);
+        arr.forEach((f) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setForm((prev) => ({ ...prev, files: [...prev.files, { name: f.name, data: ev.target.result }] }));
+            };
+            reader.readAsDataURL(f);
+        });
     };
-    
-    onAdd(newV);
-    setForm({ 
-      vin: "", 
-      plate: "", 
-      brand: "", 
-      model: "", 
-      year: "", 
-      color: "", 
-      fuel: "GASOLINA",
-      type: "AUTO",
-      ownerId: "", 
-      files: [],
-      mileage: ""
-    });
-  }
 
-  const fileInputRef = useRef(null);
-  const handleFiles = (files) => {
-    const arr = Array.from(files);
-    arr.forEach((f) => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        setForm((prev) => ({ ...prev, files: [...prev.files, { name: f.name, data: ev.target.result }] }));
-      };
-      reader.readAsDataURL(f);
-    });
-  };
+    return (
+        <div className="bg-white p-4 rounded shadow">
+            <h3 className="font-semibold mb-3">Registrar vehículo</h3>
+            <form onSubmit={submit} className="space-y-3">
 
-  return (
-    <div className="bg-white p-4 rounded shadow">
-      <h3 className="font-semibold mb-3">Registrar vehículo</h3>
-      <form onSubmit={submit} className="space-y-3">
-        
-        {/* VIN y Placa */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">VIN</label>
-            <input 
-              value={form.vin} 
-              onChange={(e)=>setForm({...form, vin:e.target.value})} 
-              placeholder="VIN (11-17 caracteres)" 
-              className="border p-2 rounded w-full" 
-            />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Placa</label>
-            <input 
-              value={form.plate} 
-              onChange={(e)=>setForm({...form, plate:e.target.value.toUpperCase()})} 
-              placeholder="Placa" 
-              className="border p-2 rounded w-full" 
-            />
-          </div>
+                {/* VIN y Placa */}
+                <div className="grid grid-cols-2 gap-2">
+                    <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">VIN</label>
+                        <input
+                            value={form.vin}
+                            onChange={(e) => setForm({ ...form, vin: e.target.value })}
+                            placeholder="VIN (11-17 caracteres)"
+                            className="border p-2 rounded w-full"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">Placa</label>
+                        <input
+                            value={form.plate}
+                            onChange={(e) => setForm({ ...form, plate: e.target.value.toUpperCase() })}
+                            placeholder="Placa"
+                            className="border p-2 rounded w-full"
+                        />
+                    </div>
+                </div>
+
+                {/* Tipo y Combustible */}
+                <div className="grid grid-cols-2 gap-2">
+                    <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">Tipo de vehículo</label>
+                        <select
+                            value={form.type}
+                            onChange={(e) => setForm({ ...form, type: e.target.value })}
+                            className="border p-2 rounded w-full"
+                        >
+                            <option value="">Seleccionar tipo</option>
+                            {VEHICLE_TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">Combustible</label>
+                        <select
+                            value={form.fuel}
+                            onChange={(e) => setForm({ ...form, fuel: e.target.value })}
+                            className="border p-2 rounded w-full"
+                        >
+                            <option value="">Seleccionar combustible</option>
+                            {FUEL_TYPES.map((f) => (
+                                <option key={f.fuelId} value={f.fuelId}>
+                                    {f.description}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Marca y Modelo */}
+                <div className="grid grid-cols-2 gap-2">
+                    {/* Marca */}
+                    <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">Marca</label>
+                        <select
+                            value={form.brand || ""}
+                            onChange={(e) => setForm({ ...form, brand: e.target.value, model: "" })}
+                            className="border p-2 rounded w-full"
+                        >
+                            <option value="">Seleccionar marca</option>
+                            {Object.keys(VEHICLE_MODELS_BY_BRAND).map((b) => (
+                                <option key={b} value={b}>{b}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Modelo */}
+                    <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">Modelo</label>
+                        <select
+                            value={form.model || ""}
+                            onChange={(e) => setForm({ ...form, model: e.target.value })}
+                            className="border p-2 rounded w-full"
+                            disabled={!form.brand}
+                        >
+                            <option value="">Seleccionar modelo</option>
+                            {form.brand &&
+                                VEHICLE_MODELS_BY_BRAND[form.brand]?.map((m) => (
+                                    <option key={m.id} value={m.name}>{m.name}</option>
+                                ))
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                {/* Año y Color */}
+                <div className="grid grid-cols-2 gap-2">
+                    <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">Año</label>
+                        <select
+                            value={form.year}
+                            onChange={(e) => setForm({ ...form, year: e.target.value })}
+                            className="border p-2 rounded w-full"
+                        >
+                            <option value="">Seleccionar año</option>
+                            {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">Color</label>
+                        <select
+                            value={form.color}
+                            onChange={(e) => setForm({ ...form, color: e.target.value })}
+                            className="border p-2 rounded w-full"
+                        >
+                            <option value="">Seleccionar color</option>
+                            {COLORS.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Kilometraje */}
+                <div>
+                    <label className="text-xs font-medium text-gray-600 block mb-1">Kilometraje actual</label>
+                    <input
+                        value={form.mileage}
+                        onChange={(e) => setForm({ ...form, mileage: e.target.value })}
+                        placeholder="Ej: 50000"
+                        type="number"
+                        min="0"
+                        className="border p-2 rounded w-full"
+                    />
+                </div>
+
+                {/* Titular */}
+                <div>
+                    <label className="text-xs font-medium text-gray-600 block mb-1">Titular</label>
+                    <select
+                        value={form.ownerId}
+                        onChange={(e) => setForm({ ...form, ownerId: e.target.value })}
+                        className="border p-2 rounded w-full"
+                    >
+                        <option value="">Seleccionar titular</option>
+                        {owners.map((o) => <option key={o.id} value={o.id}>{o.fullName} — {o.documentNumber}</option>)}
+                    </select>
+                </div>
+
+                {/* Documentos */}
+                <div>
+                    <label className="text-xs font-medium text-gray-600 block mb-1">Documentos adjuntos</label>
+                    <div className="flex items-center gap-2">
+                        <input
+                            ref={fileInputRef}
+                            onChange={(e) => handleFiles(e.target.files)}
+                            type="file"
+                            multiple
+                            accept="image/*,application/pdf"
+                            className="text-sm"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                            className="px-2 py-1 rounded border text-sm hover:bg-gray-50"
+                        >
+                            Seleccionar
+                        </button>
+                    </div>
+                </div>
+
+                {form.files.length > 0 && (
+                    <div className="bg-blue-50 p-2 rounded">
+                        {form.files.map((f, idx) => <div key={idx} className="text-sm text-gray-600">✓ {f.name}</div>)}
+                    </div>
+                )}
+
+                {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded">⚠ {error}</div>}
+
+                <div className="flex justify-end gap-2">
+                    <button
+                        type="submit"
+                        className="px-3 py-2 rounded text-white font-medium hover:opacity-90"
+                        style={{ backgroundColor: COLORS.intrantOrange }}
+                    >
+                        Registrar vehículo
+                    </button>
+                </div>
+            </form>
         </div>
-
-        {/* Tipo y Combustible */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Tipo de vehículo</label>
-            <select 
-              value={form.type} 
-              onChange={(e)=>setForm({...form, type:e.target.value})} 
-              className="border p-2 rounded w-full"
-            >
-              <option value="">Seleccionar tipo</option>
-              {VEHICLE_TYPES.map(t => <option key={t.code} value={t.code}>{t.label}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Combustible</label>
-            <select 
-              value={form.fuel} 
-              onChange={(e)=>setForm({...form, fuel:e.target.value})} 
-              className="border p-2 rounded w-full"
-            >
-              <option value="">Seleccionar combustible</option>
-              {FUEL_TYPES.map(f => <option key={f.code} value={f.code}>{f.label}</option>)}
-            </select>
-          </div>
-        </div>
-
-        {/* Marca y Modelo */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Marca</label>
-            <select 
-              value={form.brand} 
-              onChange={(e)=>setForm({...form, brand:e.target.value, model:""})} 
-              className="border p-2 rounded w-full"
-            >
-              <option value="">Seleccionar marca</option>
-              {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Modelo</label>
-            <select 
-              value={form.model} 
-              onChange={(e)=>setForm({...form, model:e.target.value})} 
-              className="border p-2 rounded w-full"
-              disabled={!form.brand}
-            >
-              <option value="">Seleccionar modelo</option>
-              {form.brand && MODELS_BY_BRAND[form.brand]?.map(m => <option key={m} value={m}>{m}</option>)}
-            </select>
-          </div>
-        </div>
-
-        {/* Año y Color */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Año</label>
-            <select 
-              value={form.year} 
-              onChange={(e)=>setForm({...form, year:e.target.value})} 
-              className="border p-2 rounded w-full"
-            >
-              <option value="">Seleccionar año</option>
-              {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-gray-600 block mb-1">Color</label>
-            <select 
-              value={form.color} 
-              onChange={(e)=>setForm({...form, color:e.target.value})} 
-              className="border p-2 rounded w-full"
-            >
-              <option value="">Seleccionar color</option>
-              {COLORS.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-        </div>
-
-        {/* Kilometraje */}
-        <div>
-          <label className="text-xs font-medium text-gray-600 block mb-1">Kilometraje actual</label>
-          <input 
-            value={form.mileage} 
-            onChange={(e)=>setForm({...form, mileage:e.target.value})} 
-            placeholder="Ej: 50000" 
-            type="number"
-            min="0"
-            className="border p-2 rounded w-full" 
-          />
-        </div>
-
-        {/* Titular */}
-        <div>
-          <label className="text-xs font-medium text-gray-600 block mb-1">Titular</label>
-          <select 
-            value={form.ownerId} 
-            onChange={(e)=>setForm({...form, ownerId:e.target.value})} 
-            className="border p-2 rounded w-full"
-          >
-            <option value="">Seleccionar titular</option>
-            {owners.map((o) => <option key={o.id} value={o.id}>{o.fullName} — {o.document}</option>)}
-          </select>
-        </div>
-
-        {/* Documentos */}
-        <div>
-          <label className="text-xs font-medium text-gray-600 block mb-1">Documentos adjuntos</label>
-          <div className="flex items-center gap-2">
-            <input 
-              ref={fileInputRef} 
-              onChange={(e)=>handleFiles(e.target.files)} 
-              type="file" 
-              multiple 
-              accept="image/*,application/pdf"
-              className="text-sm"
-            />
-            <button 
-              type="button" 
-              onClick={()=>fileInputRef.current && fileInputRef.current.click()} 
-              className="px-2 py-1 rounded border text-sm hover:bg-gray-50"
-            >
-              Seleccionar
-            </button>
-          </div>
-        </div>
-
-        {form.files.length > 0 && (
-          <div className="bg-blue-50 p-2 rounded">
-            {form.files.map((f, idx) => <div key={idx} className="text-sm text-gray-600">✓ {f.name}</div>)}
-          </div>
-        )}
-
-        {error && <div className="text-sm text-red-600 bg-red-50 p-2 rounded">⚠ {error}</div>}
-
-        <div className="flex justify-end gap-2">
-          <button 
-            type="submit" 
-            className="px-3 py-2 rounded text-white font-medium hover:opacity-90" 
-            style={{ backgroundColor: COLORS.intrantOrange }}
-          >
-            Registrar vehículo
-          </button>
-        </div>
-      </form>
-    </div>
-  );
+    );
 }
 /* =====================
    Schedule inspection
@@ -739,9 +811,7 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule, userRo
   const [selectedVehicleType, setSelectedVehicleType] = useState("");
 
   // Filter inspectors based on role
-  const availableInspectors = userRole === "Inspector" || userRole === "Supervisor" 
-    ? inspectors.filter(i => i.workshopId === userWorkshopId)
-    : inspectors;
+    const availableInspectors = inspectors
   
   const userWorkshop = talleres.find(t => t.id === userWorkshopId);
 
@@ -1478,8 +1548,7 @@ function ReportsView({ inspections, certificates }) {
 /* =====================
    Main App (estado global + flujo)
    ===================== */
-export default function App()
-{
+export default function App() {
     /* Layout & auth */
     const [portal, setPortal] = useState(null);
     const [role, setRole] = useState(null);
@@ -1498,17 +1567,67 @@ export default function App()
         { id: "u6", fullName: "Supervisor Taller Los Robles", email: "supervisor@losrobles.com", role: "Supervisor", document: "001-0000005-0", verified: true, firstLogin: false, workshopId: "w1" },
     ]);
 
-  const [vehicles, setVehicles] = useState([
-    { id: "v1", plate: "A123456", vin: "1HGBH41JXMN109186", brand: "Toyota", model: "Corolla", year: 2020, color: "Blanco", fuel: "GASOLINA", owner: "Carlos Pérez", documents: [], type: "AUTO", mileage: 45000, status: "ACTIVE" },
-    { id: "v2", plate: "B987654", vin: "JH4KA8260NC000000", brand: "Honda", model: "Civic", year: 2019, color: "Negro", fuel: "HIBRIDO", owner: "María González", documents: [], type: "AUTO", mileage: 62000, status: "ACTIVE" },
-    { id: "v3", plate: "C555888", vin: "WBAVA37553NM12345", brand: "BMW", model: "X3", year: 2021, color: "Gris", fuel: "GASOLINA", owner: "Carlos Pérez", documents: [], type: "AUTO", mileage: 28000, status: "ACTIVE" },
-    { id: "v4", plate: "D112233", vin: "1G1ZE5ST4HF123456", brand: "Chevrolet", model: "Malibu", year: 2018, color: "Azul", fuel: "GASOLINA", owner: "María González", documents: [], type: "AUTO", mileage: 78000, status: "ACTIVE" },
-    { id: "v5", plate: "M555111", vin: "JH2SC5902MK000001", brand: "Honda", model: "CBR", year: 2020, color: "Rojo", fuel: "GASOLINA", owner: "Carlos Pérez", documents: [], type: "MOTO", mileage: 15000, status: "ACTIVE" },
-    { id: "v6", plate: "T888999", vin: "3HSDJAPR8HN000001", brand: "Hino", model: "FC", year: 2019, color: "Blanco", fuel: "DIESEL", owner: "Transporte XYZ", documents: [], type: "CAMION", mileage: 125000, status: "ACTIVE" },
-  ]);
+    const [vehicles, setVehicles] = useState([
+        { id: "v1", plate: "A123456", vin: "1HGBH41JXMN109186", brand: "Toyota", model: "Corolla", year: 2020, color: "Blanco", fuel: "GASOLINA", owner: "Carlos Pérez", documents: [], type: "AUTO", mileage: 45000, status: "ACTIVE" },
+        { id: "v2", plate: "B987654", vin: "JH4KA8260NC000000", brand: "Honda", model: "Civic", year: 2019, color: "Negro", fuel: "HIBRIDO", owner: "María González", documents: [], type: "AUTO", mileage: 62000, status: "ACTIVE" },
+        { id: "v3", plate: "C555888", vin: "WBAVA37553NM12345", brand: "BMW", model: "X3", year: 2021, color: "Gris", fuel: "GASOLINA", owner: "Carlos Pérez", documents: [], type: "AUTO", mileage: 28000, status: "ACTIVE" },
+        { id: "v4", plate: "D112233", vin: "1G1ZE5ST4HF123456", brand: "Chevrolet", model: "Malibu", year: 2018, color: "Azul", fuel: "GASOLINA", owner: "María González", documents: [], type: "AUTO", mileage: 78000, status: "ACTIVE" },
+        { id: "v5", plate: "M555111", vin: "JH2SC5902MK000001", brand: "Honda", model: "CBR", year: 2020, color: "Rojo", fuel: "GASOLINA", owner: "Carlos Pérez", documents: [], type: "MOTO", mileage: 15000, status: "ACTIVE" },
+        { id: "v6", plate: "T888999", vin: "3HSDJAPR8HN000001", brand: "Hino", model: "FC", year: 2019, color: "Blanco", fuel: "DIESEL", owner: "Transporte XYZ", documents: [], type: "CAMION", mileage: 125000, status: "ACTIVE" },
+    ]);
 
-    const [inspectors, setInspectors] = useState([]);
-    const [templates, setTemplates] = useState([]);
+    const [inspectors, setInspectors] = useState([
+        { id: "1", name: "Juan Pérez", email: "juan.perez@example.com", role: "Inspector" },
+        { id: "2", name: "María López", email: "maria.lopez@example.com", role: "Inspector" },
+        { id: "3", name: "Carlos García", email: "carlos.garcia@example.com", role: "Inspector" },
+        { id: "4", name: "Ana Martínez", email: "ana.martinez@example.com", role: "Inspector" }
+    ]);
+
+    const [holders, setHolders] = useState([
+        {
+            holderId: "3f23aa3f-b26e-4915-bccf-b46d1f8b6671",
+            userId: "b81055ac-ee5d-4409-b070-7efbf83ee1d6",
+            documentType: "CEDULA",
+            documentNumber: "123456789",
+            fullNameOrCorporate: "Angel Antonio Orona Pimentel",
+            email: "antonioorona"
+        }
+    ]);
+
+    const [templates, setTemplates] = useState([{
+        templateId: "a1",
+        typeId: 1,
+        templateName: "ITV Básica",
+        resolutionId: "r1",
+        resolutionCode: "RES-001-2024",
+        resolutionTitle: "Resolución General de ITV 2024",
+        version: 1,
+        isActive: true,
+        checkItems: []
+    }, 
+    {
+        templateId: "a2",
+        typeId: 2,
+        templateName: "ITV Avanzada",
+        resolutionId: "r2",
+        resolutionCode: "RES-002-2024",
+        resolutionTitle: "Resolución Especial de ITV 2024",
+        version: 1,
+        isActive: true,
+        checkItems: []
+    },
+    {
+        templateId: "a3",
+        typeId: 3,
+        templateName: "ITV Completa",
+        resolutionId: "r3",
+        resolutionCode: "RES-003-2024",
+        resolutionTitle: "Resolución Completa de ITV 2024",
+        version: 1,
+        isActive: true,
+        checkItems: []
+    }
+    ]);
 
 
     const [talleres, setTalleres] = useState([
@@ -1519,8 +1638,9 @@ export default function App()
         { id: "w5", name: "Taller Mecánico Central", rnc: "RNC-333444" },
         { id: "w6", name: "Inspecciones Técnicas del Este", rnc: "RNC-555666" },
     ]);
-    const [vehicleModels, setVehicleModels] = useState([]);
+
     const [fuelTypes, setFuelTypes] = useState([]);
+
 
   const [scheduled, setScheduled] = useState([
     { id: "s1", vehicle: "A123456", vehicleType: "AUTO", templateId: "TEMPLATE_AUTO", datetime: "2025-09-25 09:00", inspectorId: "ins1", inspector: "Juan Pérez Martínez", workshopId: "w1", taller: "Taller Los Robles", status: "Programada", notes: "Primera inspección del año" },
@@ -1552,13 +1672,16 @@ export default function App()
         { id: "n5", title: "Nuevo taller disponible", message: "Se ha agregado 'Inspecciones Técnicas del Este' a la red de talleres autorizados", status: "Pendiente" },
     ]);
 
-    const [vehicleTypes, setVehicleTypes] = useState([
-        { id: 1, name: "Automóvil" },
-        { id: 2, name: "Motocicleta" },
-        { id: 3, name: "Camión" },
-        { id: 4, name: "SUV" },
-    ]);
-
+    //const [vehicleTypes, setVehicleTypes] = useState([
+    //    { id: 1, name: "Automóvil" },
+    //    { id: 2, name: "Motocicleta" },
+    //    { id: 3, name: "Camión" },
+    //    { id: 4, name: "SUV" },
+    //]);
+    const VEHICLE_TYPE_MAP = VEHICLE_TYPES.reduce((acc, curr) => {
+        acc[curr.code] = curr.label;
+        return acc;
+    }, {});
 
     /* UI selection state */
     const [selectedCert, setSelectedCert] = useState(null);
@@ -1659,10 +1782,6 @@ export default function App()
             setPage("dashboard");
 
             // 5. Cargar Datos Adicionales (Acciones asíncronas necesarias tras el login)
-            await loadUserVehicles();
-            await loadCertificates();
-            await loadAllInspections();  // ← Nueva
-            await loadTemplates();
             await loadInitialData();
 
         } catch (error) {
@@ -1720,29 +1839,7 @@ export default function App()
         }
     };
 
-    const loadUserVehicles = async () => {
-        try {
-            const response = await httpService.get(API_ENDPOINTS.VEHICLE_GET_ALL);
-
-            const vehiclesData = response.map(v => ({
-                id: v.vehicleId,
-                plate: v.plate,
-                vin: v.vin,
-                brand: v.Make,
-                model: v.model,
-                year: v.modelYear,
-                color: v.color,
-                type: v.vehicleTypeCode,
-                owner: v.currentHolderName || "Sin asignar",
-                documents: []
-            }));
-
-            setVehicles(vehiclesData);
-
-        } catch (error) {
-            console.error("Error cargando vehículos:", error);
-        }
-    };
+   
 
     /* Funciones de INSPECCION
      */
@@ -1750,23 +1847,133 @@ export default function App()
     // Función para cargar todos los datos al iniciar sesión
     const loadInitialData = async () => {
         try {
-            console.log('🔄 Cargando datos iniciales...');
+            console.log("🔄 Cargando datos iniciales...");
 
+            // Funciones internas de carga
+            const loadAllInspections = async () => {
+                const response = await httpService.get(API_ENDPOINTS.INSPECTION_GET_ALL);
+                const completedInspections = [];
+                const scheduledInspections = [];
+
+                response.forEach(i => {
+                    const inspectionData = {
+                        id: i.inspectionId,
+                        vehicle: i.vehiclePlate,
+                        vehicleId: i.vehicleId,
+                        //vehicleType: getVehicleTypeName(i.typeId),
+                        templateId: i.templateId,
+                        datetime: i.scheduledAt?.split("T")[0] + " " + (i.scheduledAt?.split("T")[1]?.substring(0, 5) || "00:00"),
+                        inspectorId: i.inspectorUserId,
+                        workshopId: i.workshopId,
+                        taller: i.workshopName || "N/A",
+                        notes: i.comments || "",
+                        odometerKm: i.odometerKm,
+                        totalItems: i.totalItems,
+                        completedItems: i.completedItems,
+                        pendingItems: i.pendingItems,
+                        defectsCount: i.defectsCount
+                    };
+
+                    if (i.status === "COMPLETED" && i.overallResult) {
+                        completedInspections.push({
+                            ...inspectionData,
+                            date: i.finishedAt?.split("T")[0] || i.createdAt?.split("T")[0] || new Date().toISOString().split("T")[0],
+                            result: i.overallResult === "PASS" ? "Aprobado" :
+                                i.overallResult === "FAIL" ? "Rechazado" : "No Evaluado",
+                            items: []
+                        });
+                    } else {
+                        scheduledInspections.push({
+                            ...inspectionData,
+                            status: i.status === "IN_PROGRESS" ? "En proceso" :
+                                i.status === "SCHEDULED" ? "Programada" : "Programada"
+                        });
+                    }
+                });
+
+                setInspections(completedInspections);
+                setScheduled(scheduledInspections);
+                console.log(`✓ Cargadas ${completedInspections.length} inspecciones completadas`);
+                console.log(`✓ Cargadas ${scheduledInspections.length} inspecciones programadas/en progreso`);
+            };
+
+            const loadTemplates = async () => {
+                const response = await httpService.get(API_ENDPOINTS.TEMPLATES_GET_ALL);
+                const templates = response.map(t => ({
+                    id: t.templateId,
+                    type: VEHICLE_TYPES.find(v => v.id === t.typeId)?.code || "AUTO",
+                    name: t.templateName,
+                    resolutionId: t.resolutionId,
+                    resolutionCode: t.resolutionCode,
+                    resolutionTitle: t.resolutionTitle,
+                    version: t.version,
+                    isActive: t.isActive,
+                    checkItems: t.checkItems || []
+                }));
+                setTemplates(templates);
+                console.log(`✓ Cargadas ${templates.length} plantillas de inspección`);
+            };
+
+            const loadCertificates = async () => {
+                const response = await httpService.get(API_ENDPOINTS.CERTIFICATE_GET_ALL);
+                const certsData = response.map(c => ({
+                    id: c.certificateId,
+                    vehicle: c.vehiclePlate || "N/A",
+                    date: c.issuedAt?.split("T")[0],
+                    status: c.status === "VALID" ? "Activo" :
+                        c.status === "REVOKED" ? "Revocado" : "Expirado",
+                    details: c.comments || "Certificado de inspección técnica vehicular",
+                    expiryDate: c.validUntil,
+                    qrHash: c.qrHash
+                }));
+                setCertificates(certsData);
+                console.log(`✓ Cargados ${certsData.length} certificados`);
+            };
+
+            const loadUserVehicles = async () => {
+                const response = await httpService.get(API_ENDPOINTS.VEHICLE_GET_ALL);
+                const vehiclesData = response.map(v => ({
+                    id: v.vehicleId,
+                    plate: v.plate,
+                    vin: v.vin,
+                    brand: v.make,
+                    type: v.type,
+                    model: v.model,
+                    year: v.modelYear,
+                    color: v.color,
+                    fuel: v.fuelId,
+                    owner: v.currentHolderName || "Sin asignar",
+                    documents: []
+                }));
+                setVehicles(vehiclesData);
+                console.log(`✓ Cargados ${vehiclesData.length} vehículos`);
+                console.log('Respuesta de Vehiculos:', response);
+                console.log('Respuesta de Vehiculos:', vehiclesData);
+
+
+            };
+
+            // Ejecutar todas las cargas en paralelo
             await Promise.all([
                 loadVehicleModels(),
                 loadInspectors(),
                 loadHolders(),
                 loadWorkshops(),
                 loadFuelTypes(),
-                loadVehicleTypes()
+                loadVehicleTypes(),
+                loadAllInspections(),
+                loadTemplates(),
+                loadCertificates(),
+                loadUserVehicles()
             ]);
 
-            console.log('✅ Todos los datos iniciales cargados correctamente');
+            console.log("✅ Todos los datos iniciales cargados correctamente");
         } catch (error) {
-            console.error('❌ Error cargando datos iniciales:', error);
-            // Opcional: mostrar notificación al usuario
+            console.error("❌ Error cargando datos iniciales:", error);
         }
     };
+
+
 
     // 1. Modelos de vehículos
     const loadVehicleModels = async () => {
@@ -1779,21 +1986,30 @@ export default function App()
                 makeName: m.makeName,
                 name: m.name,
                 type: m.type,
-                fullName: `${m.makeName} ${m.name}`, // Para mostrar en selects
+                fullName: `${m.makeName} ${m.name}`,
                 yearFrom: m.yearFrom,
                 yearTo: m.yearTo,
                 createdAt: m.createdAt
             }));
 
-            setVehicleModels(models);
-            console.log(`✓ Cargados ${models.length} modelos de vehículos`);
+            const modelsByBrand = models.reduce((acc, v) => {
+                if (!acc[v.makeName]) acc[v.makeName] = [];
+                acc[v.makeName].push(v);
+                return acc;
+            }, {});
 
+            //setVehicleModels(models);              // array plano
+            //setVehicleModelsByBrand(modelsByBrand); // agrupado por marca
+
+            console.log("✓ Modelos agrupados por marca:", modelsByBrand);
             return models;
         } catch (error) {
-            console.error('Error cargando modelos de vehículos:', error);
+            console.error("Error cargando modelos de vehículos:", error);
             throw error;
         }
     };
+
+
 
     // 2. Inspectores (usuarios de talleres)
     const loadInspectors = async () => {
@@ -1840,9 +2056,8 @@ export default function App()
                 createdAt: h.createdAt
             }));
 
-            setUsers(holders);
             console.log(`✓ Cargados ${holders.length} titulares`);
-
+            setHolders(holders)
             return holders;
         } catch (error) {
             console.error('Error cargando titulares:', error);
@@ -1984,7 +2199,6 @@ export default function App()
 
                 setTemplates(templates);
                 console.log(`✓ Cargadas ${templates.length} plantillas de inspección`);
-
                 return templates;
             } catch (error) {
                 console.error('Error cargando plantillas de inspección:', error);
@@ -2002,7 +2216,7 @@ export default function App()
                 createdAt: v.createdAt
             }));
 
-            setVehicleTypes(vehicleTypes);
+            //setVehicleTypes(vehicleTypes);
             console.log(`✓ Cargados ${vehicleTypes.length} tipos de vehículos`);
 
             return vehicleTypes;
@@ -2013,23 +2227,19 @@ export default function App()
         }
     };
 
-    const getVehicleTypeName = (typeId) => {
-        const type = vehicleTypes.find(v => v.id === typeId);
-        return type ? type.name : "N/A";
-    };
-    const getMakeNameByModelName = (modelName) => {
-        const model = vehicleModels.find(m => m.name === modelName);
-        return model ? model.makeName : "N/A";
-    };
+    //const getVehicleTypeName = (typeId) => {
+    //    const type = vehicleTypes.find(v => v.id === typeId);
+    //    return type ? type.name : "N/A";
+    //};
+    //const getMakeNameByModelName = (modelName) => {
+    //    const model = vehicleModels.find(m => m.name === modelName);
+    //    return model ? model.makeName : "N/A";
+
+
     const getTemplateNameById = (templateId) => {
         const template = templates.find(t => t.id === templateId);
         return template ? template.name : "Resolución General de ITV 2024";
     };
-
-
-
-
-
 
     /* =========================
        Scheduling & inspection
@@ -2461,6 +2671,7 @@ export default function App()
                             <th className="p-2">Marca/Modelo</th>
                             <th className="p-2">Año</th>
                             <th className="p-2">Tipo</th>
+
                             <th className="p-2">Color</th>
                             <th className="p-2">Combustible</th>
                             <th className="p-2">KM</th>
@@ -2473,15 +2684,12 @@ export default function App()
                             <tr key={v.id} className="border-t hover:bg-gray-50 cursor-pointer">
                               <td className="p-2 font-bold" style={{ color: COLORS.intrantBlue }}>{v.plate}</td>
                               <td className="p-2 text-xs text-gray-600">{v.vin || "N/A"}</td>
-                              <td className="p-2">{v.brand} {v.model}</td>
+                                  <td className="p-2">{v.brand} {v.model}</td>
                               <td className="p-2">{v.year}</td>
                               <td className="p-2">
-                                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                                  {v.type === "AUTO" ? "Automóvil" : 
-                                   v.type === "MOTO" ? "Moto" : 
-                                   v.type === "CAMION" ? "Camión" : 
-                                   v.type === "BUS" ? "Bus" : "Van"}
-                                </span>
+                                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                                          {v.type}
+                                      </span>
                               </td>
                               <td className="p-2">
                                 <div className="flex items-center gap-2">
@@ -2508,7 +2716,7 @@ export default function App()
                               </td>
                               <td className="p-2">
                                 <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                                  {v.fuel || "N/A"}
+                                 {v.fuel}
                                 </span>
                               </td>
                               <td className="p-2 text-right text-xs">
@@ -2534,10 +2742,9 @@ export default function App()
                     </div>
                   </div>
                 </div>
-
                     <div>
-                        <VehicleRegister owners={users.filter(u => u.role === "Titular")} onAdd={addVehicle} />
-                    </div>
+                     <VehicleRegister owners={holders} onAdd={addVehicle} />
+                   </div>
                 </div>
             </div>
         )}
@@ -2582,7 +2789,6 @@ export default function App()
                                                             workshopId: s.workshopId
                                                         })}
                                                         className="px-2 py-1 rounded border text-sm hover:bg-gray-50"
-                                                        disabled={s.status === "En proceso"} // continuar permitira cargar inspeccion guardada
                                                     >
                                                         {s.status === "En proceso" ? "Continuar" : "Iniciar"}
                                                     </button>

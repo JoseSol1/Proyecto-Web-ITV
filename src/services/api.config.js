@@ -13,8 +13,8 @@ export const API_ENDPOINTS = {
     ASSIGN_ROLE: '/api/UserAccount/assign-role',
     GET_HOLDERS: '/api/UserAccount/holders',
     GET_WORKSHOP_USERS: '/api/UserAccount/workshop-users',
-    GET_
-        : '/api/UserAccount/workshops',
+    GET_WORKSHOPS: '/api/UserAccount/workshops',
+
 
     // Vehicle endpoints
     VEHICLE_REGISTER: '/api/Vehicle/register',
