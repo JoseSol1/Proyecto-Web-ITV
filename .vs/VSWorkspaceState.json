@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\src",
+    "\\src\\services"
   ],
-  "SelectedNode": "\\C:\\Users\\anton\\Source\\Repos\\Proyecto-Web-ITV",
+  "SelectedNode": "\\src\\App.jsx",
   "PreviewInSolutionExplorer": false
 }
