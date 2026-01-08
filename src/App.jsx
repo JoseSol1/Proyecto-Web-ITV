@@ -858,7 +858,7 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule, userRo
 }
 
 /* =====================
-   Execute inspection (checklist + photos)
+   Execute inspection 
    ===================== */
 function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
   // Get template based on vehicle type
@@ -885,6 +885,7 @@ function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
     }))
   );
   const [progress, setProgress] = useState(0);
+  const [mileage, setMileage] = useState(""); 
 
   useEffect(() => {
     const done = items.filter(it => it.status !== "No aplica" && it.status !== "").length;
@@ -965,6 +966,27 @@ function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
           <div className="text-sm text-gray-600">Plantilla: {inspection.vehicleType === "AUTO" ? "Automóvil" : inspection.vehicleType === "MOTO" ? "Motocicleta" : "Camión"}</div>
         </div>
         <div className="text-sm text-gray-600">Progreso: {progress}%</div>
+      </div>
+
+      <div className="bg-blue-50 p-4 rounded border border-blue-200">
+        <label className="text-sm font-medium text-blue-800 block mb-2">Kilometraje del vehículo *</label>
+        <div className="flex gap-2 items-center">
+          <input 
+            type="number"
+            min="0"
+            value={mileage}
+            onChange={(e)=>setMileage(e.target.value)}
+            placeholder="Ej: 50000"
+            className="border p-2 rounded w-48 text-sm"
+          />
+          <span className="text-sm text-gray-600">km</span>
+          {mileage && (
+            <span className="text-xs text-green-600 ml-2">✓ {parseInt(mileage).toLocaleString()} km registrados</span>
+          )}
+        </div>
+        {!mileage && (
+          <p className="text-xs text-orange-600 mt-1">⚠ Este dato es obligatorio para completar la inspección</p>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -1052,7 +1074,13 @@ function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
 
       <div className="flex justify-end gap-2">
         <button 
-          onClick={() => onSaveProgress({ inspectionId: inspection.id, items })} 
+          onClick={() => {
+            if (!mileage) {
+              alert("Por favor ingresa el kilometraje del vehículo");
+              return;
+            }
+            onSaveProgress({ inspectionId: inspection.id, items, mileage: parseInt(mileage) });
+          }} 
           className="px-3 py-2 rounded border hover:bg-gray-50"
         >
           <Save className="w-4 h-4 inline mr-1" />
@@ -1065,7 +1093,13 @@ function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
           Cancelar
         </button>
         <button 
-          onClick={() => onFinish({ ...inspection, items })} 
+          onClick={() => {
+            if (!mileage) {
+              alert("Por favor ingresa el kilometraje del vehículo antes de finalizar");
+              return;
+            }
+            onFinish({ ...inspection, items, mileage: parseInt(mileage) });
+          }} 
           className="px-3 py-2 rounded" 
           style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}
         >
