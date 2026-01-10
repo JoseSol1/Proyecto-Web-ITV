@@ -545,23 +545,29 @@ function VehicleRegister({ owners, onAdd }) {
         if (!form.brand) return setError("Marca requerida.");
         if (!form.model) return setError("Modelo requerido.");
         if (!form.year) return setError("Año requerido.");
+        if (!form.color) return setError("Color requerido.");
         if (!form.ownerId) return setError("Titular requerido.");
 
         setError("");
+
+        const selectedModel = VEHICLE_MODELS_BY_BRAND[form.brand]?.find(m => m.name === form.model);
 
         const newVehicle = {
             vin: form.vin,
             plate: form.plate,
             vehicleTypeCode: form.type,
+            vehicleMakeId: selectedModel?.makeId,
             vehicleMakeName: form.brand,
             vehicleModelName: form.model,
             modelYear: parseInt(form.year),
-            vehicleModelYearFrom: parseInt(form.year),
+            vehicleModelYearFrom: parseInt(form.year),  // Mismo año en ambos campos
             fuelTypeCode: FUEL_TYPES.find(f => f.fuelId === Number(form.fuel))?.code || "GASOLINA",
-            color: form.color || "No especificado",
-            status: "ACTIVE",
+            color: form.color,
             initialHolderId: form.ownerId,
-            documents: form.files
+            engineNumber: "N/A",
+            grossWeightKg: 1,
+            seatCount: form.type === "AUTO" ? 5 : form.type === "MOTO" ? 2 : 4,
+            imageUrl: ""
         };
 
         onAdd(newVehicle);
@@ -704,8 +710,8 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule, userRo
       vehiclePlate: form.vehiclePlate,
       vehicleId: vehicle?.id,
       vehicleType: vehicle?.type || "AUTO",
-      templateId: form.templateId,
-      datetime: `${form.date} ${form.time || "09:00"}`,
+        templateId: "a6eda317-b11e-4e7f-9d6f-e474a6087c29",
+        datetime: `${form.date}T${form.time || "09:00"}:00`,
       inspectorId: form.inspectorId,
       inspector: inspector?.name || "No asignado",
       workshopId: form.workshopId,
@@ -1008,12 +1014,12 @@ function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
                 {renderItemInput(it)}
               </div>
               
-              <input 
-                placeholder="Comentario adicional" 
-                value={it.comment} 
-                onChange={(e)=>updateItem(it.code, { comment: e.target.value })} 
-                className="border p-1 rounded text-sm flex-1 min-w-[200px]" 
-              />
+              {/*<input */}
+              {/*  placeholder="Comentario adicional" */}
+              {/*  value={it.comment} */}
+              {/*  onChange={(e)=>updateItem(it.code, { comment: e.target.value })} */}
+              {/*  className="border p-1 rounded text-sm flex-1 min-w-[200px]" */}
+              {/*/>*/}
               
               <label className="p-1 rounded border cursor-pointer text-sm flex items-center gap-1 hover:bg-gray-50">
                 <Camera className="w-4 h-4"/>
@@ -1705,37 +1711,20 @@ export default function App() {
     /* =========================
        Vehicle handlers
        ========================= */
-    const addVehicle = async (v) => {
+    const addVehicle = async (vehicleData) => {
         try {
-            const requestData = {
-                vin: v.vin,
-                plate: v.plate,
-                vehicleTypeCode: v.type || "AUTO",
-                vehicleMakeName: v.brand,
-                vehicleModelName: v.model,
-                modelYear: parseInt(v.year),
-                vehicleModelYearFrom: parseInt(v.year),
-                fuelTypeCode: v.fuel || "GASOLINA",
-                engineNumber: v.engineNumber || "",
-                color: v.color,
-                status: v.status || "ACTIVE",
-                grossWeightKg: v.weight || 0,
-                seatCount: v.seats || 5,
-                imageUrl: v.imageUrl || "",
-                initialHolderId: v.ownerId || loggedUser?.id
-            };
-
-            const response = await httpService.post(API_ENDPOINTS.VEHICLE_REGISTER, requestData);
+            // vehicleData ya viene con todos los campos correctos desde VehicleRegister
+            const response = await httpService.post(API_ENDPOINTS.VEHICLE_REGISTER, vehicleData);
 
             const newVehicle = {
-                id: response.vehicleId,
-                ...v,
-                owner: users.find(u => u.id === v.ownerId)?.fullName || "Sin asignar"
+                vehicleId: response.vehicleId,
+                ...vehicleData,
+                currentHolderName: users.find(u => u.id === vehicleData.initialHolderId)?.fullName || "Sin asignar",
+                currentHolderId: vehicleData.initialHolderId
             };
 
             setVehicles(prev => [newVehicle, ...prev]);
             alert("Vehículo registrado exitosamente");
-
         } catch (error) {
             alert(`Error al registrar vehículo: ${error.message}`);
         }
@@ -2155,7 +2144,7 @@ export default function App() {
                 vehicleId: vehicle?.id,
                 workshopId: s.workshopId || talleres[0]?.id,
                 inspectorUserId: s.inspectorId || null,
-                templateId: s.templateId,
+                templateId: "a6eda317-b11e-4e7f-9d6f-e474a6087c29",
                 scheduledAt: new Date(`${s.datetime}`).toISOString(),
                 odometerKm: 0,
                 comments: s.notes || ""
