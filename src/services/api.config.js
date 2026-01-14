@@ -1,4 +1,4 @@
-// src/services/api.config.js
+ï»¿// src/services/api.config.js
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7125';
 
@@ -48,8 +48,12 @@ export const API_ENDPOINTS = {
     INSPECTION_GET_DEFECTS: (id) => `/api/Inspection/${id}/defects`,
     INSPECTION_GET_PROGRESS: (id) => `/api/Inspection/${id}/progress`,
     INSPECTION_UPDATE_ITEM: (inspectionId, itemId) => `/api/Inspection/${inspectionId}/items/${itemId}`,
-    INSPECTION_BATCH_UPDATE_ITEMS: (inspectionId) => `/api/Inspection/${inspectionId}/items/batch`,
-    INSPECTION_ADD_DEFECT: (inspectionId) => `/api/Inspection/${inspectionId}/defects`,
+    INSPECTION_BATCH_UPDATE_ITEMS: (inspectionId) =>
+        `/api/inspections/${inspectionId}/items/batch`,
+    INSPECTION_ADD_DEFECT: (inspectionId) =>
+        `/api/inspections/${inspectionId}/defects`,
+    INSPECTION_COMPLETE: (inspectionId) =>
+        `/api/inspections/${inspectionId}/complete`,    INSPECTION_ADD_DEFECT: (inspectionId) => `/api/Inspection/${inspectionId}/defects`,
     INSPECTION_START: (id) => `/api/Inspection/${id}/start`,
     INSPECTION_COMPLETE: (id) => `/api/Inspection/${id}/complete`,
     INSPECTION_RESCHEDULE: (id) => `/api/Inspection/${id}/reschedule`,
@@ -113,7 +117,7 @@ class HttpService {
 
             if (response.status === 401) {
                 this.setToken(null);
-                throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.');
+                throw new Error('SesiÃ³n expirada. Por favor inicia sesiÃ³n nuevamente.');
             }
 
             if (!response.ok) {

@@ -124,49 +124,531 @@ const VEHICLE_MODELS_BY_BRAND = {
 /* =====================
    Plantillas de inspección por tipo de vehículo
    ===================== */
+// Template real de la base de datos para vehículos AUTO
+// Plantilla real de inspección ITV-1 (TypeId: 1 - AUTO)
+// Basada en la resolución RES-001-2024
 const INSPECTION_TEMPLATES = {
-  AUTO: [
-    { code: "SEG_001", name: "Sistema de frenos", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar estado de discos, pastillas y sistema hidráulico" },
-    { code: "SEG_002", name: "Sistema de dirección", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar columna, caja de dirección y terminales" },
-    { code: "SEG_003", name: "Sistema de suspensión", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar amortiguadores, resortes y bujes" },
-    { code: "SEG_004", name: "Neumáticos", category: "SEGURIDAD", resultType: "NUMERIC", unit: "mm", minValue: 1.6, severity: "GRAVE", description: "Profundidad mínima de labrado" },
-    { code: "SEG_005", name: "Sistema de luces", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar faros, luces de freno, intermitentes y neblineros" },
-    { code: "SEG_006", name: "Cinturones de seguridad", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar funcionamiento y anclajes" },
-    { code: "SEG_007", name: "Limpia parabrisas", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "LEVE", description: "Verificar estado de gomas y funcionamiento" },
-    { code: "SEG_008", name: "Espejos retrovisores", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "LEVE", description: "Verificar estado y ajuste" },
-    { code: "MED_001", name: "Emisiones de gases", category: "MEDIOAMBIENTE", resultType: "NUMERIC", unit: "%", maxValue: 1.0, severity: "CRITICA", description: "Nivel de CO en emisiones" },
-    { code: "MED_002", name: "Fugas de fluidos", category: "MEDIOAMBIENTE", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar fugas de aceite, refrigerante o combustible" },
-    { code: "MED_003", name: "Sistema de escape", category: "MEDIOAMBIENTE", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar integridad y fugas" },
-    { code: "DOC_001", name: "Número de chasis", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar coincidencia con documentación" },
-    { code: "DOC_002", name: "Placa visible", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar legibilidad y fijación" },
-  ],
-  MOTO: [
-    { code: "SEG_M01", name: "Sistema de frenos", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar freno delantero y trasero" },
-    { code: "SEG_M02", name: "Neumáticos", category: "SEGURIDAD", resultType: "NUMERIC", unit: "mm", minValue: 1.0, severity: "GRAVE", description: "Profundidad mínima de labrado" },
-    { code: "SEG_M03", name: "Sistema de luces", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar faro, luz de freno e intermitentes" },
-    { code: "SEG_M04", name: "Suspensión", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar horquilla y amortiguador" },
-    { code: "SEG_M05", name: "Espejos", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "LEVE", description: "Verificar presencia y estado" },
-    { code: "MED_M01", name: "Emisiones de gases", category: "MEDIOAMBIENTE", resultType: "NUMERIC", unit: "%", maxValue: 1.5, severity: "CRITICA", description: "Nivel de CO en emisiones" },
-    { code: "MED_M02", name: "Sistema de escape", category: "MEDIOAMBIENTE", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar integridad y ruido" },
-    { code: "DOC_M01", name: "Número de chasis", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar coincidencia con documentación" },
-    { code: "DOC_M02", name: "Placa visible", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar legibilidad y fijación" },
-  ],
-  CAMION: [
-    { code: "SEG_C01", name: "Sistema de frenos", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar sistema de frenos de servicio y estacionamiento" },
-    { code: "SEG_C02", name: "Sistema de dirección", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar columna, caja y terminales con holguras" },
-    { code: "SEG_C03", name: "Sistema de suspensión", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar ballestas, amortiguadores y bujes" },
-    { code: "SEG_C04", name: "Neumáticos", category: "SEGURIDAD", resultType: "NUMERIC", unit: "mm", minValue: 2.0, severity: "CRITICA", description: "Profundidad mínima de labrado (mayor por carga)" },
-    { code: "SEG_C05", name: "Sistema de luces", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar luces delanteras, traseras, laterales y de freno" },
-    { code: "SEG_C06", name: "Triángulos y señales", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "LEVE", description: "Verificar presencia de equipo de seguridad" },
-    { code: "SEG_C07", name: "Carrocería y carga", category: "SEGURIDAD", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar integridad y sistemas de sujeción" },
-    { code: "MED_C01", name: "Emisiones de gases", category: "MEDIOAMBIENTE", resultType: "NUMERIC", unit: "%", maxValue: 2.0, severity: "CRITICA", description: "Nivel de opacidad en diésel" },
-    { code: "MED_C02", name: "Fugas de fluidos", category: "MEDIOAMBIENTE", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar fugas de aceite, refrigerante o combustible" },
-    { code: "MED_C03", name: "Sistema de escape", category: "MEDIOAMBIENTE", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar integridad y fugas" },
-    { code: "DOC_C01", name: "Número de chasis", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar coincidencia con documentación" },
-    { code: "DOC_C02", name: "Placa visible", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "CRITICA", description: "Verificar legibilidad y fijación" },
-    { code: "DOC_C03", name: "Peso y dimensiones", category: "DOCUMENTAL", resultType: "BOOLEAN", severity: "GRAVE", description: "Verificar cumplimiento de límites legales" },
-  ],
+    AUTO: [
+        // ALUMBRADO (ALU)
+        {
+            itemId: "0121ae53-9c2a-4265-bef0-d284491b9537",
+            code: "ALU-01",
+            name: "Luces bajas",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            unit: null,
+            minValue: null,
+            maxValue: null,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Funcionamiento e intensidad luces bajas"
+        },
+        {
+            itemId: "37283a30-3b79-4aeb-9844-2bfc57e95904",
+            code: "ALU-02",
+            name: "Luces altas",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            unit: null,
+            minValue: null,
+            maxValue: null,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Funcionamiento e intensidad luces altas"
+        },
+        {
+            itemId: "574a148d-5736-4bf7-9b97-bbdb713c0226",
+            code: "ALU-03",
+            name: "Luces direccionales",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            unit: null,
+            minValue: null,
+            maxValue: null,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Funcionamiento de intermitentes"
+        },
+        {
+            itemId: "58ea2c83-b4ca-4dc5-85f1-40bdeb61b99c",
+            code: "ALU-04",
+            name: "Luces de freno",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            unit: null,
+            minValue: null,
+            maxValue: null,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Funcionamiento luces de stop"
+        },
+        {
+            itemId: "77c48b77-2540-490e-852a-58d932f6ba8f",
+            code: "ALU-05",
+            name: "Luces de reversa",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            unit: null,
+            minValue: null,
+            maxValue: null,
+            allowedValues: null,
+            severityIfFail: "LEVE",
+            description: "Funcionamiento luces de retroceso"
+        },
+
+        // DIRECCIÓN Y NEUMÁTICOS (DIR)
+        {
+            itemId: "4cf9fde8-ba9e-4313-afb3-0a03aed7205b",
+            code: "DIR-01",
+            name: "Juego en dirección",
+            category: "SEGURIDAD",
+            resultType: "NUMERIC",
+            unit: "grados",
+            minValue: 0,
+            maxValue: 25,
+            allowedValues: null,
+            severityIfFail: "CRITICA",
+            description: "Holgura máxima en el volante"
+        },
+        {
+            itemId: "c8bc829f-d7fd-4c92-9e98-264dbec73bac",
+            code: "DIR-02",
+            name: "Alineación",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            unit: null,
+            minValue: null,
+            maxValue: null,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Verificación de alineación de ruedas"
+        },
+        {
+            itemId: "732f6217-91bf-4866-aaf8-483f3802ec77",
+            code: "DIR-03",
+            name: "Estado de neumáticos",
+            category: "SEGURIDAD",
+            resultType: "NUMERIC",
+            unit: "mm",
+            minValue: 1.6,
+            maxValue: 15,
+            allowedValues: null,
+            severityIfFail: "CRITICA",
+            description: "Profundidad y estado general de neumáticos"
+        },
+
+        // DOCUMENTALES (DOC)
+        {
+            itemId: "a7748f07-e210-4b3b-ad7e-c2145145ac8b",
+            code: "DOC-01",
+            name: "Registro vehicular",
+            category: "DOCUMENTAL",
+            resultType: "BOOLEAN",
+            unit: null,
+            minValue: null,
+            maxValue: null,
+            allowedValues: null,
+            severityIfFail: "CRITICA",
+            description: "Verificación de documentos del vehículo"
+        },
+        {
+            itemId: "431261a1-780d-4198-84aa-43fcf1b31642",
+            code: "DOC-02",
+            name: "Seguro vigente",
+            category: "DOCUMENTAL",
+            resultType: "BOOLEAN",
+            unit: null,
+            minValue: null,
+            maxValue: null,
+            allowedValues: null,
+            severityIfFail: "CRITICA",
+            description: "Verificación de póliza de seguro"
+        },
+        {
+            itemId: "5dd34ed8-ab58-460c-86f3-8e5fe94e085c",
+            code: "DOC-03",
+            name: "Identificación VIN",
+            category: "DOCUMENTAL",
+            resultType: "BOOLEAN",
+            unit: null,
+            minValue: null,
+            maxValue: null,
+            allowedValues: null,
+            severityIfFail: "CRITICA",
+            description: "Verificación de número VIN"
+        },
+
+        // EMISIONES (EMI)
+        {
+            itemId: "1a4d900e-cc6a-42db-a2db-6c08e7eca9ce",
+            code: "EMI-01",
+            name: "CO en ralentí",
+            category: "MEDIOAMBIENTE",
+            resultType: "NUMERIC",
+            unit: "%",
+            minValue: 0,
+            maxValue: 3.5,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Monóxido de carbono en ralentí"
+        },
+        {
+            itemId: "6660bc76-d4bf-4f7b-9f54-6a45d90f8b4f",
+            code: "EMI-02",
+            name: "HC en ralentí",
+            category: "MEDIOAMBIENTE",
+            resultType: "NUMERIC",
+            unit: "ppm",
+            minValue: 0,
+            maxValue: 200,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Hidrocarburos en ralentí"
+        },
+        {
+            itemId: "4d6e0920-ac23-47df-8172-4a94c53f62c4",
+            code: "EMI-03",
+            name: "CO en acelerado",
+            category: "MEDIOAMBIENTE",
+            resultType: "NUMERIC",
+            unit: "%",
+            minValue: 0,
+            maxValue: 2.5,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Monóxido de carbono acelerado"
+        },
+        {
+            itemId: "49acd02c-4755-4625-beb9-74e3f64b36a8",
+            code: "EMI-04",
+            name: "Opacidad diesel",
+            category: "MEDIOAMBIENTE",
+            resultType: "NUMERIC",
+            unit: "m-1",
+            minValue: 0,
+            maxValue: 2.5,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Medición de humo en motores diesel"
+        },
+
+        // FRENOS (FRE)
+        {
+            itemId: "59dae52f-93fc-4340-ba4b-3122bb30ec3d",
+            code: "FRE-01",
+            name: "Eficiencia freno delantero",
+            category: "SEGURIDAD",
+            resultType: "NUMERIC",
+            unit: "%",
+            minValue: 50,
+            maxValue: 100,
+            allowedValues: null,
+            severityIfFail: "CRITICA",
+            description: "Medición de eficiencia del sistema de frenos delanteros"
+        },
+        {
+            itemId: "cd61a966-2a43-4c40-a262-5d92b80cb9f4",
+            code: "FRE-02",
+            name: "Eficiencia freno trasero",
+            category: "SEGURIDAD",
+            resultType: "NUMERIC",
+            unit: "%",
+            minValue: 40,
+            maxValue: 100,
+            allowedValues: null,
+            severityIfFail: "CRITICA",
+            description: "Medición de eficiencia del sistema de frenos traseros"
+        },
+        {
+            itemId: "ef54b486-86ac-4427-a50d-79f69ea32544",
+            code: "FRE-03",
+            name: "Equilibrio de frenado",
+            category: "SEGURIDAD",
+            resultType: "NUMERIC",
+            unit: "%",
+            minValue: -30,
+            maxValue: 30,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Balance entre frenos izquierdo y derecho"
+        },
+        {
+            itemId: "2344d2bb-58b3-4b05-b6fd-6dad42d3f8e9",
+            code: "FRE-04",
+            name: "Freno de estacionamiento",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            unit: null,
+            minValue: null,
+            maxValue: null,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Funcionamiento del freno de mano"
+        },
+
+        // RUIDO (RUI)
+        {
+            itemId: "2a888ae3-331c-4471-a141-a1ad5c9390b5",
+            code: "RUI-01",
+            name: "Nivel de ruido",
+            category: "MEDIOAMBIENTE",
+            resultType: "NUMERIC",
+            unit: "dB",
+            minValue: 0,
+            maxValue: 95,
+            allowedValues: null,
+            severityIfFail: "LEVE",
+            description: "Medición de ruido exterior"
+        },
+
+        // SUSPENSIÓN (SUS)
+        {
+            itemId: "e84a88d0-24f6-48ba-9999-89b51eeaa5eb",
+            code: "SUS-01",
+            name: "Amortiguadores delanteros",
+            category: "SEGURIDAD",
+            resultType: "NUMERIC",
+            unit: "%",
+            minValue: 40,
+            maxValue: 100,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Eficiencia de amortiguadores delanteros"
+        },
+        {
+            itemId: "3788fb3c-3e28-4be9-a8c1-9e7bac953a7f",
+            code: "SUS-02",
+            name: "Amortiguadores traseros",
+            category: "SEGURIDAD",
+            resultType: "NUMERIC",
+            unit: "%",
+            minValue: 40,
+            maxValue: 100,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Eficiencia de amortiguadores traseros"
+        },
+        {
+            itemId: "15f803eb-9abb-47b5-99c5-ff2ea9a7a59f",
+            code: "SUS-03",
+            name: "Diferencia lateral suspension",
+            category: "SEGURIDAD",
+            resultType: "NUMERIC",
+            unit: "%",
+            minValue: -40,
+            maxValue: 40,
+            allowedValues: null,
+            severityIfFail: "GRAVE",
+            description: "Diferencia entre lados izquierdo y derecho"
+        },
+    ],
+
+    // Mantén los otros tipos de vehículos
+    MOTO: [
+        {
+            code: "SEG_M01",
+            name: "Sistema de frenos",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            severityIfFail: "CRITICA",
+            description: "Verificar freno delantero y trasero"
+        },
+        {
+            code: "SEG_M02",
+            name: "Neumáticos",
+            category: "SEGURIDAD",
+            resultType: "NUMERIC",
+            unit: "mm",
+            minValue: 1.0,
+            severityIfFail: "GRAVE",
+            description: "Profundidad mínima de labrado"
+        },
+        {
+            code: "SEG_M03",
+            name: "Sistema de luces",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            severityIfFail: "GRAVE",
+            description: "Verificar faro, luz de freno e intermitentes"
+        },
+        {
+            code: "SEG_M04",
+            name: "Suspensión",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            severityIfFail: "GRAVE",
+            description: "Verificar horquilla y amortiguador"
+        },
+        {
+            code: "SEG_M05",
+            name: "Espejos",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            severityIfFail: "LEVE",
+            description: "Verificar presencia y estado"
+        },
+        {
+            code: "MED_M01",
+            name: "Emisiones de gases",
+            category: "MEDIOAMBIENTE",
+            resultType: "NUMERIC",
+            unit: "%",
+            maxValue: 1.5,
+            severityIfFail: "CRITICA",
+            description: "Nivel de CO en emisiones"
+        },
+        {
+            code: "MED_M02",
+            name: "Sistema de escape",
+            category: "MEDIOAMBIENTE",
+            resultType: "BOOLEAN",
+            severityIfFail: "GRAVE",
+            description: "Verificar integridad y ruido"
+        },
+        {
+            code: "DOC_M01",
+            name: "Número de chasis",
+            category: "DOCUMENTAL",
+            resultType: "BOOLEAN",
+            severityIfFail: "CRITICA",
+            description: "Verificar coincidencia con documentación"
+        },
+        {
+            code: "DOC_M02",
+            name: "Placa visible",
+            category: "DOCUMENTAL",
+            resultType: "BOOLEAN",
+            severityIfFail: "CRITICA",
+            description: "Verificar legibilidad y fijación"
+        },
+    ],
+
+    CAMION: [
+        {
+            code: "SEG_C01",
+            name: "Sistema de frenos",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            severityIfFail: "CRITICA",
+            description: "Verificar sistema de frenos de servicio y estacionamiento"
+        },
+        {
+            code: "SEG_C02",
+            name: "Sistema de dirección",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            severityIfFail: "CRITICA",
+            description: "Verificar columna, caja y terminales con holguras"
+        },
+        {
+            code: "SEG_C03",
+            name: "Sistema de suspensión",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            severityIfFail: "GRAVE",
+            description: "Verificar ballestas, amortiguadores y bujes"
+        },
+        {
+            code: "SEG_C04",
+            name: "Neumáticos",
+            category: "SEGURIDAD",
+            resultType: "NUMERIC",
+            unit: "mm",
+            minValue: 2.0,
+            severityIfFail: "CRITICA",
+            description: "Profundidad mínima de labrado (mayor por carga)"
+        },
+        {
+            code: "SEG_C05",
+            name: "Sistema de luces",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            severityIfFail: "GRAVE",
+            description: "Verificar luces delanteras, traseras, laterales y de freno"
+        },
+        {
+            code: "SEG_C06",
+            name: "Triángulos y señales",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            severityIfFail: "LEVE",
+            description: "Verificar presencia de equipo de seguridad"
+        },
+        {
+            code: "SEG_C07",
+            name: "Carrocería y carga",
+            category: "SEGURIDAD",
+            resultType: "BOOLEAN",
+            severityIfFail: "GRAVE",
+            description: "Verificar integridad y sistemas de sujeción"
+        },
+        {
+            code: "MED_C01",
+            name: "Emisiones de gases",
+            category: "MEDIOAMBIENTE",
+            resultType: "NUMERIC",
+            unit: "%",
+            maxValue: 2.0,
+            severityIfFail: "CRITICA",
+            description: "Nivel de opacidad en diésel"
+        },
+        {
+            code: "MED_C02",
+            name: "Fugas de fluidos",
+            category: "MEDIOAMBIENTE",
+            resultType: "BOOLEAN",
+            severityIfFail: "GRAVE",
+            description: "Verificar fugas de aceite, refrigerante o combustible"
+        },
+        {
+            code: "MED_C03",
+            name: "Sistema de escape",
+            category: "MEDIOAMBIENTE",
+            resultType: "BOOLEAN",
+            severityIfFail: "GRAVE",
+            description: "Verificar integridad y fugas"
+        },
+        {
+            code: "DOC_C01",
+            name: "Número de chasis",
+            category: "DOCUMENTAL",
+            resultType: "BOOLEAN",
+            severityIfFail: "CRITICA",
+            description: "Verificar coincidencia con documentación"
+        },
+        {
+            code: "DOC_C02",
+            name: "Placa visible",
+            category: "DOCUMENTAL",
+            resultType: "BOOLEAN",
+            severityIfFail: "CRITICA",
+            description: "Verificar legibilidad y fijación"
+        },
+        {
+            code: "DOC_C03",
+            name: "Peso y dimensiones",
+            category: "DOCUMENTAL",
+            resultType: "BOOLEAN",
+            severityIfFail: "GRAVE",
+            description: "Verificar cumplimiento de límites legales"
+        },
+    ],
 };
+
+// Metadata del template ITV-1
+const TEMPLATE_METADATA = {
+    templateId: "a6eda317-b11e-4e7f-9d6f-e474a6087c29",
+    templateName: "ITV-1",
+    typeId: 1,
+    version: 1,
+    isActive: true,
+    resolutionId: "6039db67-2acc-4715-9a68-d62ac5daf7eb",
+    resolutionCode: "RES-001-2024",
+    resolutionTitle: "Resolución General de ITV 2024"
+};
+
+;
+
 const VEHICLE_TYPES = [
     { id: 1, code: "AUTO", label: "Automóvil" },
     { id: 2, code: "MOTO", label: "Motocicleta" },
@@ -174,7 +656,8 @@ const VEHICLE_TYPES = [
     { id: 4, code: "BUS", label: "Autobús" },
     { id: 5, code: "VAN", label: "Camioneta" },
 ];
-
+// Exportar para uso en tu aplicación
+export { INSPECTION_TEMPLATES, TEMPLATE_METADATA, VEHICLE_TYPES }
 /* =====================
    Helper: export CSV
    ===================== */
@@ -867,95 +1350,134 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule, userRo
    Execute inspection 
    ===================== */
 function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
-  // Get template based on vehicle type
-  const template = INSPECTION_TEMPLATES[inspection.vehicleType] || INSPECTION_TEMPLATES.AUTO;
-  
-  const [items, setItems] = useState(() => 
-    template.map((it) => ({ 
-      code: it.code,
-      name: it.name, 
-      category: it.category,
-      description: it.description,
-      resultType: it.resultType,
-      unit: it.unit,
-      minValue: it.minValue,
-      maxValue: it.maxValue,
-      severity: it.severity,
-      status: "No aplica", 
-      valueBoolean: null,
-      valueNumeric: "",
-      comment: "", 
-      photos: [],
-      defectSeverity: "",
-      defectDescription: ""
-    }))
-  );
-  const [progress, setProgress] = useState(0);
-  const [mileage, setMileage] = useState(""); 
+    const [items, setItems] = useState(() => {
+        const template =
+            INSPECTION_TEMPLATES[inspection.vehicleType] || INSPECTION_TEMPLATES.AUTO;
 
-  useEffect(() => {
-    const done = items.filter(it => it.status !== "No aplica" && it.status !== "").length;
-    setProgress(Math.round((done / items.length) * 100));
-  }, [items]);
+        // Indexar items del backend por itemId para acceso rápido
+        const backendItemsMap = new Map(
+            (inspection.items || []).map(item => [item.itemId, item])
+        );
 
-  const handlePhoto = (file, itemCode) => {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setItems(prev => prev.map(it => it.code === itemCode ? { ...it, photos: [...it.photos, { name: file.name, data: ev.target.result }] } : it));
+        return template.map((tpl) => {
+            const backendItem = backendItemsMap.get(tpl.itemId);
+
+            return {
+                // Identidad y definición SIEMPRE desde el template
+                itemId: tpl.itemId,
+                code: tpl.code,
+                name: tpl.name,
+                category: tpl.category,
+                description: tpl.description,
+                resultType: tpl.resultType,
+
+                // ✅ valores por defecto desde el template
+                unit: tpl.unit,
+                minValue: tpl.minValue,
+                maxValue: tpl.maxValue,
+                severityIfFail: tpl.severityIfFail,
+
+                // IDs y estado del backend (si existen)
+                resultId: backendItem?.resultId,
+
+                status: backendItem?.status || "No aplica",
+                valueBoolean: backendItem?.valueBoolean ?? null,
+                valueNumeric: backendItem?.valueNumeric ?? "",
+                valueEnum: backendItem?.valueEnum ?? null,
+                comment: backendItem?.comment || "",
+                photos: backendItem?.photos || [],
+
+                // Defectos
+                defectSeverity: backendItem?.defectSeverity || "",
+                defectDescription: backendItem?.defectDescription || "",
+                hasDefects: backendItem?.hasDefects || false
+            };
+        });
+    });
+
+    const [progress, setProgress] = useState(0);
+    const [mileage, setMileage] = useState(inspection.odometerKm || "");
+
+    useEffect(() => {
+        const done = items.filter(it => it.status !== "No aplica" && it.status !== "").length;
+        setProgress(Math.round((done / items.length) * 100));
+    }, [items]);
+
+    const handlePhoto = (file, itemCode) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            setItems(prev => prev.map(it =>
+                it.code === itemCode
+                    ? { ...it, photos: [...it.photos, { name: file.name, data: ev.target.result }] }
+                    : it
+            ));
+        };
+        reader.readAsDataURL(file);
     };
-    reader.readAsDataURL(file);
-  };
 
-  const updateItem = (itemCode, patch) => setItems(prev => prev.map(it => it.code === itemCode ? { ...it, ...patch } : it));
+    const updateItem = (itemCode, patch) => {
+        setItems(prev => prev.map(it =>
+            it.code === itemCode ? { ...it, ...patch } : it
+        ));
+    };
 
-  const renderItemInput = (item) => {
-    if (item.resultType === "BOOLEAN") {
-      return (
-        <select value={item.status} onChange={(e)=>{
-          const newStatus = e.target.value;
-          updateItem(item.code, { 
-            status: newStatus, 
-            valueBoolean: newStatus === "Aprobado" ? true : newStatus === "Falla" ? false : null,
-            defectSeverity: newStatus === "Falla" ? item.severity : "",
-            defectDescription: newStatus === "Falla" ? "" : ""
-          });
-        }} className="border p-1 rounded">
-          <option>No aplica</option>
-          <option>Aprobado</option>
-          <option>Falla</option>
-        </select>
-      );
-    } else if (item.resultType === "NUMERIC") {
-      return (
-        <div className="flex gap-2 items-center">
-          <input 
-            type="number" 
-            step="0.01"
-            value={item.valueNumeric} 
-            onChange={(e)=>{
-              const val = parseFloat(e.target.value);
-              const passes = (!item.minValue || val >= item.minValue) && (!item.maxValue || val <= item.maxValue);
-              updateItem(item.code, { 
-                valueNumeric: e.target.value,
-                status: e.target.value === "" ? "No aplica" : passes ? "Aprobado" : "Falla",
-                defectSeverity: !passes && e.target.value !== "" ? item.severity : "",
-                defectDescription: !passes && e.target.value !== "" ? "" : ""
-              });
-            }} 
-            placeholder={`${item.unit || ""}`}
-            className="border p-1 rounded w-24" 
-          />
-          <span className="text-xs text-gray-600">
-            {item.minValue && `≥${item.minValue}`}
-            {item.minValue && item.maxValue && " / "}
-            {item.maxValue && `≤${item.maxValue}`}
-            {item.unit && ` ${item.unit}`}
-          </span>
-        </div>
-      );
-    }
-    return null;
-  };
+    const renderItemInput = (item) => {
+        if (item.resultType === "BOOLEAN") {
+            return (
+                <select
+                    value={item.status}
+                    onChange={(e) => {
+                        const newStatus = e.target.value;
+                        updateItem(item.code, {
+                            status: newStatus,
+                            valueBoolean: newStatus === "Aprobado" ? true :
+                                newStatus === "Falla" ? false : null,
+                            defectSeverity: newStatus === "Falla" ? item.severityIfFail : "",
+                            defectDescription: newStatus === "Falla" ? "" : ""
+                        });
+                    }}
+                    className="border p-1 rounded"
+                >
+                    <option>No aplica</option>
+                    <option>Aprobado</option>
+                    <option>Falla</option>
+                </select>
+            );
+        } else if (item.resultType === "NUMERIC") {
+            return (
+                <div className="flex gap-2 items-center">
+                    <input
+                        type="number"
+                        step="0.01"
+                        value={item.valueNumeric}
+                        onChange={(e) => {
+                            const val = e.target.value ? parseFloat(e.target.value) : null;
+                            const passes = val !== null &&
+                                (!item.minValue || val >= item.minValue) &&
+                                (!item.maxValue || val <= item.maxValue);
+                            updateItem(item.code, {
+                                valueNumeric: e.target.value,
+                                status: e.target.value === "" ? "No aplica" :
+                                    passes ? "Aprobado" : "Falla",
+                                defectSeverity: !passes && e.target.value !== "" ? item.severityIfFail : "",
+                                defectDescription: !passes && e.target.value !== "" ? "" : ""
+                            });
+                        }}
+                        placeholder={`${item.unit || ""}`}
+                        className="border p-1 rounded w-24"
+                    />
+                    <span className="text-xs text-gray-600">
+                        {item.minValue != null && `≥${item.minValue}`}
+                        {item.minValue != null && item.maxValue != null && " / "}
+                        {item.maxValue != null && `≤${item.maxValue}`}
+                        {item.unit && ` ${item.unit}`}
+                    </span>
+                </div>
+            );
+        }
+        return null;
+    };
+
 
   const getCategoryColor = (cat) => {
     if (cat === "SEGURIDAD") return "bg-red-100 text-red-800";
@@ -2009,9 +2531,7 @@ export default function App() {
     };
 
     // 6. Plantillas de inspección
-    
-
-
+   
 
     const loadAllInspections = async () => {
         try {
@@ -2176,7 +2696,6 @@ export default function App() {
     const addInspection = (ins) => {
         setInspections(prev => [ins, ...prev]);
     };
-
     const saveInspectionProgress = async ({ inspectionId, items }) => {
         try {
             const itemsToUpdate = items.filter(item =>
@@ -2190,14 +2709,19 @@ export default function App() {
 
             const batchRequest = {
                 items: itemsToUpdate.map(item => ({
-                    itemId: item.code,
+                    itemId: item.itemId,
                     valueBoolean: item.valueBoolean,
                     valueNumeric: item.valueNumeric ? parseFloat(item.valueNumeric) : null,
                     valueEnum: item.valueEnum || null,
                     valueText: item.comment || null,
                     passFail: item.status === "Aprobado" ? "PASS" :
-                        item.status === "Falla" ? "FAIL" : null,
-                    evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null
+                        item.status === "Falla" ? "FAIL" :
+                            "PENDING", // ✅ AGREGADO: default para otros estados
+                    evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null,
+                                    // 🔹 NUEVOS CAMPOS DE DEFECTO
+                    hasDefect: item.hasDefects || false,
+                    defectSeverity: item.defectSeverity || null,
+                    defectComment: item.defectComment || null
                 }))
             };
 
@@ -2232,11 +2756,11 @@ export default function App() {
                 ...prev
             ]);
 
-            alert(`✓ Progreso guardado\n${itemsToUpdate.length} items actualizados`);
+            alert(`✓ Progreso guardado\n${itemsToUpdate.length} items actualizados`); // ✅ CORREGIDO: sintaxis de alert
 
         } catch (error) {
             console.error("Error guardando progreso:", error);
-            alert(`Error guardando progreso: ${error.message}`);
+            alert(`Error guardando progreso: ${error.message}`); // ✅ CORREGIDO: sintaxis de alert
         }
     };
 
@@ -2250,13 +2774,14 @@ export default function App() {
             if (itemsToUpdate.length > 0) {
                 const batchRequest = {
                     items: itemsToUpdate.map(item => ({
-                        itemId: item.code,
+                        itemId: item.itemId, // ✅ CORREGIDO: usar itemId consistentemente
                         valueBoolean: item.valueBoolean,
                         valueNumeric: item.valueNumeric ? parseFloat(item.valueNumeric) : null,
                         valueEnum: item.valueEnum || null,
                         valueText: item.comment || null,
                         passFail: item.status === "Aprobado" ? "PASS" :
-                            item.status === "Falla" ? "FAIL" : null,
+                            item.status === "Falla" ? "FAIL" :
+                                "PENDING",
                         evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null
                     }))
                 };
@@ -2271,7 +2796,7 @@ export default function App() {
             const defects = inspectionWithItems.items
                 .filter(item => item.status === "Falla" && item.defectSeverity)
                 .map(item => ({
-                    itemId: item.code,
+                    itemId: item.itemId, // ✅ CORREGIDO: usar itemId
                     severity: item.defectSeverity,
                     description: item.defectDescription || `Defecto en ${item.name}`,
                     correctiveDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
@@ -2696,14 +3221,105 @@ export default function App() {
                                                 </td>
                                                 <td className="p-2">
                                                     <button
-                                                        onClick={() => setExecInspection({
-                                                            id: s.id,
-                                                            vehicle: s.vehicle,
-                                                            vehicleType: s.vehicleType,
-                                                            inspector: s.inspector,
-                                                            taller: s.taller,
-                                                            workshopId: s.workshopId
-                                                        })}
+                                                        onClick={async () => {
+                                                            try {
+                                                                // Mostrar indicador de carga
+                                                                const loadingMsg = s.status === "En proceso" ? "Cargando inspección..." : "Iniciando inspección...";
+                                                                console.log(loadingMsg);
+
+                                                                // Obtener los detalles completos de la inspección
+                                                                const inspectionDetail = await httpService.get(
+                                                                    API_ENDPOINTS.INSPECTION_GET_BY_ID(s.id)
+                                                                );
+                                                                const inspectionDefects = await httpService.get(
+                                                                    API_ENDPOINTS.INSPECTION_GET_DEFECTS(s.id)
+                                                                );
+
+                                                                console.log("Inspección cargada:", inspectionDetail);
+                                                                console.log("Defectos cargados:", inspectionDefects);
+
+                                                                // Verificar si tiene items (resultados)
+                                                                if (!inspectionDetail.results || inspectionDetail.results.length === 0) {
+                                                                    alert("⚠️ Esta inspección no tiene items asociados. Verifica la creación de la inspección.");
+                                                                    return;
+                                                                }
+
+                                                                // Mapear los items del backend al formato del frontend
+                                                                const items = inspectionDetail.results.map(result => {
+                                                                    // Buscar defecto asociado (si existe)
+                                                                    const defect = inspectionDefects.find(d => d.itemId === result.itemId);
+
+                                                                    return {
+
+                                                                        // IDs y códigos
+                                                                        itemId: result.itemId,
+                                                                        resultId: result.resultId,
+                                                                        code: result.itemCode,
+
+                                                                        // Información del item
+                                                                        name: result.itemName,
+                                                                        description: result.itemDescription,
+                                                                        category: result.category,
+                                                                        resultType: result.resultType,
+
+                                                                        // Validaciones numéricas
+                                                                        unit: result.unit,
+                                                                        minValue: result.minValue,
+                                                                        maxValue: result.maxValue,
+                                                                        allowedValues: result.allowedValues,
+
+                                                                        // Estado de evaluación
+                                                                        status: result.passFail === "PASS" ? "Aprobado" :
+                                                                            result.passFail === "FAIL" ? "Falla" :
+                                                                                result.passFail === "PENDING" ? "" : "",
+
+                                                                        // Valores capturados
+                                                                        valueBoolean: result.valueBoolean,
+                                                                        valueNumeric: result.valueNumeric,
+                                                                        valueEnum: result.valueEnum,
+                                                                        comment: result.valueText || "",
+
+                                                                        // Evidencias
+                                                                        photos: result.evidenceUrl ? [{ data: result.evidenceUrl }] : [],
+                                                                        evidenceUrl: result.evidenceUrl,
+
+                                                                        // Defectos (si los hay)
+                                                                        hasDefects: !!defect,
+                                                                        defectSeverity: defect?.severity || null,
+                                                                        defectDescription: defect?.description || null                                                                    }
+                                                                });
+
+                                                                console.log(`${items.length} items cargados con itemId`);
+                                                                console.log(`${items.length} items cargados con defectos asociados`);
+
+
+                                                                // Establecer la inspección en ejecución
+                                                                setExecInspection({
+                                                                    id: inspectionDetail.inspectionId,
+                                                                    vehicle: inspectionDetail.vehiclePlate,
+                                                                    vehicleVin: inspectionDetail.vehicleVin,
+                                                                    vehicleType: s.vehicleType,
+                                                                    inspector: inspectionDetail.inspectorEmail,
+                                                                    taller: inspectionDetail.workshopName,
+                                                                    workshopId: inspectionDetail.workshopId,
+                                                                    items: items,
+
+                                                                    // Metadata adicional
+                                                                    scheduledAt: inspectionDetail.scheduledAt,
+                                                                    startedAt: inspectionDetail.startedAt,
+                                                                    odometerKm: inspectionDetail.odometerKm,
+                                                                    comments: inspectionDetail.comments,
+                                                                    status: inspectionDetail.status,
+                                                                    totalItems: inspectionDetail.totalItems,
+                                                                    completedItems: inspectionDetail.completedItems,
+                                                                    pendingItems: inspectionDetail.pendingItems
+                                                                });
+
+                                                            } catch (error) {
+                                                                console.error("Error cargando inspección:", error);
+                                                                alert(`Error al cargar la inspección: ${error.message}`);
+                                                            }
+                                                        }}
                                                         className="px-2 py-1 rounded border text-sm hover:bg-gray-50"
                                                     >
                                                         {s.status === "En proceso" ? "Continuar" : "Iniciar"}
