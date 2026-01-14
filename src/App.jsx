@@ -1165,9 +1165,6 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule, userRo
   });
   const [error, setError] = useState("");
   const [selectedVehicleType, setSelectedVehicleType] = useState("");
-
-  // Filter inspectors based on role
-    const availableInspectors = inspectors
   
   const userWorkshop = talleres.find(t => t.id === userWorkshopId);
 
@@ -1308,8 +1305,8 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule, userRo
             className="border p-2 rounded w-full"
           >
             <option value="">Seleccionar inspector</option>
-            {availableInspectors.map(i=> (
-              <option key={i.id} value={i.id}>{i.name}</option>
+            {inspectors.map(i=> (
+              <option key={i.id} value={i.id}>{i.username}</option>
             ))}
           </select>
         </div>
@@ -2361,7 +2358,6 @@ export default function App() {
                 }));
                 setVehicles(vehiclesData);
                 console.log(`✓ Cargados ${vehiclesData.length} vehículos`);
-                console.log('Respuesta de Vehiculos:', response);
                 console.log('Respuesta de Vehiculos:', vehiclesData);
 
 
@@ -2532,66 +2528,39 @@ export default function App() {
 
     // 6. Plantillas de inspección
    
-
-    const loadAllInspections = async () => {
+    // Al inicio de tu componente App
+    const loadInspections = async () => {
         try {
-            const response = await httpService.get(API_ENDPOINTS.INSPECTION_GET_ALL);
+            const inspections = await httpService.get(API_ENDPOINTS.INSPECTION_GET_ALL);
 
-            // Separar inspecciones completadas de las programadas/en progreso
-            const completedInspections = [];
-            const scheduledInspections = [];
-            console.log("Response de inspecciones:", response);
-            response.forEach(i => {
-                const inspectionData = {
-                    id: i.inspectionId,
-                    vehicle: i.vehiclePlate,
-                    vehicleId: i.vehicleId,
-                    vehicleType: getVehicleTypeName(i.typeId), // Podrías necesitar obtener esto del vehículo
-                    templateId: i.templateId,
-                    datetime: i.scheduledAt?.split('T')[0] + ' ' + (i.scheduledAt?.split('T')[1]?.substring(0, 5) || '00:00'),
-                    inspectorId: i.inspectorUserId,
-                    workshopId: i.workshopId,
-                    taller: i.workshopName || "N/A",
-                    notes: i.comments || "",
-                    odometerKm: i.odometerKm,
-                    totalItems: i.totalItems,
-                    completedItems: i.completedItems,
-                    pendingItems: i.pendingItems,
-                    defectsCount: i.defectsCount
-                };
+            // Mapear las inspecciones al formato que usa tu UI
+            const mappedInspections = inspections.map(insp => ({
+                id: insp.inspectionId,
+                vehicle: insp.vehiclePlate,
+                vehicleType: insp.vehicleType,
+                templateId: insp.templateId,
+                datetime: insp.scheduledAt,
+                inspectorUserId: insp.inspectorUserId,
+                inspector: insp.inspectorEmail,
+                taller: insp.workshopName,
+                workshopId: insp.workshopId,
+                status: insp.status === "IN_PROGRESS" ? "En proceso" :
+                    insp.status === "COMPLETED" ? "Completada" :
+                        "Programada"
+            }));
 
-                // Criterio: completada si tiene overallResult Y status es COMPLETED
-                if (i.status === "COMPLETED" && i.overallResult) {
-                    completedInspections.push({
-                        ...inspectionData,
-                        date: i.finishedAt?.split('T')[0] || i.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0],
-                        result: i.overallResult === "PASS" ? "Aprobado" :
-                            i.overallResult === "FAIL" ? "Rechazado" :
-                                "No Evaluado",
-                        items: []
-                    });
-                } else {
-                    // Inspección programada o en progreso
-                    scheduledInspections.push({
-                        ...inspectionData,
-                        status: i.status === "IN_PROGRESS" ? "En proceso" :
-                            i.status === "SCHEDULED" ? "Programada" :
-                                "Programada",
-                    });
-                }
-            });
-
-            // Actualizar ambos estados
-            setInspections(completedInspections);
-            setScheduled(scheduledInspections);
-
-            console.log(`✓ Cargadas ${completedInspections.length} inspecciones completadas`);
-            console.log(`✓ Cargadas ${scheduledInspections.length} inspecciones programadas/en progreso`);
-
+            setScheduled(mappedInspections);
         } catch (error) {
             console.error("Error cargando inspecciones:", error);
         }
     };
+
+    // Llamar al cargar la página
+    useEffect(() => {
+        if (loggedIn) {
+            loadInspections();
+        }
+    }, [loggedIn]);
 
     const loadTemplates = async () => {
             try {
@@ -2766,131 +2735,112 @@ export default function App() {
 
     const finishInspectionFlow = async (inspectionWithItems) => {
         try {
-            // 1. Actualizar items en batch
-            const itemsToUpdate = inspectionWithItems.items.filter(item =>
-                item.status !== "No aplica" && item.status !== ""
+            console.log("=== FINALIZANDO INSPECCIÓN ===");
+
+            // 1. Validar que todos los items estén evaluados
+            const pendingItems = inspectionWithItems.items.filter(item =>
+                item.status === "" || item.status === "No aplica"
             );
 
-            if (itemsToUpdate.length > 0) {
-                const batchRequest = {
-                    items: itemsToUpdate.map(item => ({
-                        itemId: item.itemId, // ✅ CORREGIDO: usar itemId consistentemente
-                        valueBoolean: item.valueBoolean,
-                        valueNumeric: item.valueNumeric ? parseFloat(item.valueNumeric) : null,
-                        valueEnum: item.valueEnum || null,
-                        valueText: item.comment || null,
-                        passFail: item.status === "Aprobado" ? "PASS" :
-                            item.status === "Falla" ? "FAIL" :
-                                "PENDING",
-                        evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null
-                    }))
-                };
-
-                await httpService.put(
-                    API_ENDPOINTS.INSPECTION_BATCH_UPDATE_ITEMS(inspectionWithItems.id),
-                    batchRequest
-                );
+            if (pendingItems.length > 0) {
+                alert(`⚠️ No se puede finalizar la inspección.\nFaltan ${pendingItems.length} items por evaluar.`);
+                return;
             }
 
-            // 2. Agregar defectos
+            // 2. Actualizar items en batch (guardar estado final)
+            const batchRequest = {
+                items: inspectionWithItems.items.map(item => ({
+                    itemId: item.itemId,
+                    valueBoolean: item.valueBoolean,
+                    valueNumeric: item.valueNumeric ? parseFloat(item.valueNumeric) : null,
+                    valueEnum: item.valueEnum || null,
+                    valueText: item.comment || null,
+                    passFail: item.status === "Aprobado" ? "PASS" : "FAIL",
+                    evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null
+                }))
+            };
+
+            await httpService.put(
+                API_ENDPOINTS.INSPECTION_BATCH_UPDATE_ITEMS(inspectionWithItems.id),
+                batchRequest
+            );
+
+            console.log("✓ Items actualizados");
+
+            // 3. Agregar defectos (si los hay)
             const defects = inspectionWithItems.items
-                .filter(item => item.status === "Falla" && item.defectSeverity)
+                .filter(item => item.status === "Falla" && item.severityIfFail)
                 .map(item => ({
-                    itemId: item.itemId, // ✅ CORREGIDO: usar itemId
-                    severity: item.defectSeverity,
+                    itemId: item.itemId,
+                    severity: item.severityIfFail,
                     description: item.defectDescription || `Defecto en ${item.name}`,
                     correctiveDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
                 }));
 
-            for (const defect of defects) {
-                try {
-                    await httpService.post(
-                        API_ENDPOINTS.INSPECTION_ADD_DEFECT(inspectionWithItems.id),
-                        defect
-                    );
-                } catch (defectError) {
-                    console.error(`Error registrando defecto:`, defectError);
+            if (defects.length > 0) {
+                console.log(`Registrando ${defects.length} defecto(s)...`);
+
+                for (const defect of defects) {
+                    try {
+                        await httpService.post(
+                            API_ENDPOINTS.INSPECTION_ADD_DEFECT(inspectionWithItems.id),
+                            defect
+                        );
+                    } catch (defectError) {
+                        console.error("Error registrando defecto:", defectError);
+                    }
                 }
+
+                console.log("✓ Defectos registrados");
             }
 
-            // 3. Completar inspección
-            const completeResponse = await httpService.post(
+            // 4. Completar inspección (el backend calcula el resultado)
+            console.log("Completando inspección...");
+
+            const completedInspection = await httpService.post(
                 API_ENDPOINTS.INSPECTION_COMPLETE(inspectionWithItems.id),
                 {
                     finalComments: `Inspección completada. ${defects.length} defecto(s) encontrado(s).`
                 }
             );
 
-            // 4. Mapear resultado
+            console.log("✓ Inspección completada:", completedInspection);
+
+            // 5. Mostrar notificación según resultado
             const resultMap = {
-                "APPROVED": "Aprobado",
-                "REJECTED": "Rechazado",
-                "CONDITIONAL": "Condicional"
+                "PASS": "✓ Aprobada",
+                "FAIL": "✗ Rechazada",
+                "CONDITIONAL": "⚠ Condicional"
             };
 
-            const newInspection = {
-                id: inspectionWithItems.id,
-                vehicle: inspectionWithItems.vehicle,
-                vehicleType: inspectionWithItems.vehicleType,
-                date: nowDate(),
-                result: resultMap[completeResponse.overallResult] || "Aprobado",
-                inspector: inspectionWithItems.inspector,
-                taller: inspectionWithItems.taller,
-                workshopId: inspectionWithItems.workshopId,
-                items: inspectionWithItems.items
-            };
+            const resultText = resultMap[completedInspection.overallResult] || completedInspection.overallResult;
 
-            addInspection(newInspection);
+            setNotifications(prev => [
+                {
+                    id: `n${Date.now()}`,
+                    title: "Inspección finalizada",
+                    message: `${inspectionWithItems.vehicle}: ${resultText}`,
+                    status: "Entregado"
+                },
+                ...prev
+            ]);
 
-            // 5. Si aprobó, solicitar certificado
-            if (newInspection.result === "Aprobado") {
-                try {
-                    await requestCertificate(inspectionWithItems.id);
-
-                    setNotifications(prev => [
-                        {
-                            id: `n${Date.now()}`,
-                            title: "Certificado en proceso",
-                            message: `El certificado para ${newInspection.vehicle} está siendo generado`,
-                            status: "Entregado"
-                        },
-                        ...prev
-                    ]);
-                } catch (certError) {
-                    console.error("Error solicitando certificado:", certError);
-                    alert("Inspección aprobada pero hubo un error al solicitar el certificado.");
-                }
-            } else if (newInspection.result === "Condicional") {
-                setNotifications(prev => [
-                    {
-                        id: `n${Date.now()}`,
-                        title: "Inspección condicional",
-                        message: `La inspección de ${newInspection.vehicle} tiene defectos que deben corregirse en 30 días`,
-                        status: "Entregado"
-                    },
-                    ...prev
-                ]);
-            } else {
-                setNotifications(prev => [
-                    {
-                        id: `n${Date.now()}`,
-                        title: "Inspección no aprobada",
-                        message: `La inspección de ${newInspection.vehicle} requiere reparaciones críticas`,
-                        status: "Entregado"
-                    },
-                    ...prev
-                ]);
-            }
-
+            // 6. Cerrar la inspección y volver a la lista
             setExecInspection(null);
             setPage("inspections");
 
-            alert(`✓ Inspección completada\nResultado: ${newInspection.result}\nDefectos: ${defects.length}`);
+            alert(`✓ Inspección completada\n\nVehículo: ${inspectionWithItems.vehicle}\nResultado: ${resultText}\nDefectos: ${defects.length}`);
 
         } catch (error) {
             console.error("Error al finalizar inspección:", error);
             alert(`Error al finalizar inspección: ${error.message}`);
         }
+
+        // 6. Recargar la lista
+        await loadInspections();
+
+        // 7. Cerrar la inspección (sin cambiar de página)
+        setExecInspection(null);
     };
 
     const requestCertificate = async (inspectionId) => {
@@ -3207,13 +3157,21 @@ export default function App() {
                                 </thead>
                                 <tbody>
                                     {scheduled
-                                        .filter(s => (role === "Inspector" || role === "Supervisor") ? s.workshopId === loggedUser?.workshopId : true)
-                                        .map(s => (
+                                                .filter(s =>
+                                                ((role === "Inspector" || role === "Supervisor")
+                                                ? s.workshopId === loggedUser?.workshopId
+                                                : true
+                                                ) && (s.status === 'Programada' || s.status === 'En proceso')
+      )                                        .map(s => (
                                             <tr key={s.id} className="border-t">
                                                 <td className="p-2 font-medium">{s.vehicle}</td>
                                                 <td className="p-2">{getTemplateNameById(s.templateId)}</td>
-                                                <td className="p-2">{s.datetime}</td>
-                                                <td className="p-2">{s.inspectorUserId}</td>
+                                                <td className="p-2">
+                                                    {new Date(s.datetime).toLocaleDateString('es-DO')}
+                                                </td>
+                                                <td className="p-2">
+                                                    {inspectors.find(i => String(i.inspectorUserId) === String(s.userId))?.username || 'Desconocido'}
+                                                </td>
                                                 <td className="p-2">
                                                     <span className={`px-2 py-1 rounded text-xs ${s.status === 'Programada' ? 'bg-blue-100 text-blue-800' : s.status === 'En proceso' ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
                                                         {s.status}
@@ -3229,7 +3187,7 @@ export default function App() {
 
                                                                 // Obtener los detalles completos de la inspección
                                                                 const inspectionDetail = await httpService.get(
-                                                                    API_ENDPOINTS.INSPECTION_GET_BY_ID(s.id)
+                                                                    API_ENDPOINTS.INSPECTION_DETAIL(s.id)
                                                                 );
                                                                 const inspectionDefects = await httpService.get(
                                                                     API_ENDPOINTS.INSPECTION_GET_DEFECTS(s.id)
@@ -3356,8 +3314,10 @@ export default function App() {
                                             <tr key={it.id} className="border-t">
                                                 <td className="p-2 text-sm text-gray-600">{it.id}</td>
                                                 <td className="p-2 font-medium">{it.vehicle}</td>
-                                                <td className="p-2">{it.date}</td>
-                                                <td className="p-2">{it.inspector}</td>
+                                                <td className="p-2">{new Date(it.date).toLocaleDateString('es-DO')}</td>
+                                                <td className="p-2">
+                                                    {inspectors.find(i => String(i.inspectorUserId) === String(it.userId))?.username || 'Desconocido'}
+                                                </td>
                                                 <td className="p-2">{it.taller}</td>
                                                 <td className="p-2">
                                                     <span className={`px-2 py-1 rounded text-xs ${it.result === 'Aprobado' ? 'bg-green-100 text-green-800' : it.result === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}`}>

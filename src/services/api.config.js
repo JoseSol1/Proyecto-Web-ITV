@@ -15,7 +15,6 @@ export const API_ENDPOINTS = {
     GET_WORKSHOP_USERS: '/api/UserAccount/workshop-users',
     GET_WORKSHOPS: '/api/UserAccount/workshops',
 
-
     // Vehicle endpoints
     VEHICLE_REGISTER: '/api/Vehicle/register',
     VEHICLE_ASSIGN_OWNERSHIP: '/api/Vehicle/assign-ownership',
@@ -44,20 +43,23 @@ export const API_ENDPOINTS = {
     INSPECTION_CREATE: '/api/Inspection',
     INSPECTION_GET_ALL: '/api/Inspection',
     INSPECTION_GET_BY_ID: (id) => `/api/Inspection/${id}`,
+    INSPECTION_DETAIL: (id) => `/api/Inspection/${id}`, // Alias para mayor claridad
     INSPECTION_GET_ITEMS: (id) => `/api/Inspection/${id}/items`,
     INSPECTION_GET_DEFECTS: (id) => `/api/Inspection/${id}/defects`,
     INSPECTION_GET_PROGRESS: (id) => `/api/Inspection/${id}/progress`,
+
+    // ✅ Operaciones sobre items (usar el controlador correcto)
     INSPECTION_UPDATE_ITEM: (inspectionId, itemId) => `/api/Inspection/${inspectionId}/items/${itemId}`,
-    INSPECTION_BATCH_UPDATE_ITEMS: (inspectionId) =>
-        `/api/inspections/${inspectionId}/items/batch`,
-    INSPECTION_ADD_DEFECT: (inspectionId) =>
-        `/api/inspections/${inspectionId}/defects`,
-    INSPECTION_COMPLETE: (inspectionId) =>
-        `/api/inspections/${inspectionId}/complete`,    INSPECTION_ADD_DEFECT: (inspectionId) => `/api/Inspection/${inspectionId}/defects`,
+    INSPECTION_BATCH_UPDATE_ITEMS: (inspectionId) => `/api/Inspection/${inspectionId}/items/batch`,
+
+    // ✅ Operaciones de flujo de inspección
+    INSPECTION_ADD_DEFECT: (inspectionId) => `/api/Inspection/${inspectionId}/defects`,
     INSPECTION_START: (id) => `/api/Inspection/${id}/start`,
     INSPECTION_COMPLETE: (id) => `/api/Inspection/${id}/complete`,
     INSPECTION_RESCHEDULE: (id) => `/api/Inspection/${id}/reschedule`,
     INSPECTION_CANCEL: (id) => `/api/Inspection/${id}/cancel`,
+
+    // Reinspecciones
     INSPECTION_CREATE_REINSPECTION: '/api/Inspection/reinspections',
     INSPECTION_GET_REINSPECTIONS: (originalInspectionId) => `/api/Inspection/${originalInspectionId}/reinspections`,
 
@@ -101,6 +103,8 @@ class HttpService {
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
 
+        console.log(`[HTTP ${options.method || 'GET'}]`, url); // ✅ DEBUG
+
         const headers = {
             'Content-Type': 'application/json',
             ...options.headers,
@@ -121,13 +125,45 @@ class HttpService {
             }
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+                // ✅ Mejorado: Intentar leer el error como JSON primero
+                let errorMessage = `Error ${response.status}: ${response.statusText}`;
+
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorData.title || errorMessage;
+                        console.error('Error del servidor:', errorData);
+                    } catch (e) {
+                        console.error('No se pudo parsear el error como JSON');
+                    }
+                } else {
+                    // Intentar leer como texto
+                    try {
+                        const text = await response.text();
+                        if (text) {
+                            errorMessage = text;
+                            console.error('Error (texto):', text);
+                        }
+                    } catch (e) {
+                        console.error('No se pudo leer el error');
+                    }
+                }
+
+                throw new Error(errorMessage);
             }
 
+            // ✅ Manejar respuestas sin contenido
             if (response.status === 204) return null;
 
-            return await response.json();
+            // ✅ Verificar si hay contenido JSON
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return await response.json();
+            }
+
+            return null;
+
         } catch (error) {
             console.error('HTTP Request Error:', error);
             throw error;
