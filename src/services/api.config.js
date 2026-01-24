@@ -58,6 +58,8 @@ export const API_ENDPOINTS = {
     INSPECTION_COMPLETE: (id) => `/api/Inspection/${id}/complete`,
     INSPECTION_RESCHEDULE: (id) => `/api/Inspection/${id}/reschedule`,
     INSPECTION_CANCEL: (id) => `/api/Inspection/${id}/cancel`,
+    UPLOAD_EVIDENCE: '/api/Inspection/upload-evidence',
+
 
     // Reinspecciones
     INSPECTION_CREATE_REINSPECTION: '/api/Inspection/reinspections',
@@ -70,8 +72,6 @@ export const API_ENDPOINTS = {
 
     // Certificate endpoints
     CERTIFICATE_REQUEST: '/api/Certificate/request',
-    CERTIFICATE_CALLBACK: '/api/Certificate/callback',
-    CERTIFICATE_SIMULATE: '/api/Certificate/simulate-processing',
     CERTIFICATE_GET_BY_ID: (id) => `/api/Certificate/${id}`,
     CERTIFICATE_GET_BY_INSPECTION: (inspectionId) => `/api/Certificate/inspection/${inspectionId}`,
     CERTIFICATE_GET_ALL: '/api/Certificate',
@@ -196,6 +196,62 @@ class HttpService {
     async delete(endpoint) {
         return this.request(endpoint, { method: 'DELETE' });
     }
+    async uploadFile(endpoint, formData) {
+        const url = `${this.baseURL}${endpoint}`;
+        console.log(`[HTTP UPLOAD]`, url);
+
+        const headers = {};
+
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers,
+                body: formData // Enviar FormData directamente
+            });
+
+            if (response.status === 401) {
+                this.setToken(null);
+                throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.');
+            }
+
+            if (!response.ok) {
+                let errorMessage = `Error ${response.status}: ${response.statusText}`;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorData.title || errorMessage;
+                        console.error('Error del servidor:', errorData);
+                    } catch (e) {
+                        console.error('No se pudo parsear el error como JSON');
+                    }
+                } else {
+                    try {
+                        const text = await response.text();
+                        if (text) errorMessage = text;
+                    } catch (e) {
+                        console.error('No se pudo leer el error');
+                    }
+                }
+                throw new Error(errorMessage);
+            }
+
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return await response.json();
+            }
+
+            return null;
+        } catch (error) {
+            console.error('HTTP Upload Error:', error);
+            throw error;
+        }
+    }
+
 }
 
 export const httpService = new HttpService();

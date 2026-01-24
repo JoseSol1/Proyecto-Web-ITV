@@ -720,53 +720,90 @@ function TopMenu({ loggedIn, onToggleLogin, goPortal }) {
    Sidebar component
    ===================== */
 function Sidebar({ role, page, setPage, username }) {
-  const MenuButton = ({ Icon, label, target }) => (
-    <button
-      onClick={() => setPage(target)}
-      className={`flex gap-2 items-center p-2 rounded text-left w-full ${page === target ? "font-semibold" : ""}`}
-      style={{ color: page === target ? COLORS.intrantOrange : COLORS.intrantBlue }}
-    >
-      <Icon className="w-5 h-5" />
-      <span>{label}</span>
-    </button>
-  );
+    const MenuButton = ({ Icon, label, target }) => (
+        <button
+            onClick={() => setPage(target)}
+            className={`flex gap-2 items-center p-2 rounded text-left w-full ${page === target ? "font-semibold" : ""}`}
+            style={{ color: page === target ? COLORS.intrantOrange : COLORS.intrantBlue }}
+        >
+            <Icon className="w-5 h-5" />
+            <span>{label}</span>
+        </button>
+    );
 
-  // admin sees more options
-  const common = [
-    { Icon: BarChart2, label: "Dashboard", target: "dashboard" },
-    { Icon: Car, label: "Vehículos", target: "vehicles" },
-    { Icon: FileCheck, label: "Inspecciones", target: "inspections" },
-    { Icon: Users, label: "Inspectores", target: "inspectors" },
-    { Icon: FileCheck, label: "Certificados", target: "certificates" },
-    { Icon: Bell, label: "Notificaciones", target: "notifications" },
-  ];
+    const holderMenu = [
+        { Icon: BarChart2, label: "Dashboard", target: "dashboard" },
+        { Icon: Car, label: "Vehículos", target: "vehicles" },
+        { Icon: FileCheck, label: "Certificados", target: "certificates" },
+        { Icon: Bell, label: "Notificaciones", target: "notifications" },
+    ];
 
-  const adminOnly = [
-    { Icon: Settings, label: "Admin: Usuarios/Talleres", target: "admin" },
-    { Icon: BarChart2, label: "Reportes", target: "reports" },
-  ];
+    const workshopAndAdminCommon = [
+        { Icon: BarChart2, label: "Dashboard", target: "dashboard" },
+        { Icon: Car, label: "Vehículos", target: "vehicles" },
+        { Icon: FileCheck, label: "Inspecciones", target: "inspections" },
+        { Icon: Users, label: "Inspectores", target: "inspectors" },
+        { Icon: FileCheck, label: "Certificados", target: "certificates" },
+        { Icon: Bell, label: "Notificaciones", target: "notifications" },
+    ];
 
-  const supervisorOnly = [
-    { Icon: Users, label: "Gestión de Inspectores", target: "supervisor" },
-  ];
+    const adminOnly = [
+        { Icon: Settings, label: "Admin: Usuarios/Talleres", target: "admin" },
+        { Icon: BarChart2, label: "Reportes", target: "reports" },
+    ];
 
-  return (
-    <aside className="w-72 p-4 border-r bg-white">
-      <div className="text-center mb-6">
-        <div style={{ width: 72, height: 72, margin: "0 auto", borderRadius: 999, background: COLORS.intrantOrange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>
-          LOGO
-        </div>
-        <div style={{ color: COLORS.intrantBlue, marginTop: 8 }}>{username}</div>
-        <div className="text-xs text-gray-500 mt-1">{role}</div>
-      </div>
+    const supervisorOnly = [
+        { Icon: Users, label: "Gestión de Inspectores", target: "supervisor" },
+    ];
 
-    <nav className="flex flex-col gap-2">
-      {common.map((m) => <MenuButton key={m.target} Icon={m.Icon} label={m.label} target={m.target} />)}
-      {role === "Administrador" && adminOnly.map((m) => <MenuButton key={m.target} Icon={m.Icon} label={m.label} target={m.target} />)}
-      {role === "Supervisor" && supervisorOnly.map((m) => <MenuButton key={m.target} Icon={m.Icon} label={m.label} target={m.target} />)}
-    </nav>
-    </aside>
-  );
+    const getMenuItems = () => {
+        if (role === "Titular") {
+            return holderMenu;
+        }
+
+        let menu = [...workshopAndAdminCommon];
+
+        if (role === "Administrador") {
+            menu = [...menu, ...adminOnly];
+        }
+
+        if (role === "Supervisor") {
+            menu = [...menu, ...supervisorOnly];
+        }
+
+        return menu;
+    };
+
+    const menuItems = getMenuItems();
+
+    return (
+        <aside className="w-72 p-4 border-r bg-white">
+            <div className="text-center mb-6">
+                <div style={{
+                    width: 72,
+                    height: 72,
+                    margin: "0 auto",
+                    borderRadius: 999,
+                    background: COLORS.intrantOrange,
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 800
+                }}>
+                    LOGO
+                </div>
+                <div style={{ color: COLORS.intrantBlue, marginTop: 8 }}>{username}</div>
+                <div className="text-xs text-gray-500 mt-1">{role}</div>
+            </div>
+
+            <nav className="flex flex-col gap-2">
+                {menuItems.map((m) => (
+                    <MenuButton key={m.target} Icon={m.Icon} label={m.label} target={m.target} />
+                ))}
+            </nav>
+        </aside>
+    );
 }
 
 /* =====================
@@ -953,20 +990,35 @@ function Register({ portal, onRegister }) {
 /* =====================
    Login component
    ===================== */
-function Login({ onLogin, onForgot }) {
-  const [creds, setCreds] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+function Login({ portal, onLogin, onForgot }) {
+    const [creds, setCreds] = useState({ email: "", password: "" });
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-  function submit(e) {
-    e.preventDefault();
-    if (!creds.email || !creds.password) return setError("Completa correo y contraseña.");
-    setError("");
-    onLogin(creds);
-  }
+    async function submit(e) {
+        e.preventDefault();
+
+        if (!creds.email || !creds.password) {
+            return setError("Completa correo y contraseña.");
+        }
+
+        setError("");
+        setLoading(true);
+
+        try {
+            //Solo llama a handleLogin del padre
+            await onLogin(creds);
+        } catch (err) {
+            //Solo maneja el error de UI
+            setError(err.message || "Credenciales inválidas");
+        } finally {
+            setLoading(false);
+        }
+    }
 
   return (
     <div className="max-w-md mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-xl font-semibold mb-3" style={{ color: COLORS.intrantBlue }}>Iniciar sesión</h2>
+          <h2 className="text-xl font-semibold mb-3" style={{ color: COLORS.intrantBlue }}>Iniciar sesión - {portal}</h2>
       <form onSubmit={submit} className="space-y-2">
         <input value={creds.email} onChange={(e)=>setCreds({...creds, email:e.target.value})} placeholder="Correo o usuario" className="border p-2 rounded w-full" />
         <input value={creds.password} onChange={(e)=>setCreds({...creds, password:e.target.value})} type="password" placeholder="Contraseña" className="border p-2 rounded w-full" />
@@ -1166,12 +1218,9 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule, userRo
   const [error, setError] = useState("");
   const [selectedVehicleType, setSelectedVehicleType] = useState("");
   
-  const userWorkshop = talleres.find(t => t.id === userWorkshopId);
 
   // Si el usuario es Inspector/Supervisor, solo mostrar su taller
-  const availableTalleres = userRole === "Inspector" || userRole === "Supervisor" 
-    ? talleres.filter(t => t.id === userWorkshopId)
-    : talleres;
+  const availableTalleres = talleres;
 
   function submit(e) {
     e.preventDefault();
@@ -1400,16 +1449,29 @@ function ExecuteInspection({ inspection, onSaveProgress, onFinish, onCancel }) {
         setProgress(Math.round((done / items.length) * 100));
     }, [items]);
 
-    const handlePhoto = (file, itemCode) => {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            setItems(prev => prev.map(it =>
-                it.code === itemCode
-                    ? { ...it, photos: [...it.photos, { name: file.name, data: ev.target.result }] }
-                    : it
-            ));
-        };
-        reader.readAsDataURL(file);
+    const handlePhoto = async (file, itemCode) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await httpService.uploadFile(
+                API_ENDPOINTS.UPLOAD_EVIDENCE,
+                formData
+            );
+
+            const imageUrl = response.url;
+
+            setItems(prev =>
+                prev.map(it =>
+                    it.code === itemCode
+                        ? { ...it, photos: [...it.photos, { name: file.name, data: imageUrl }] }
+                        : it
+                )
+            );
+        } catch (error) {
+            console.error('Error subiendo imagen:', error);
+            alert('Error al subir la imagen');
+        }
     };
 
     const updateItem = (itemCode, patch) => {
@@ -1731,18 +1793,110 @@ function AdminPanel({ users, setUsers, talleres, setTalleres }) {
   const [newUser, setNewUser] = useState({ fullName: "", email: "", role: "Inspector", workshopId: "" });
   const [newTaller, setNewTaller] = useState({ name: "", rnc: "" });
 
-  const addUser = () => {
-    if (!newUser.fullName || !newUser.email) return;
-    const userData = { 
-      id: Date.now().toString(), 
-      ...newUser,
-      verified: true,
-      firstLogin: true,
-      document: `DOC-${Date.now()}`
+    const addUser = async () => {
+        if (!newUser.fullName || !newUser.email) {
+            alert("Nombre completo y correo son obligatorios");
+            return;
+        }
+
+        try {
+            let response;
+            let userId;
+
+            // 1. CREAR USUARIO SEGÚN EL ROL
+            if (newUser.role === "Titular") {
+                // Crear Titular
+                if (!newUser.document) {
+                    alert("El documento es obligatorio para Titulares");
+                    return;
+                }
+
+                response = await httpService.post(API_ENDPOINTS.REGISTER_HOLDER, {
+                    email: newUser.email,
+                    password: "Temporal123!", // Password temporal
+                    documentType: "CEDULA",
+                    documentNumber: newUser.document,
+                    fullNameOrCorporate: newUser.fullName,
+                    phone: newUser.phone || "",
+                    addressLine: newUser.address || "",
+                    municipalityId: 1
+                });
+
+                userId = response.userId;
+                console.log("✓ Titular creado:", userId);
+
+            } else if (newUser.role === "Inspector" || newUser.role === "Supervisor") {
+                // Crear usuario de Taller (Inspector o Supervisor)
+                if (!newUser.workshopId) {
+                    alert("Debe seleccionar un taller para Inspector/Supervisor");
+                    return;
+                }
+
+                response = await httpService.post(API_ENDPOINTS.CREATE_WORKSHOP_USER, {
+                    email: newUser.email,
+                    phone: newUser.phone || "",
+                    workshopId: newUser.workshopId,
+                    roleInWorkshop: newUser.role === "Supervisor" ? "SUPERVISOR" : "INSPECTOR"
+                });
+
+                userId = response.userId;
+                console.log("✓ Usuario de taller creado:", userId);
+
+            } else if (newUser.role === "Administrador") {
+                // Crear cuenta base
+                response = await httpService.post(API_ENDPOINTS.REGISTER, {
+                    email: newUser.email,
+                    phone: newUser.phone || "",
+                    password: "Temporal123!" // Password temporal
+                });
+
+                userId = response.userId;
+                console.log("✓ Cuenta base creada:", userId);
+
+                // Asignar rol ADMIN
+                await httpService.post(API_ENDPOINTS.ASSIGN_ROLE, {
+                    userId: userId,
+                    roleCode: "ADMIN"
+                });
+
+                console.log("✓ Rol ADMIN asignado");
+            }
+
+            // 2. AGREGAR A LA LISTA LOCAL
+            const userData = {
+                id: userId,
+                fullName: newUser.fullName,
+                email: newUser.email,
+                role: newUser.role,
+                workshopId: newUser.workshopId || null,
+                document: newUser.document || "",
+                phone: newUser.phone || "",
+                verified: true,
+                firstLogin: true
+            };
+
+            setUsers(prev => [userData, ...prev]);
+
+            // 3. LIMPIAR FORMULARIO
+            setNewUser({
+                fullName: "",
+                email: "",
+                role: "Inspector",
+                workshopId: "",
+                document: "",
+                phone: "",
+                address: ""
+            });
+
+            alert(`✓ Usuario ${newUser.role} creado exitosamente`);
+
+        } catch (error) {
+            console.error("Error creando usuario:", error);
+            alert(`Error al crear usuario: ${error.message}`);
+        }
+
+        await loadUsers();
     };
-    setUsers(prev => [userData, ...prev]);
-    setNewUser({ fullName: "", email: "", role: "Inspector", workshopId: "" });
-  };
   
   const delUser = (id) => setUsers(prev => prev.filter(u => u.id !== id));
   
@@ -1754,78 +1908,136 @@ function AdminPanel({ users, setUsers, talleres, setTalleres }) {
   
   const delTaller = (id) => setTalleres(prev => prev.filter(x => x.id !== id));
 
-  return (
-    <div>
-      <h2 className="text-xl font-semibold" style={{ color: COLORS.intrantBlue }}>Administración</h2>
+    return (
+        <div>
+            <h2 className="text-xl font-semibold" style={{ color: COLORS.intrantBlue }}>Administración</h2>
 
-      <div className="grid grid-cols-2 gap-4 mt-4">
-        <div className="bg-white p-4 rounded shadow">
-          <h3 className="font-semibold mb-2">Usuarios del Sistema</h3>
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <input value={newUser.fullName} onChange={e=>setNewUser({...newUser, fullName:e.target.value})} placeholder="Nombre completo" className="border p-2 rounded flex-1" />
-              <input value={newUser.email} onChange={e=>setNewUser({...newUser, email:e.target.value})} placeholder="Correo" className="border p-2 rounded flex-1" />
-            </div>
-            <div className="flex gap-2">
-              <select value={newUser.role} onChange={e=>setNewUser({...newUser, role:e.target.value})} className="border p-2 rounded flex-1">
-                <option>Inspector</option>
-                <option>Supervisor</option>
-                <option>Administrador</option>
-                <option>Titular</option>
-              </select>
-              {(newUser.role === "Inspector" || newUser.role === "Supervisor") && (
-                <select value={newUser.workshopId} onChange={e=>setNewUser({...newUser, workshopId:e.target.value})} className="border p-2 rounded flex-1">
-                  <option value="">Asignar taller</option>
-                  {talleres.map(t=> <option key={t.id} value={t.id}>{t.name}</option>)}
-                </select>
-              )}
-              <button onClick={addUser} className="px-3 py-2 rounded flex items-center gap-1" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}>
-                <UserPlus className="w-4 h-4"/> Agregar
-              </button>
-            </div>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="bg-white p-4 rounded shadow">
+                    <h3 className="font-semibold mb-2">Usuarios del Sistema</h3>
+                    <div className="space-y-2">
+                        {/* Fila 1: Nombre y Email */}
+                        <div className="flex gap-2">
+                            <input
+                                value={newUser.fullName}
+                                onChange={e => setNewUser({ ...newUser, fullName: e.target.value })}
+                                placeholder="Nombre completo"
+                                className="border p-2 rounded flex-1"
+                            />
+                            <input
+                                value={newUser.email}
+                                onChange={e => setNewUser({ ...newUser, email: e.target.value })}
+                                placeholder="Correo"
+                                className="border p-2 rounded flex-1"
+                            />
+                        </div>
 
-            <div className="mt-3 border-t pt-2 max-h-96 overflow-y-auto">
-              {users.map(u=>(
-                <div key={u.id} className="flex justify-between items-center py-2 border-b">
-                  <div>
-                    <div className="font-medium">{u.fullName}</div>
-                    <div className="text-sm text-gray-600">
-                      {u.role} - {u.email}
-                      {u.workshopId && ` - ${talleres.find(t => t.id === u.workshopId)?.name || "Taller no asignado"}`}
+                        {/* Fila 2: Teléfono y Documento */}
+                        <div className="flex gap-2">
+                            <input
+                                value={newUser.phone || ""}
+                                onChange={e => setNewUser({ ...newUser, phone: e.target.value })}
+                                placeholder="Teléfono"
+                                className="border p-2 rounded flex-1"
+                            />
+                            <input
+                                value={newUser.document || ""}
+                                onChange={e => setNewUser({ ...newUser, document: e.target.value })}
+                                placeholder={newUser.role === "Titular" ? "Cédula/RNC *" : "Documento (opcional)"}
+                                className="border p-2 rounded flex-1"
+                            />
+                        </div>
+
+                        {/* Fila 3: Rol y Taller (solo si es Inspector/Supervisor) */}
+                        <div className="flex gap-2">
+                            <select
+                                value={newUser.role}
+                                onChange={e => setNewUser({ ...newUser, role: e.target.value })}
+                                className="border p-2 rounded flex-1"
+                            >
+                                <option>Inspector</option>
+                                <option>Administrador</option>
+                                <option>Titular</option>
+                            </select>
+
+                            {(newUser.role === "Inspector" || newUser.role === "Supervisor") && (
+                                <select
+                                    value={newUser.workshopId}
+                                    onChange={e => setNewUser({ ...newUser, workshopId: e.target.value })}
+                                    className="border p-2 rounded flex-1"
+                                >
+                                    <option value="">Seleccionar taller *</option>
+                                    {talleres.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                </select>
+                            )}
+                        </div>
+
+                        {/* Fila 4: Dirección (solo para Titular) */}
+                        {newUser.role === "Titular" && (
+                            <input
+                                value={newUser.address || ""}
+                                onChange={e => setNewUser({ ...newUser, address: e.target.value })}
+                                placeholder="Dirección (opcional)"
+                                className="border p-2 rounded w-full"
+                            />
+                        )}
+
+                        {/* Fila 5: Botón Agregar */}
+                        <div className="flex justify-end pt-2">
+                            <button
+                                onClick={addUser}
+                                className="px-4 py-2 rounded flex items-center gap-2"
+                                style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}
+                            >
+                                <UserPlus className="w-4 h-4" />
+                                Agregar Usuario
+                            </button>
+                        </div>
+
+                        {/* Lista de usuarios */}
+                        <div className="mt-3 border-t pt-2 max-h-96 overflow-y-auto">
+                            {users.map(u => (
+                                <div key={u.userId} className="flex justify-between items-center py-2 border-b">
+                                    <div>
+                                        <div className="font-medium">{u.email}</div>
+                                        <div className="text-sm text-gray-600">
+                                            {u.phone} - {u.status}
+                                        </div>
+                                    </div>
+                                    <button onClick={() => delUser(u.userId)} className="px-2 py-1 text-xs rounded border hover:bg-red-50 hover:text-red-600">
+                                        Borrar
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                  </div>
-                  <button onClick={()=>delUser(u.id)} className="px-2 py-1 text-xs rounded border hover:bg-red-50 hover:text-red-600">Borrar</button>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
 
-        <div className="bg-white p-4 rounded shadow">
-          <h3 className="font-semibold mb-2">Talleres Autorizados</h3>
-          <div className="space-y-2">
-            <input value={newTaller.name} onChange={e=>setNewTaller({...newTaller, name:e.target.value})} placeholder="Nombre del taller" className="border p-2 rounded w-full" />
-            <div className="flex gap-2">
-              <input value={newTaller.rnc} onChange={e=>setNewTaller({...newTaller, rnc:e.target.value})} placeholder="RNC" className="border p-2 rounded flex-1" />
-              <button onClick={addTaller} className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}>Agregar</button>
-            </div>
-          </div>
-          
-          <div className="mt-3 border-t pt-2">
-            {talleres.map(t=>(
-              <div key={t.id} className="flex justify-between items-center py-2 border-b">
-                <div>
-                  <div className="font-medium">{t.name}</div>
-                  <div className="text-sm text-gray-600">{t.rnc}</div>
+                <div className="bg-white p-4 rounded shadow">
+                    <h3 className="font-semibold mb-2">Talleres Autorizados</h3>
+                    <div className="space-y-2">
+                        <input value={newTaller.name} onChange={e => setNewTaller({ ...newTaller, name: e.target.value })} placeholder="Nombre del taller" className="border p-2 rounded w-full" />
+                        <div className="flex gap-2">
+                            <input value={newTaller.rnc} onChange={e => setNewTaller({ ...newTaller, rnc: e.target.value })} placeholder="RNC" className="border p-2 rounded flex-1" />
+                            <button onClick={addTaller} className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}>Agregar</button>
+                        </div>
+                    </div>
+
+                    <div className="mt-3 border-t pt-2">
+                        {talleres.map(t => (
+                            <div key={t.id} className="flex justify-between items-center py-2 border-b">
+                                <div>
+                                    <div className="font-medium">{t.name}</div>
+                                    <div className="text-sm text-gray-600">{t.rnc}</div>
+                                </div>
+                                <button onClick={() => delTaller(t.id)} className="px-2 py-1 text-xs rounded border hover:bg-red-50 hover:text-red-600">Borrar</button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <button onClick={()=>delTaller(t.id)} className="px-2 py-1 text-xs rounded border hover:bg-red-50 hover:text-red-600">Borrar</button>
-              </div>
-            ))}
-          </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
 
 /* =====================
@@ -2168,53 +2380,44 @@ export default function App() {
                 password
             });
 
-            // 2. Establecer el Token
-            // 'response.token' es la clave JWT necesaria para futuras peticiones.
+            // 2. Verificar acceso al portal seleccionado
+            const hasAccess = validatePortalAccess(portal, response.roles);
+            if (!hasAccess) {
+                alert(`No tienes permisos para acceder al portal de ${portal}`);
+                setPortal(null);
+                return;
+            }
+
+            // 3. Establecer el Token
             httpService.setToken(response.token);
 
-            // 3. Mapear la Respuesta del Backend al Objeto de Usuario (user)
+            // 4. Determinar el rol según el portal
+            const userRole = determineUserRole(portal, response.roles);
 
-            // Obtener el rol: si 'roles' existe y tiene elementos, toma el primero. De lo contrario, asigna 'user'.
-            const userRole = (response.roles && response.roles.length > 0)
-                ? response.roles[0]
-                : 'user';
-
+            // 5. Mapear la Respuesta del Backend al Objeto de Usuario
             const user = {
-                // Usamos 'response.userId' y 'response.email' que vienen directamente en la respuesta.
                 id: response.userId,
                 email: response.email,
-
-                // Mapear propiedades opcionales o con diferente nombre:
-                // Si 'fullName' no existe, usamos el email como nombre.
                 fullName: response.fullName || response.email,
-
-                // Mapeamos el rol del array (roles) al singular (role).
                 role: userRole,
-
-                // Mapeamos 'mustChangePassword' a 'firstLogin' (asumiendo que es la intención)
                 firstLogin: response.mustChangePassword || false,
-
-                // 'workshopId' puede ser nulo o indefinido, por lo que usamos 'null' como fallback.
                 workshopId: response.workshopId || null,
-
-                // 'verified' y 'status' (opcionalmente) se mantienen en la lógica del frontend.
                 verified: response.status === 'ACTIVE',
+                allRoles: response.roles
             };
 
-            // 4. Configurar el Estado de la Aplicación
+            // 6. Configurar el Estado de la Aplicación
             setLoggedUser(user);
             setRole(user.role);
             setLoggedIn(true);
             setPage("dashboard");
 
-            // 5. Cargar Datos Adicionales (Acciones asíncronas necesarias tras el login)
+            // 7. Cargar Datos Adicionales
             await loadInitialData();
 
         } catch (error) {
-            // Manejo de errores: Muestra un mensaje amigable.
-            // El 'failed to fetch' o el error 401/500 será atrapado aquí.
             console.error("Login Failed:", error);
-            alert(`Error al iniciar sesión: ${error.message || "Por favor, verifica tus credenciales y la conexión."}`);
+            httpService.setToken(null); // Limpiar token si falla
         }
     };
     const handleLogout = () => {
@@ -2226,7 +2429,36 @@ export default function App() {
         setPage("dashboard");
         setExecInspection(null);
     };
+    //Validar si el usuario tiene acceso al portal
+    function validatePortalAccess(portal, roles) {
+        const accessMap = {
+            "Titular": ["TITULAR"],
+            "Taller": ["INSPECTOR", "SUPERVISOR"],
+            "Administrador": ["ADMIN", "SUPERVISOR"]
+        };
 
+        const requiredRoles = accessMap[portal] || [];
+        return requiredRoles.some(role => roles.includes(role));
+    }
+
+    //Determinar el rol específico según el portal
+    function determineUserRole(portal, roles) {
+        if (portal === "Titular") return "Titular";
+
+        if (portal === "Taller") {
+            if (roles.includes("SUPERVISOR")) return "Supervisor";
+            if (roles.includes("INSPECTOR")) return "Inspector";
+            return "Taller";
+        }
+
+        if (portal === "Administrador") {
+            if (roles.includes("ADMIN")) return "Administrador";
+            if (roles.includes("SUPERVISOR")) return "Supervisor";
+            return "Administrador";
+        }
+
+        return portal;
+    }
     /* =========================
        Vehicle handlers
        ========================= */
@@ -2330,8 +2562,7 @@ export default function App() {
                     id: c.certificateId,
                     vehicle: c.vehiclePlate || "N/A",
                     date: c.issuedAt?.split("T")[0],
-                    status: c.status === "VALID" ? "Activo" :
-                        c.status === "REVOKED" ? "Revocado" : "Expirado",
+                    status: c.status ,
                     details: c.comments || "Certificado de inspección técnica vehicular",
                     expiryDate: c.validUntil,
                     qrHash: c.qrHash
@@ -2360,9 +2591,16 @@ export default function App() {
                 console.log(`✓ Cargados ${vehiclesData.length} vehículos`);
                 console.log('Respuesta de Vehiculos:', vehiclesData);
 
-
             };
-
+            const loadUsers = async () => {
+                try {
+                    const response = await httpService.get(API_ENDPOINTS.GET_ALL_USERS);
+                    setUsers(response); // Directo, sin mapeo
+                    console.log('✓ Usuarios cargados');
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            };
             // Ejecutar todas las cargas en paralelo
             await Promise.all([
                 loadVehicleModels(),
@@ -2374,7 +2612,8 @@ export default function App() {
                 loadAllInspections(),
                 loadTemplates(),
                 loadCertificates(),
-                loadUserVehicles()
+                loadUserVehicles(),
+                loadUsers()
             ]);
 
             console.log("✅ Todos los datos iniciales cargados correctamente");
@@ -2528,7 +2767,6 @@ export default function App() {
 
     // 6. Plantillas de inspección
    
-    // Al inicio de tu componente App
     const loadInspections = async () => {
         try {
             const inspections = await httpService.get(API_ENDPOINTS.INSPECTION_GET_ALL);
@@ -2977,7 +3215,7 @@ export default function App() {
                                 </div>
                                 <div className="bg-white p-4 rounded shadow">
                                     <div className="text-sm text-gray-600">Certificados activos</div>
-                                    <div className="text-2xl font-bold">{certificates.filter(c => c.status === "Activo").length}</div>
+                                    <div className="text-2xl font-bold">{certificates.filter(c => c.status === "ISSUED").length}</div>
                                     <div className="text-xs text-blue-600">• Vigentes</div>
                                 </div>
                                 <div className="bg-white p-4 rounded shadow">
@@ -3156,13 +3394,9 @@ export default function App() {
                                     <tr><th className="p-2">Vehículo</th><th className="p-2">Plantilla</th><th className="p-2">Fecha/Hora</th><th className="p-2">Inspector</th><th className="p-2">Estado</th><th className="p-2">Acciones</th></tr>
                                 </thead>
                                 <tbody>
-                                    {scheduled
-                                                .filter(s =>
-                                                ((role === "Inspector" || role === "Supervisor")
-                                                ? s.workshopId === loggedUser?.workshopId
-                                                : true
-                                                ) && (s.status === 'Programada' || s.status === 'En proceso')
-      )                                        .map(s => (
+                                                {scheduled
+                                                    .filter(s => s.status === 'Programada' || s.status === 'En proceso')
+                                                    .map(s => (
                                             <tr key={s.id} className="border-t">
                                                 <td className="p-2 font-medium">{s.vehicle}</td>
                                                 <td className="p-2">{getTemplateNameById(s.templateId)}</td>
@@ -3308,7 +3542,6 @@ export default function App() {
                                 </thead>
                                 <tbody>
                                     {inspections
-                                        .filter(i => (role === "Inspector" || role === "Supervisor") ? i.workshopId === loggedUser?.workshopId : true)
                                         .slice(0, 8)
                                         .map(it => (
                                             <tr key={it.id} className="border-t">
