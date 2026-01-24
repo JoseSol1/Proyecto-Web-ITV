@@ -677,22 +677,411 @@ function downloadCSV(filename, rows) {
 }
 
 /* =====================
+   Modal Component (Reutilizable)
+   ===================== */
+function Modal({ isOpen, onClose, title, children, size = "md" }) {
+  if (!isOpen) return null;
+
+  const sizeClasses = {
+    sm: "max-w-md",
+    md: "max-w-2xl",
+    lg: "max-w-4xl",
+    xl: "max-w-6xl"
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
+      <div 
+        className={`bg-white rounded-lg shadow-xl ${sizeClasses[size]} w-full mx-4 max-h-[90vh] overflow-hidden`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center p-4 border-b" style={{ backgroundColor: COLORS.intrantBlue }}>
+          <h2 className="text-xl font-semibold text-white">{title}</h2>
+          <button onClick={onClose} className="text-white hover:text-gray-200">
+            <span className="text-2xl">×</span>
+          </button>
+        </div>
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =====================
+   Sobre Nosotros Modal
+   ===================== */
+function AboutModal({ isOpen, onClose }) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Sobre APNITV" size="lg">
+      <div className="space-y-4">
+        <div className="text-center mb-6">
+          <div style={{ width: 120, height: 120, margin: "0 auto", borderRadius: "50%", background: COLORS.intrantOrange, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", fontWeight: 800 }}>
+            APNITV
+          </div>
+        </div>
+
+        <div className="prose max-w-none">
+          <h3 className="text-lg font-semibold" style={{ color: COLORS.intrantBlue }}>
+            Automatización del Programa Nacional de Inspección Técnica Vehicular
+          </h3>
+          
+          <p className="text-gray-700 leading-relaxed">
+            Sistema desarrollado para automatizar el Programa Nacional de Inspección Técnica Vehicular 
+            en República Dominicana, garantizando la seguridad vial y el cumplimiento de estándares 
+            técnico-mecánicos y ambientales de los vehículos en circulación.
+          </p>
+
+          <h4 className="font-semibold mt-4" style={{ color: COLORS.intrantBlue }}>Nuestra Misión</h4>
+          <p className="text-gray-700">
+            Facilitar la inspección técnica vehicular mediante una plataforma digital eficiente y transparente, 
+            contribuyendo a la reducción de accidentes de tránsito y emisiones contaminantes.
+          </p>
+
+          <h4 className="font-semibold mt-4" style={{ color: COLORS.intrantBlue }}>Nuestra Visión</h4>
+          <p className="text-gray-700">
+            Ser el sistema de referencia nacional para la gestión integral de inspecciones técnicas vehiculares, 
+            reconocido por su transparencia, trazabilidad y modernización del parque vehicular.
+          </p>
+
+          <h4 className="font-semibold mt-4" style={{ color: COLORS.intrantBlue }}>Objetivos</h4>
+          <ul className="list-disc list-inside text-gray-700 space-y-1">
+            <li>Optimizar procesos técnicos y administrativos</li>
+            <li>Garantizar trazabilidad de la información</li>
+            <li>Facilitar emisión de certificados digitales</li>
+            <li>Reducir fallas mecánicas y accidentes</li>
+            <li>Disminuir emisiones contaminantes</li>
+          </ul>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+/* =====================
+   Servicios Modal
+   ===================== */
+function ServicesModal({ isOpen, onClose }) {
+  const services = [
+    {
+      icon: <FileCheck className="w-8 h-8" />,
+      title: "Inspección Técnica Vehicular (ITV)",
+      description: "Verificación periódica del estado mecánico y de seguridad de los vehículos para garantizar su circulación segura."
+    },
+    {
+      icon: <Car className="w-8 h-8" />,
+      title: "Registro de Vehículos",
+      description: "Inscripción y actualización de datos de vehículos en el sistema nacional de tránsito."
+    },
+    {
+      icon: <Users className="w-8 h-8" />,
+      title: "Licencias de Conducir",
+      description: "Emisión, renovación y gestión de licencias de conducir para todas las categorías vehiculares."
+    },
+    {
+      icon: <BarChart2 className="w-8 h-8" />,
+      title: "Consultas y Certificaciones",
+      description: "Emisión de certificados de inspección, historiales vehiculares y consultas de multas."
+    }
+  ];
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Nuestros Servicios" size="lg">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {services.map((service, idx) => (
+          <div key={idx} className="p-4 border rounded-lg hover:shadow-lg transition-shadow">
+            <div className="flex items-start gap-4">
+              <div style={{ color: COLORS.intrantOrange }}>
+                {service.icon}
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg mb-2" style={{ color: COLORS.intrantBlue }}>
+                  {service.title}
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {service.description}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <p className="text-sm text-blue-800">
+          <strong>Nota:</strong> Todos nuestros servicios están disponibles en nuestras oficinas regionales 
+          y a través de nuestra plataforma digital.
+        </p>
+      </div>
+    </Modal>
+  );
+}
+
+/* =====================
+   Contacto Modal
+   ===================== */
+function ContactModal({ isOpen, onClose }) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Contacto" size="md">
+      <div className="space-y-6">
+        <div>
+          <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: COLORS.intrantBlue }}>
+            <Phone className="w-5 h-5" />
+            Teléfonos
+          </h3>
+          <div className="space-y-2 ml-7">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Línea Principal:</span>
+              <a href="tel:8091234567" className="font-medium hover:text-blue-600">809-565-7540</a>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Servicio al Cliente:</span>
+              <a href="tel:8099876543" className="font-medium hover:text-blue-600">809-565-7541</a>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Emergencias:</span>
+              <a href="tel:911" className="font-medium hover:text-blue-600">911</a>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: COLORS.intrantBlue }}>
+            <Bell className="w-5 h-5" />
+            Correos Electrónicos
+          </h3>
+          <div className="space-y-2 ml-7">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Información General:</span>
+              <a href="mailto:info@intrant.gob.do" className="font-medium hover:text-blue-600 text-sm">
+                info@itv.com.do
+              </a>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Soporte Técnico:</span>
+              <a href="mailto:soporte@intrant.gob.do" className="font-medium hover:text-blue-600 text-sm">
+                soporte@itv.com.do
+              </a>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Quejas y Sugerencias:</span>
+              <a href="mailto:quejas@intrant.gob.do" className="font-medium hover:text-blue-600 text-sm">
+                quejas@itv.com.do
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: COLORS.intrantBlue }}>
+            <Home className="w-5 h-5" />
+            Dirección
+          </h3>
+          <div className="ml-7">
+            <p className="text-gray-700">
+              Av. Gregorio Luperón esquina Av. Núñez de Cáceres<br />
+              Ensanche La Fe, Santo Domingo<br />
+              República Dominicana
+            </p>
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <h3 className="font-semibold mb-3" style={{ color: COLORS.intrantBlue }}>Horario de Atención</h3>
+          <div className="ml-0">
+            <p className="text-gray-700">
+              Lunes a Viernes: 8:00 AM - 4:00 PM<br />
+              Sábados: 8:00 AM - 12:00 PM
+            </p>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+/* =====================
+   Ajustes Modal
+   ===================== */
+function SettingsModal({ isOpen, onClose }) {
+  const [settings, setSettings] = useState({
+    notifications: true,
+    emailAlerts: true,
+    darkMode: false,
+    language: "es",
+    autoSave: true
+  });
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Configuración" size="md">
+      <div className="space-y-6">
+        <div>
+          <h3 className="font-semibold mb-4" style={{ color: COLORS.intrantBlue }}>
+            Notificaciones
+          </h3>
+          <div className="space-y-3">
+            <label className="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+              <span className="text-gray-700">Notificaciones push</span>
+              <input
+                type="checkbox"
+                checked={settings.notifications}
+                onChange={(e) => setSettings({...settings, notifications: e.target.checked})}
+                className="w-5 h-5"
+              />
+            </label>
+            <label className="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+              <span className="text-gray-700">Alertas por correo</span>
+              <input
+                type="checkbox"
+                checked={settings.emailAlerts}
+                onChange={(e) => setSettings({...settings, emailAlerts: e.target.checked})}
+                className="w-5 h-5"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <h3 className="font-semibold mb-4" style={{ color: COLORS.intrantBlue }}>
+            Apariencia
+          </h3>
+          <label className="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+            <span className="text-gray-700">Modo oscuro</span>
+            <input
+              type="checkbox"
+              checked={settings.darkMode}
+              onChange={(e) => setSettings({...settings, darkMode: e.target.checked})}
+              className="w-5 h-5"
+            />
+          </label>
+        </div>
+
+        <div className="border-t pt-4">
+          <h3 className="font-semibold mb-4" style={{ color: COLORS.intrantBlue }}>
+            Preferencias
+          </h3>
+          <div className="space-y-3">
+            <div className="p-3 border rounded">
+              <label className="block text-gray-700 mb-2">Idioma</label>
+              <select
+                value={settings.language}
+                onChange={(e) => setSettings({...settings, language: e.target.value})}
+                className="w-full p-2 border rounded"
+              >
+                <option value="es">Español</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <label className="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+              <span className="text-gray-700">Autoguardado</span>
+              <input
+                type="checkbox"
+                checked={settings.autoSave}
+                onChange={(e) => setSettings({...settings, autoSave: e.target.checked})}
+                className="w-5 h-5"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 border rounded hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={() => {
+              alert("Configuración guardada");
+              onClose();
+            }}
+            className="px-4 py-2 rounded text-white"
+            style={{ backgroundColor: COLORS.intrantOrange }}
+          >
+            Guardar cambios
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+/* =====================
+   Notificaciones Panel (Sidebar)
+   ===================== */
+function NotificationsPanel({ isOpen, onClose, notifications, onRetry }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end" onClick={onClose}>
+      <div 
+        className="bg-white w-96 shadow-2xl h-full overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center" style={{ backgroundColor: COLORS.intrantBlue }}>
+          <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+            <Bell className="w-5 h-5" />
+            Notificaciones
+          </h2>
+          <button onClick={onClose} className="text-white hover:text-gray-200">
+            <span className="text-2xl">×</span>
+          </button>
+        </div>
+
+        <div className="p-4">
+          {notifications.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <Bell className="w-12 h-12 mx-auto mb-2 opacity-50" />
+              <p>No tienes notificaciones</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {notifications.map(n => (
+                <div key={n.id} className="p-3 border rounded hover:bg-gray-50">
+                  <div className="flex justify-between items-start mb-1">
+                    <h4 className="font-medium text-sm">{n.title}</h4>
+                    <span className={`text-xs px-2 py-1 rounded ${n.status === 'Entregado' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}`}>
+                      {n.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600">{n.message}</p>
+                  {n.status !== 'Entregado' && (
+                    <button 
+                      onClick={() => onRetry(n.id)}
+                      className="mt-2 text-xs text-blue-600 hover:underline"
+                    >
+                      Reintentar envío
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =====================
    Top menu component
    ===================== */
-function TopMenu({ loggedIn, onToggleLogin, goPortal }) {
+function TopMenu({ loggedIn, onToggleLogin, goPortal, onOpenAbout, onOpenServices, onOpenContact, onOpenNotifications, onOpenSettings }) {
   return (
     <header className="flex justify-between items-center p-4 shadow bg-white">
       <nav className="flex gap-4 items-center">
-        <button onClick={() => goPortal("home")} className="flex items-center gap-1 text-sm">
+        <button onClick={() => goPortal("home")} className="flex items-center gap-1 text-sm hover:text-blue-600">
           <Home className="w-4 h-4" /> Inicio
         </button>
-        <button className="flex items-center gap-1 text-sm">
+        <button onClick={onOpenAbout} className="flex items-center gap-1 text-sm hover:text-blue-600">
           <Info className="w-4 h-4" /> Sobre
         </button>
-        <button className="flex items-center gap-1 text-sm">
+        <button onClick={onOpenServices} className="flex items-center gap-1 text-sm hover:text-blue-600">
           <Briefcase className="w-4 h-4" /> Servicios
         </button>
-        <button className="flex items-center gap-1 text-sm">
+        <button onClick={onOpenContact} className="flex items-center gap-1 text-sm hover:text-blue-600">
           <Phone className="w-4 h-4" /> Contacto
         </button>
       </nav>
@@ -700,15 +1089,25 @@ function TopMenu({ loggedIn, onToggleLogin, goPortal }) {
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleLogin}
-          className="px-3 py-1 rounded text-sm"
+          className="px-3 py-1 rounded text-sm hover:opacity-90"
           style={{ backgroundColor: COLORS.intrantOrange, color: "#fff" }}
         >
           {loggedIn ? "Cerrar sesión" : "Iniciar sesión"}
         </button>
-        <button aria-label="alertas" title="Alertas">
+        <button 
+          onClick={onOpenNotifications}
+          aria-label="alertas" 
+          title="Alertas"
+          className="hover:bg-gray-100 p-2 rounded"
+        >
           <Bell className="w-5 h-5" color={COLORS.intrantBlue} />
         </button>
-        <button aria-label="ajustes" title="Ajustes">
+        <button 
+          onClick={onOpenSettings}
+          aria-label="ajustes" 
+          title="Ajustes"
+          className="hover:bg-gray-100 p-2 rounded"
+        >
           <Settings className="w-5 h-5" color={COLORS.intrantBlue} />
         </button>
       </div>
@@ -2195,6 +2594,13 @@ export default function App() {
     const [loggedIn, setLoggedIn] = useState(false);
     const [execInspection, setExecInspection] = useState(null);
 
+    /* Modal states */
+    const [showAbout, setShowAbout] = useState(false);
+    const [showServices, setShowServices] = useState(false);
+    const [showContact, setShowContact] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
+
     /* Data stores */
     const [users, setUsers] = useState([
         { id: "u1", fullName: "Carlos Pérez", email: "carlos@example.com", role: "Titular", document: "001-0000001-0", verified: true, firstLogin: false },
@@ -3166,7 +3572,21 @@ export default function App() {
     if (!loggedIn) {
         return (
             <div className="min-h-screen flex flex-col" style={{ backgroundColor: COLORS.grayBg }}>
-                <TopMenu loggedIn={loggedIn} onToggleLogin={() => { setLoggedIn(true); }} goPortal={(p) => { if (p === 'home') setPortal(null); }} />
+                {/* Modales disponibles antes de login */}
+                <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
+                <ServicesModal isOpen={showServices} onClose={() => setShowServices(false)} />
+                <ContactModal isOpen={showContact} onClose={() => setShowContact(false)} />
+                
+                <TopMenu 
+                    loggedIn={loggedIn} 
+                    onToggleLogin={() => { setLoggedIn(true); }} 
+                    goPortal={(p) => { if (p === 'home') setPortal(null); }}
+                    onOpenAbout={() => setShowAbout(true)}
+                    onOpenServices={() => setShowServices(true)}
+                    onOpenContact={() => setShowContact(true)}
+                    onOpenNotifications={() => {}}
+                    onOpenSettings={() => {}}
+                />
                 <div className="flex-1 p-6">
                     <div className="max-w-5xl mx-auto grid grid-cols-2 gap-6">
                         <div>
@@ -3200,7 +3620,37 @@ export default function App() {
        ========================= */
     return (
         <div className="min-h-screen flex flex-col" style={{ backgroundColor: COLORS.grayBg }}>
-            <TopMenu loggedIn={loggedIn} onToggleLogin={handleLogout} goPortal={(p) => { if (p === 'home') { setPortal(null); setLoggedIn(false); } }} />
+            {/* Modals */}
+            <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
+            <ServicesModal isOpen={showServices} onClose={() => setShowServices(false)} />
+            <ContactModal isOpen={showContact} onClose={() => setShowContact(false)} />
+            <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+            <NotificationsPanel 
+                isOpen={showNotifications} 
+                onClose={() => setShowNotifications(false)}
+                notifications={notifications}
+                onRetry={retryNotification}
+            />
+            
+            <TopMenu 
+                loggedIn={loggedIn} 
+                onToggleLogin={handleLogout} 
+                goPortal={(p) => { 
+                    if (p === 'home') { 
+                        if (loggedIn) {
+                            setPage("dashboard");
+                        } else {
+                            setPortal(null); 
+                            setLoggedIn(false); 
+                        }
+                    } 
+                }}
+                onOpenAbout={() => setShowAbout(true)}
+                onOpenServices={() => setShowServices(true)}
+                onOpenContact={() => setShowContact(true)}
+                onOpenNotifications={() => setShowNotifications(true)}
+                onOpenSettings={() => setShowSettings(true)}
+            />
             <div className="flex flex-1">
                 <Sidebar role={role || (loggedUser?.role ?? portal)} page={page} setPage={setPage} username={loggedUser?.fullName || "Usuario"} />
                 <main className="flex-1 p-6 overflow-auto">
