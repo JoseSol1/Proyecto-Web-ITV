@@ -1699,7 +1699,7 @@ function ScheduleInspection({ vehicles, inspectors, talleres, onSchedule, userRo
               <option value="">Seleccionar plantilla</option>
               <option value={`TEMPLATE_${selectedVehicleType}`}>
                 Inspección {selectedVehicleType === "AUTO" ? "Automóvil" : 
-                           selectedVehicleType === "MOTO" ? "Motocicleta" : "Camión"}
+                                  selectedVehicleType === "MOTO" ? "Motocicleta" : "Automóvil"}
               </option>
             </select>
             <p className="text-xs text-green-600 mt-1">✓ Plantilla cargada según tipo de vehículo</p>
@@ -3328,13 +3328,13 @@ export default function App() {
                     valueEnum: item.valueEnum || null,
                     valueText: item.comment || null,
                     passFail: item.status === "Aprobado" ? "PASS" :
-                        item.status === "Falla" ? "FAIL" :
-                            "PENDING", // ✅ AGREGADO: default para otros estados
+                        item.status === "Falla" ? "FAIL" : "PENDING",
                     evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null,
-                                    // 🔹 NUEVOS CAMPOS DE DEFECTO
-                    hasDefect: item.hasDefects || false,
-                    defectSeverity: item.defectSeverity || null,
-                    defectComment: item.defectComment || null
+
+                    // 🔹 CORREGIR: usar la misma lógica que finishInspectionFlow
+                    hasDefect: item.status === "Falla",
+                    defectSeverity: item.status === "Falla" ? (item.defectSeverity || "GRAVE") : null,
+                    defectComment: item.status === "Falla" ? (item.defectDescription || `Defecto en ${item.name}`) : null
                 }))
             };
 
@@ -3343,40 +3343,14 @@ export default function App() {
                 batchRequest
             );
 
-            const scheduledItem = scheduled.find(s => s.id === inspectionId);
-            const progressInspection = {
-                id: `progress_${inspectionId}`,
-                vehicle: scheduledItem?.vehicle || "Desconocido",
-                date: nowDate(),
-                result: "En progreso",
-                inspector: scheduledItem?.inspector || "N/A",
-                taller: scheduledItem?.taller || "N/A",
-                items
-            };
+            alert(`✓ Progreso guardado\n${itemsToUpdate.length} items actualizados`);
 
-            setInspections(prev => {
-                const filtered = prev.filter(i => i.id !== progressInspection.id);
-                return [progressInspection, ...filtered];
-            });
-
-            setNotifications(prev => [
-                {
-                    id: `n${Date.now()}`,
-                    title: "Progreso guardado",
-                    message: `Se han guardado ${itemsToUpdate.length} items de la inspección`,
-                    status: "Entregado"
-                },
-                ...prev
-            ]);
-
-            alert(`✓ Progreso guardado\n${itemsToUpdate.length} items actualizados`); // ✅ CORREGIDO: sintaxis de alert
 
         } catch (error) {
             console.error("Error guardando progreso:", error);
-            alert(`Error guardando progreso: ${error.message}`); // ✅ CORREGIDO: sintaxis de alert
+            alert(`Error guardando progreso: ${error.message}`);
         }
     };
-
     const finishInspectionFlow = async (inspectionWithItems) => {
         try {
             console.log("=== FINALIZANDO INSPECCIÓN ===");
@@ -3399,8 +3373,14 @@ export default function App() {
                     valueNumeric: item.valueNumeric ? parseFloat(item.valueNumeric) : null,
                     valueEnum: item.valueEnum || null,
                     valueText: item.comment || null,
-                    passFail: item.status === "Aprobado" ? "PASS" : "FAIL",
-                    evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null
+                    passFail: item.status === "Aprobado" ? "PASS" :
+                        item.status === "Falla" ? "FAIL" : "PENDING",
+                    evidenceUrl: item.photos.length > 0 ? item.photos[0].data : null,
+
+                    // 🔹 AGREGAR ESTOS CAMPOS PARA QUE EL BACKEND CREE DEFECTOS
+                    hasDefect: item.status === "Falla",
+                    defectSeverity: item.status === "Falla" ? (item.defectSeverity || item.severityIfFail || "GRAVE") : null,
+                    defectComment: item.status === "Falla" ? (item.defectDescription || `Defecto en ${item.name}`) : null
                 }))
             };
 
@@ -3411,32 +3391,16 @@ export default function App() {
 
             console.log("✓ Items actualizados");
 
-            // 3. Agregar defectos (si los hay)
-            const defects = inspectionWithItems.items
-                .filter(item => item.status === "Falla" && item.severityIfFail)
-                .map(item => ({
-                    itemId: item.itemId,
-                    severity: item.severityIfFail,
-                    description: item.defectDescription || `Defecto en ${item.name}`,
-                    correctiveDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-                }));
+            //// 3. Agregar defectos (si los hay)
+            //const defects = inspectionWithItems.items
+            //    .filter(item => item.status === "Falla" && item.severityIfFail)
+            //    .map(item => ({
+            //        itemId: item.itemId,
+            //        severity: item.severityIfFail,
+            //        description: item.defectDescription || `Defecto en ${item.name}`,
+            //        correctiveDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            //    }));
 
-            if (defects.length > 0) {
-                console.log(`Registrando ${defects.length} defecto(s)...`);
-
-                for (const defect of defects) {
-                    try {
-                        await httpService.post(
-                            API_ENDPOINTS.INSPECTION_ADD_DEFECT(inspectionWithItems.id),
-                            defect
-                        );
-                    } catch (defectError) {
-                        console.error("Error registrando defecto:", defectError);
-                    }
-                }
-
-                console.log("✓ Defectos registrados");
-            }
 
             // 4. Completar inspección (el backend calcula el resultado)
             console.log("Completando inspección...");
